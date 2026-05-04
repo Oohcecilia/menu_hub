@@ -110,8 +110,6 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
     # --------------------------------------------------
     # 3. RETURN
     # --------------------------------------------------
-    formatted_products = format_products(products)
-    print(f"products {formatted_products}")
     return {
         "categories": categories,
         "products": products
