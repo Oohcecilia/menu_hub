@@ -4,7 +4,7 @@ import { CheckCircle, ArrowLeft, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import QRCode from '@/components/menu/QRCode';
+import QRCode from '@/components/menu/QrCode';
 import { useLanguage } from '@/lib/i18n';
 import { useBranch } from '@/lib/BranchContext.jsx';
 import { buildOrderSummary } from '@/utils/orderUtils';
