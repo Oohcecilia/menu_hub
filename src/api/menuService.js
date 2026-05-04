@@ -1,21 +1,5 @@
 const API_BASE = "http://localhost:7777";
-import {
-  Pizza,
-  Beef,
-  Utensils,
-  Coffee,
-  Beer,
-  Wine,
-  Martini,
-  CupSoda,
-  Salad,
-  Soup,
-  Cake,
-  Package
-} from "lucide-react";
-/**
- * Fetch + format categories in one call
- */
+
 export async function getMenuData(buid, order) {
   try {
     const res = await fetch(
@@ -138,7 +122,8 @@ function formatProducts(products = []) {
         branch: props.Branch || "",
         variations,
         sort_order: item.sort_order || 0,
-        options: []
+        options: [],
+        website_picture: item.website_picture
       };
     })
     .filter(Boolean); // remove skipped items

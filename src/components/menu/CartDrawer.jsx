@@ -25,7 +25,6 @@ function CartItem({
 }) {
   if (!product) return null;
 
-  console.log(JSON.stringify(item));
 
   const { activeBranch } = useBranch();
 

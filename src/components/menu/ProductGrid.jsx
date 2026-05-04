@@ -122,18 +122,16 @@ export default function ProductGrid({ products, activeCategory, onProductOpen })
     );
   }
 
-  const featured = products.slice(0, 5);
-  const rest = products.slice(5);
 
   return (
     <div>
       <FeaturedSection
-        products={featured}
+        products={products}
         activeCategory={activeCategory}
         onProductOpen={onProductOpen}
       />
 
-      {rest.length > 0 && (
+      {products.length > 0 && (
         <motion.section
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -165,13 +163,13 @@ export default function ProductGrid({ products, activeCategory, onProductOpen })
           <div className="premium-glow">
             <div className="inner bg-card/50">
               <div className="grid grid-cols-1 sm:grid-cols-2 overflow-hidden bg-card/50 backdrop-blur-sm divide-y-0">
-                {rest.map((product, i) => (
+                {products.map((product, i) => (
                   <ProductListRow
                     key={product.id}
                     product={product}
                     onOpen={onProductOpen}
                     index={i}
-                    isLast={i === rest.length - 1}
+                    isLast={i === products.length - 1}
                   />
                 ))}
               </div>

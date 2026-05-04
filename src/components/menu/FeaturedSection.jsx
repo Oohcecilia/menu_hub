@@ -1,20 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion} from 'framer-motion';
 import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
 
-
-const menuItems = [
-    { id: 341, name: "Pollo alla Pizzaiola", image: "/src/assets/sample/3.png", price: 1150, featured: false },
-    { id: 438, name: "Pollo alla Milanese", image: "/src/assets/sample/2.png", price: 1450, featured: true },
-    { id: 341, name: "Polo Alforno", image: "/src/assets/sample/1.png", price: 1250, featured: true },
-    { id: 438, name: "Pollo Parmigiana", image: "/src/assets/sample/4.png", price: 950, featured: false },
-    { id: 341, name: "Pollo alla Cacciatora", image: "/src/assets/sample/3.png", price: 1350, featured: false },
-    // { id: 438, name: "Pollo Parmigiana", image: "/src/assets/sample/4.png", price: 950, featured: false },
-    // { id: 341, name: "Pollo alla Cacciatora", image: "/src/assets/sample/3.png", price: 1350, featured: false }
-];
 
 /* ─── Cart hook ─────────────────────────────────────────────────── */
 function useProductCart(product) {
@@ -60,6 +49,7 @@ function AddBtn({ product }) {
 function FloatImage({ src, alt, size, float = true }) {
     const { activeBranch } = useBranch();
     const noImage = activeBranch?.no_image;
+    const image = src || noImage;
     return (
         <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
             {src && (
@@ -80,15 +70,11 @@ function FloatImage({ src, alt, size, float = true }) {
                     />
                 </>
             )}
-            {src ? (
-                <img
-                    src={src} alt={alt}
-                    className="relative z-10 object-contain drop-shadow-2xl w-full h-full"
-                    style={{ filter: 'drop-shadow(0 12px 28px --primary)' }}
-                />
-            ) : (
-                <span className="text-5xl relative z-10">🍽️</span>
-            )}
+            <img
+                src={src} alt={alt}
+                className="relative z-10 object-contain drop-shadow-2xl w-full h-full"
+                style={{ filter: 'drop-shadow(0 12px 28px --primary)' }}
+            />
         </div>
     );
 }
@@ -110,6 +96,7 @@ function FloatWrap({ children, delay = 0, amplitude = 6 }) {
 function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
     const { getLocalizedField } = useLanguage();
     const name = getLocalizedField(product, 'name');
+
     return (
         <motion.div
             onClick={() => onOpen(product)}
@@ -118,7 +105,7 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
             transition={{ duration: 0.3, ease: 'easeOut' }}
         >
             <FloatWrap delay={delay} amplitude={5}>
-                <FloatImage src={product.images?.[0]} alt={name} size={size} />
+                <FloatImage src={product.image} alt={name} size={size} />
             </FloatWrap>
             <div className="mt-2 text-center">
                 <p className="font-serif font-light text-xs md:text-sm text-foreground/80 tracking-wide line-clamp-1">{name}</p>
@@ -138,6 +125,8 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
    1 large center hero flanked by 2 medium + 2 small floating
 ══════════════════════════════════════════════════════ */
 function LayoutGrandStage({ products, onOpen }) {
+
+     
     const [p0, p1, p2, p3, p4] = products;
     return (
         <div className="relative w-full">
@@ -164,7 +153,7 @@ function LayoutGrandStage({ products, onOpen }) {
                             </span>
                             {/* )} */}
                             <FloatWrap delay={0} amplitude={9}>
-                                <FloatImage src={p0.images?.[0]} alt={p0.name_en} size={220} />
+                                <FloatImage src={p0.image} alt={p0.name_en} size={220} />
                             </FloatWrap>
                             <div className="mt-4 text-center">
                                 <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{p0.name_en}</p>
@@ -240,23 +229,22 @@ function LayoutGrandStage({ products, onOpen }) {
 
 
 /* ─── Layout registry ────────────────────────────────────────────── */
-const LAYOUTS = [ LayoutGrandStage];
+const LAYOUTS = [LayoutGrandStage];
 
 /* ─── Main export ─────────────────────────────────────────────────── */
 export default function FeaturedSection({ products, activeCategory, onProductOpen }) {
     const { t } = useLanguage();
-    // if (products.length === 0) return null;
+    if (products.length === 0) return null;
 
-    // const featured = products.slice(0, 5);
 
-    const adaptedProducts = menuItems.map(p => ({
-        ...p,
-        name_en: p.name,
-        images: [p.image],
-        is_popular: p.featured,
-    }));
+    const featured = products.filter((product) => {
+        const hasWebsitePicture = Number(product.website_picture) === 1;
 
-    const featured = adaptedProducts.slice(0, 5);
+        return hasWebsitePicture;
+    });
+
+    if (featured.length === 0) return null;
+
 
     const layoutIndex = activeCategory
         ? activeCategory.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)

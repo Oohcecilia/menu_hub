@@ -7,8 +7,6 @@ export default function QRCode({ order = {}, size = 200, cuid = "" }) {
 
   const buid = order.buid || "";
 
-  console.log("ORDER : ", order);
-
   const { clearCart } = useCart();
 
   useEffect(() => {

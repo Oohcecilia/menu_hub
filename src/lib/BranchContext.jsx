@@ -104,7 +104,6 @@ function BranchContextInner({ children }) {
 
     if (theme?.fonts?.sans) {
       loadFont(theme.fonts.sans);
-      console.log(`FONT sans:  ${theme.fonts.heading}`);
       root.style.setProperty(
         "--font-sans",
         `'${theme.fonts.sans}', sans-serif`
@@ -113,7 +112,6 @@ function BranchContextInner({ children }) {
 
     if (theme?.fonts?.heading) {
       loadFont(theme.fonts.heading);
-      console.log(`FONT serif: ${theme.fonts.heading}`);
       root.style.setProperty(
         "--font-serif",
         `'${theme.fonts.heading}', serif`

@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
 import Header from '@/components/menu/Header.jsx';
-import CoverHero from '@/components/menu/CoverHero';
 import CategoryNav from '@/components/menu/CategoryNav.jsx';
 import SearchBar from '@/components/menu/SearchBar.jsx';
 import ProductGrid from '@/components/menu/ProductGrid.jsx';
