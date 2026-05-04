@@ -24,26 +24,51 @@ async def init_db_pool():
 
     if pool:
         return  # prevent double init
+    try:
+        pool = await aiomysql.create_pool(
+            host=DB_HOST,
+            port=DB_PORT,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            db=DB_NAME,
+            autocommit=True,
+            minsize=1,
+            maxsize=10,
+        )
 
-    pool = await aiomysql.create_pool(
-        host=DB_HOST,
-        port=DB_PORT,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        db=DB_NAME,
-        autocommit=True,
-        minsize=1,
-        maxsize=10,
-    )
+        print("\n\n ✅ Successfully connected to MariaDB (pool created) \n\n")
+
+    except Exception as e:
+        logger.exception("❌ Failed to initialize DB pool")
+        raise
 
 
 # ---------------------------
 # GET CONNECTION (DEPENDENCY)
 # ---------------------------
 async def get_conn():
-    if not pool:
-        raise RuntimeError("DB pool not initialized. Call init_db_pool() first.")
+    try:
+        if not pool:
+            logger.error("DB pool not initialized")
+            raise HTTPException(
+                status_code=500,
+                detail="Database connection not initialized"
+            )
 
-    async with pool.acquire() as conn:
-        async with conn.cursor(aiomysql.DictCursor) as cur:
-            yield cur
+        async with pool.acquire() as conn:
+            async with conn.cursor(aiomysql.DictCursor) as cur:
+                yield cur
+
+    except aiomysql.MySQLError as e:
+        logger.error(f"MySQL error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Database query failed"
+        )
+
+    except Exception as e:
+        logger.exception("Unexpected database error")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while accessing database"
+        )
