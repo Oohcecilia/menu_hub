@@ -1,0 +1,69 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "order_number": {
+      "type": "string",
+      "description": "Unique order number"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Optional customer name"
+    },
+    "table_number": {
+      "type": "string",
+      "description": "Optional table number"
+    },
+    "items": {
+      "type": "array",
+      "description": "Ordered items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "preparing",
+        "ready",
+        "completed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "language": {
+      "type": "string",
+      "description": "Language used when ordering"
+    }
+  },
+  "required": [
+    "order_number",
+    "items",
+    "total",
+    "status"
+  ]
+}

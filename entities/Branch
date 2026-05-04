@@ -1,0 +1,58 @@
+{
+  "name": "Branch",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Branch display name"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-safe identifier, e.g. 'downtown'"
+    },
+    "address": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "hours": {
+      "type": "string",
+      "description": "Operating hours text"
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Cover photo URL for this branch"
+    },
+    "brand_name": {
+      "type": "string",
+      "description": "Brand/restaurant name shown in navbar"
+    },
+    "brand_tagline": {
+      "type": "string"
+    },
+    "brand_emoji": {
+      "type": "string",
+      "description": "Emoji used in branding"
+    },
+    "theme_primary": {
+      "type": "string",
+      "description": "HSL primary color, e.g. '25 95% 53%'"
+    },
+    "theme_background": {
+      "type": "string",
+      "description": "HSL background color"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "sort_order": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "name",
+    "slug"
+  ]
+}

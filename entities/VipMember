@@ -1,0 +1,42 @@
+{
+  "name": "VIPMember",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Member's email"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Member's full name"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "membership_tier": {
+      "type": "string",
+      "enum": [
+        "bronze",
+        "silver",
+        "gold",
+        "platinum"
+      ],
+      "default": "bronze"
+    },
+    "points": {
+      "type": "number",
+      "default": 0
+    },
+    "joined_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "user_email",
+    "full_name"
+  ]
+}
+
+
+
