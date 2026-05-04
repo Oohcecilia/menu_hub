@@ -1,9 +1,38 @@
 from fastapi import APIRouter, Depends
 from app.db import get_conn
+import json
+
 
 router = APIRouter()
 
 
+def format_products(products):
+    formatted = []
+
+    for item in products:
+
+        # HARD GUARD
+        if not item.get("groupuids"):
+            continue
+
+        # parse properties safely
+        try:
+            props = json.loads(item["properties"]) if item.get("properties") else {}
+        except:
+            props = {}
+
+        name = props.get("name", {})
+
+        formatted.append({
+            "id": item["uid"],
+            "name": name.get("def", ""),
+            "website_picture": item.get("website_picture", "")
+        })
+
+    return formatted
+
+
+    
 
 @router.get("/product-groups")
 async def get_product_groups(buid: str, conn=Depends(get_conn)):
@@ -76,9 +105,13 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
         await conn.execute(product_query, (buid, *category_uids))
         products = await conn.fetchall()
 
+        
+
     # --------------------------------------------------
     # 3. RETURN
     # --------------------------------------------------
+    formatted_products = format_products(products)
+    print(f"products {formatted_products}")
     return {
         "categories": categories,
         "products": products
