@@ -1,4 +1,4 @@
-import { motion} from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
@@ -9,6 +9,7 @@ import { useBranch } from '@/lib/BranchContext.jsx';
 function useProductCart(product) {
     const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
     const qty = getProductQuantity(product.id);
+
     const handleMinus = (e) => {
         e.stopPropagation();
         const cartItems = items.filter(i => i.product_id === product.id);
@@ -17,28 +18,53 @@ function useProductCart(product) {
         const lastIndex = items.findIndex(i => i === last);
         last.quantity > 1 ? updateQuantity(lastIndex, last.quantity - 1) : removeItem(lastIndex);
     };
+
     const handlePlus = (e) => { e.stopPropagation(); addItem(product, 1); };
     return { qty, handleMinus, handlePlus };
 }
 
 /* ─── Minimal add button ────────────────────────────────────────── */
-function AddBtn({ product }) {
+function AddBtn({ product, onOpen }) {
     const { qty, handleMinus, handlePlus } = useProductCart(product);
+
+    const hasVariations =
+        Array.isArray(product?.variations)
+            ? product.variations.length > 0
+            : !!product?.variations;
+
     return qty === 0 ? (
         <motion.button
             whileTap={{ scale: 0.85 }}
+            disabled={hasVariations}
             onClick={handlePlus}
-            className="h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm hover:bg-primary/85 transition-all group-hover:opacity-100 group-focus-within:opacity-100"
+            className={`
+                        h-7 w-7 rounded-full flex items-center justify-center shadow-sm transition-all
+                        group-focus-within:opacity-100
+
+                    ${hasVariations
+                    ? "bg-primary/90 text-primary-foreground cursor-not-allowed opacity-60"
+                    : "bg-primary text-primary-foreground hover:bg-primary/85"}
+                    `}
         >
             <Plus className="h-3.5 w-3.5" />
         </motion.button>
     ) : (
         <div className="flex items-center gap-1.5 rounded-full px-2 py-0.5 bg-foreground/8 border border-primary backdrop-blur-sm">
-            <button onClick={handleMinus} className="h-5 w-5 flex items-center justify-center text-foreground/60 hover:text-foreground">
+            <button
+                onClick={handleMinus}
+                className="h-5 w-5 flex items-center justify-center text-foreground/60 hover:text-foreground"
+            >
                 <Minus className="h-2.5 w-2.5" />
             </button>
-            <span className="text-foreground text-xs font-bold w-3 text-center">{qty}</span>
-            <button onClick={handlePlus} className="h-5 w-5 flex items-center justify-center text-foreground/60 hover:text-foreground">
+
+            <span className="text-foreground text-xs font-bold w-3 text-center">
+                {qty}
+            </span>
+
+            <button
+                onClick={handlePlus}
+                className="h-5 w-5 flex items-center justify-center text-foreground/60 hover:text-foreground"
+            >
                 <Plus className="h-2.5 w-2.5 text-primary" />
             </button>
         </div>
@@ -113,7 +139,7 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
                     <p className="text-xs font-light tracking-widest text-primary">
                         ${product.price?.toFixed(2)}
                     </p>
-                    {showAdd && <AddBtn product={product} />}
+                    {showAdd && <AddBtn product={product} onOpen={onOpen} />}
                 </div>
             </div>
         </motion.div>
@@ -126,7 +152,6 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
 ══════════════════════════════════════════════════════ */
 function LayoutGrandStage({ products, onOpen, isAll }) {
 
-     
     const [p0, p1, p2, p3, p4] = products;
     return (
         <div className="relative w-full">
@@ -161,7 +186,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                 <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{p0.name_en}</p>
                                 <div className="flex items-center justify-center gap-3 mt-1.5">
                                     <p className="font-light tracking-widest text-base text-primary">${p0.price?.toFixed(2)}</p>
-                                    <AddBtn product={p0} />
+                                    <AddBtn product={p0} onOpen={onOpen} />
                                 </div>
                             </div>
                         </motion.div>

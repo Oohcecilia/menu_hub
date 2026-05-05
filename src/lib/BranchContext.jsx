@@ -77,21 +77,6 @@ function BranchContextInner({ children }) {
     load();
   }, [activeBranch]);
 
-  // 🎨 theme injection
-  // useEffect(() => {
-  //   const root = document.documentElement;
-
-  //   if (activeBranch?.color) {
-  //     root.style.setProperty(
-  //       "--primary",
-  //       hexToHsl(activeBranch.color)
-  //     );
-  //   }
-
-  //   return () => {
-  //     root.style.removeProperty("--primary");
-  //   };
-  // }, [activeBranch]);
 
   useEffect(() => {
     const root = document.documentElement;

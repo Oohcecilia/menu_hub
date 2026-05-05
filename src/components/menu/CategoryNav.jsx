@@ -52,7 +52,7 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
         {/* NAV */}
         <nav
           ref={navRef}
-          className="flex gap-1.5 overflow-x-auto scrollbar-none no-scrollbar pb-0.5"
+          className="flex gap-1.5 overflow-x-auto pb-0.5"
         >
           {items.map(item => (
             <button

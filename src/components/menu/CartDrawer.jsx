@@ -171,6 +171,7 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0 }) {
             product_id: item.product_id,
             quantity: item.quantity,
             note: item.note || undefined,
+            variations: item.variations
           };
         }),
         status: "placed",

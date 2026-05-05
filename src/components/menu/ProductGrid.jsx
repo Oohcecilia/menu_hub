@@ -21,12 +21,27 @@ function RowCartControls({ product }) {
   };
   const handlePlus = (e) => { e.stopPropagation(); addItem(product, 1); };
 
+  const hasVariations =
+    Array.isArray(product?.variations)
+      ? product.variations.length > 0
+      : !!product?.variations;
+
   if (qty === 0) {
     return (
       <motion.button
-        whileTap={{ scale: 0.88 }}
+        whileTap={{ scale: 0.85 }}
+        disabled={hasVariations}
         onClick={handlePlus}
-        className="h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm hover:bg-primary/85 transition-all opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+        className={`
+    h-7 w-7 rounded-full flex items-center justify-center shadow-sm
+    transition-all
+
+    opacity-0 group-hover:opacity-100 group-focus-within:opacity-100
+
+    ${hasVariations
+            ? "bg-primary/40 text-primary-foreground/60 cursor-not-allowed"
+            : "bg-primary text-primary-foreground hover:bg-primary/85"}
+  `}
       >
         <Plus className="h-3.5 w-3.5" />
       </motion.button>

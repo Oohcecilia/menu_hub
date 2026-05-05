@@ -72,7 +72,7 @@ function OptionGroup({ group, selections, onChange }) {
                 w-full flex items-center justify-between px-3 rounded-xl transition-all duration-200
 
                 ${selected
-                  ? " bg-[color:var(--primary)/0.08] shadow-sm"
+                  ? " bg-[color:var(--primary)/0.08]"
                   : " hover:bg-gray-50 dark:hover:bg-white/10"}
               `}
             >
@@ -83,10 +83,10 @@ function OptionGroup({ group, selections, onChange }) {
 
                     ${selected
                       ? "bg-[var(--primary)] border-[var(--primary)]"
-                      : "border-gray-300 dark:border-white/20"}
+                      : "dark:border-white/20"}
                   `}
                 >
-                  {selected && <Check className="h-3 w-3 text-lime-600" />}
+                  {selected && <Check className="h-4 w-4 text-lime-500 border-lime-500" />}
                 </div>
 
                 <span className="text-sm font-medium text-gray-800 dark:text-white">
@@ -152,29 +152,31 @@ export default function ProductModal({ product, onClose }) {
   }, [product]);
 
   // 🔥 VALIDATION FIXED
-  const isValid = useMemo(() => {
-    return groups.every((group) => {
-      if (!group.required) return true;
+  // const isValid = useMemo(() => {
+  //   return groups.every((group) => {
+  //     if (!group.required) return true;
 
-      const sel = selections[group.id];
+  //     const sel = selections[group.id];
 
-      return sel !== undefined && sel !== null && sel !== "";
-    });
-  }, [selections, groups]);
+  //     return sel !== undefined && sel !== null && sel !== "";
+  //   });
+  // }, [selections, groups]);
 
   const hasGroups = groups.length > 0;
-  const canAdd = !hasGroups || isValid;
 
   // 🔥 ADD TO CART FIXED
   const handleAdd = () => {
-    if (!canAdd) return;
-
     const selectedVariations = groups.flatMap((g) => {
-      const sel = selections[g.id];
+      const sel = selections[g.name];
+
       if (!sel) return [];
 
       return g.items
-        .filter(item => item.id === sel)
+        .filter(item =>
+          Array.isArray(sel)
+            ? sel.includes(item.id)
+            : sel === item.id
+        )
         .map(item => item.name?.def);
     });
 

@@ -100,7 +100,13 @@ export default function OrderConfirmation() {
       >
         <div className="max-w-lg mx-auto px-4 h-16 flex items-center gap-3">
           <Link to="/">
-            <Button variant="ghost" size="icon" className="rounded-full h-9 w-9">
+            <Button size="icon" className="
+                                  rounded-full h-9 w-9
+                                  bg-transparent hover:bg-gray-100 text-gray
+                                  hover:bg-green-400/10
+                                  hover:text-white
+                                  transition-colors
+                                ">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>

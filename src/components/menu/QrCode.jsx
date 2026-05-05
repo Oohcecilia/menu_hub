@@ -9,6 +9,9 @@ export default function QRCode({ order = {}, size = 200, cuid = "" }) {
 
   const { clearCart } = useCart();
 
+
+  console.log(`QR order`, JSON.stringify(order))
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -18,7 +21,8 @@ export default function QRCode({ order = {}, size = 200, cuid = "" }) {
       cuid: cuid || "",
       items: order?.items?.map(item => {
         const options = (item.variations || [])
-          .map(v => v.name)
+          .map(v => (typeof v === "string" ? v : v?.name))
+          .filter(Boolean)
           .join(", ");
 
         const note = item.note || "";
@@ -26,7 +30,7 @@ export default function QRCode({ order = {}, size = 200, cuid = "" }) {
         return {
           id: item.product_id,
           qty: item.quantity,
-          rem: `${options} , ${note}`.trim()
+          rem: `${options}${options && note ? ", " : ""}${note}`.trim()
         };
       })
     };
