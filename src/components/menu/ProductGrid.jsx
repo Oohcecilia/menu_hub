@@ -184,7 +184,7 @@ export default function ProductGrid({ products, activeCategory, onProductOpen })
 
           <div className="premium-glow">
             <div className="inner bg-card/50">
-              <div className="grid grid-cols-1 sm:grid-cols-2 overflow-hidden bg-card/50 backdrop-blur-sm divide-y-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 overflow-hidden bg-card/50 border-primary-400/10 backdrop-blur-sm divide-y-0">
                 {lists.map((product, i) => (
                   <ProductListRow
                     key={product.id}
