@@ -124,7 +124,7 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
    LAYOUT 1 — Grand Stage
    1 large center hero flanked by 2 medium + 2 small floating
 ══════════════════════════════════════════════════════ */
-function LayoutGrandStage({ products, onOpen }) {
+function LayoutGrandStage({ products, onOpen, isAll }) {
 
      
     const [p0, p1, p2, p3, p4] = products;
@@ -148,9 +148,11 @@ function LayoutGrandStage({ products, onOpen }) {
                         <motion.div onClick={() => onOpen(p0)} className="flex flex-col items-center cursor-pointer"
                             whileHover={{ scale: 1.03 }} transition={{ duration: 0.4 }}>
                             {/* {p0.is_popular && ( */}
-                            <span className="mb-2 text-[9px] font-bold tracking-[0.22em] uppercase px-3 py-1 rounded-full text-primary bg-primary/10 border border-primary/25">
-                                Chef's Selection
-                            </span>
+                            {isAll && (
+                                <span className="mb-2 text-[9px] font-bold tracking-[0.22em] uppercase px-3 py-1 rounded-full text-primary bg-primary/10 border border-primary/25">
+                                    Chef's Selection
+                                </span>
+                            )}
                             {/* )} */}
                             <FloatWrap delay={0} amplitude={9}>
                                 <FloatImage src={p0.image} alt={p0.name_en} size={220} />
@@ -237,18 +239,14 @@ export default function FeaturedSection({ products, activeCategory, onProductOpe
     if (products.length === 0) return null;
 
 
-    const featured = products.filter((product) => {
-        const hasWebsitePicture = Number(product.website_picture) === 1;
+    const isAll = activeCategory === "__all__";
 
-        return hasWebsitePicture;
-    });
-
-    if (featured.length === 0) return null;
 
 
     const layoutIndex = activeCategory
         ? activeCategory.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
         : 0;
+
     const LayoutComponent = LAYOUTS[layoutIndex % LAYOUTS.length];
 
     return (
@@ -268,7 +266,7 @@ export default function FeaturedSection({ products, activeCategory, onProductOpe
                 <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
             </div>
 
-            <LayoutComponent products={featured} onOpen={onProductOpen} />
+            <LayoutComponent products={products} onOpen={onProductOpen} isAll={isAll} />
         </motion.section>
     );
 }

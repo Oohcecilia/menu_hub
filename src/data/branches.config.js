@@ -1,4 +1,16 @@
+import GILogo from "@/assets/GI/logo.png";
+import GICover1 from "@/assets/GI/cover/cover1.jpg";
+import GICover2 from "@/assets/GI/cover/cover2.jpeg";
+import GICover3 from "@/assets/GI/cover/cover3.png";
+
+import JILogo from "@/assets/JI/logo.png";
+import JINavLogo from "@/assets/JI/nav_logo.png";
+import JICover1 from "@/assets/JI/cover/cover1.png";
+import JICover2 from "@/assets/JI/cover/cover2.jpg";
+import JICover3 from "@/assets/JI/cover/cover3.jpg";
+
 const server = window.location.hostname.split(".")[0];
+
 
 export const branchesData = {
   giuseppe: {
@@ -21,12 +33,12 @@ export const branchesData = {
       'Cocktails',
       'Beverages',
     ],
-    logo: "/@/assets/GI/logo.png",
-    nav_logo: "/@/assets/GI/logo.png",
-    no_image: "/@/assets/GI/logo.png",
+    logo: GILogo,
+    nav_logo: GILogo,
+    no_image: GILogo,
     brand_name: "GIUSEPPE",
     brand_tagline: "Pizzeria Sicilian Roast",
-    cover_images: ["/@/assets/GI/cover/cover1.jpg", "/@/assets/GI/cover/cover2.jpeg", "/@/assets/GI/cover/cover3.png"],
+    cover_images: [GICover1, GICover2, GICover3],
     is_active: true,
     theme: {
       colors: {
@@ -59,11 +71,11 @@ export const branchesData = {
       'Beverages',
       'Beers',
     ],
-    logo: "/@assets/JI/logo.png",
-    nav_logo: "/@/assets/JI/nav_logo.png",
-    no_image: "/@/assets/JI/nav_logo.png",
+    logo: JILogo,
+    nav_logo: JINavLogo,
+    no_image: JINavLogo,
     brand_name: "JARDIN",
-    cover_images: ["/@/assets/JI/cover/cover1.png", "/@/assets/JI/cover/cover3.jpg", "/@/assets/JI/cover/cover2.jpg"],
+    cover_images: [JICover1, JICover3, JICover2],
     brand_tagline: "Mediterranean Cuisine",
     is_active: true,
     theme: {
@@ -75,15 +87,5 @@ export const branchesData = {
         heading: "Playfair Display",
       }
     }
-  },
-
-  mb: {
-    slug: "mb",
-    buid: 1154,
-    name: `MB Restaurant - ${server}`,
-    categories: ['All Items'],
-    theme_primary: "#1e293b",
-    theme_background: "#ffffff",
-    is_active: true,
-  },
+  }
 };

@@ -123,10 +123,17 @@ export default function ProductGrid({ products, activeCategory, onProductOpen })
   }
 
 
+  const isAll = activeCategory === "__all__";
+
+  const isFeatured = (product) => Number(product.website_picture) === 1;
+  const featured = products.filter(isFeatured);
+  const lists = products.filter(product => !isFeatured(product));
+
+
   return (
     <div>
       <FeaturedSection
-        products={products}
+        products={featured}
         activeCategory={activeCategory}
         onProductOpen={onProductOpen}
       />
@@ -163,7 +170,7 @@ export default function ProductGrid({ products, activeCategory, onProductOpen })
           <div className="premium-glow">
             <div className="inner bg-card/50">
               <div className="grid grid-cols-1 sm:grid-cols-2 overflow-hidden bg-card/50 backdrop-blur-sm divide-y-0">
-                {products.map((product, i) => (
+                {lists.map((product, i) => (
                   <ProductListRow
                     key={product.id}
                     product={product}

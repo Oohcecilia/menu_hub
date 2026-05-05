@@ -1,5 +1,5 @@
-// const API_BASE = "http://localhost:7777";
-const API_BASE = window.location.origin + "/api";
+const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
+
 
 export async function getMenuData(buid, order) {
   try {
@@ -31,6 +31,25 @@ export async function getMenuData(buid, order) {
 function formatCategories(apiData, order) {
   if (!Array.isArray(apiData)) return [];
 
+  const normalize = (str) => str?.toLowerCase().trim();
+
+  // map inconsistent API names → your desired order names
+  const categoryMap = {
+    "pasta": "Pasta E Risotti",
+    "pasta e risotti": "Pasta E Risotti",
+    "pizzas": "Pizze",
+    "pizza": "Pizze",
+    "soups": "Soup",
+    "soup": "Soup",
+  };
+
+  const normalizeName = (name) => {
+    const key = normalize(name);
+    return categoryMap[key] || name?.trim();
+  };
+
+  const orderNormalized = order.map(o => normalize(o));
+
   return apiData
     .filter((item) => item.website === 1)
     .map((item, index) => {
@@ -46,23 +65,30 @@ function formatCategories(apiData, order) {
       }
 
       const nameObj = properties?.name || {};
-      const name = nameObj.en || nameObj.def || item.name || "";
+      const rawName = nameObj.en || nameObj.def || item.name || "";
 
       return {
         id: item.uid || index,
         name: {
-          en: name,
+          en: rawName,
           translation: nameObj,
         },
         is_active: true,
-        raw_name: name,
+        raw_name: rawName,
+        normalized_name: normalizeName(rawName),
+        backend_sort: item.sort_order ?? null, // preserve backend sort
       };
     })
     .sort((a, b) => {
-      const aIndex = order.indexOf(a.raw_name);
-      const bIndex = order.indexOf(b.raw_name);
+      // ✅ 1. prioritize backend sort if available
+      if (a.backend_sort != null && b.backend_sort != null) {
+        return a.backend_sort - b.backend_sort;
+      }
 
-      // unknown categories go to bottom
+      // ✅ 2. fallback to your custom order
+      const aIndex = orderNormalized.indexOf(normalize(a.normalized_name));
+      const bIndex = orderNormalized.indexOf(normalize(b.normalized_name));
+
       const aRank = aIndex === -1 ? 999 : aIndex;
       const bRank = bIndex === -1 ? 999 : bIndex;
 
