@@ -9,9 +9,6 @@ export default function QRCode({ order = {}, size = 200, cuid = "" }) {
 
   const { clearCart } = useCart();
 
-
-  console.log(`QR order`, JSON.stringify(order))
-
   useEffect(() => {
     if (!canvasRef.current) return;
 

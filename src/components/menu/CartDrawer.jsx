@@ -75,7 +75,7 @@ function CartItem({
           </p>
 
           <p className="text-primary font-bold text-sm">
-            ${total.toFixed(2)}
+            {total.toFixed(2)}
           </p>
         </div>
 
