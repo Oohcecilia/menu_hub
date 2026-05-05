@@ -56,12 +56,11 @@ export default function Header({ products }) {
             ) : (
               <span className="text-2xl">🍽️</span>
             )}
-            {!isMobile && (
-              <div>
-                <p className="font-serif font-bold text-lg leading-tight tracking-tight">{brandName}</p>
-                <p className="text-[10px] font-serif text-muted-foreground leading-none tracking-widest uppercase">{brandTagline}</p>
-              </div>
-            )}
+
+            <div>
+              <p className="font-serif font-bold text-lg leading-tight tracking-tight">{brandName}</p>
+              <p className="text-[10px] font-serif text-muted-foreground leading-none tracking-widest uppercase">{brandTagline}</p>
+            </div>
           </div>
 
           {/* Controls */}
