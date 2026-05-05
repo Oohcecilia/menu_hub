@@ -275,7 +275,7 @@ export default function ProductModal({ product, onClose }) {
                 )}
 
               <p className="text-xl font-bold text-primary mt-2">
-                ${product.price?.toFixed(2)}
+                {product.price?.toFixed(2)}
               </p>
             </div>
 

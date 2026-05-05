@@ -33,6 +33,8 @@ export default function Menu() {
   }, [categories]);
 
 
+
+
   const filteredProducts = useMemo(() => {
     const active =
       activeCategory === ALL ? ALL : Number(activeCategory);
@@ -70,8 +72,6 @@ export default function Menu() {
       return matchCat && matchSearch;
     });
   }, [products, activeCategory, searchQuery, getLocalizedField]);
-
-
 
 
   const productMap = useMemo(() => {
@@ -122,7 +122,7 @@ export default function Menu() {
             </div>
           </div>
         ) : (
-          <ProductGrid products={filteredProducts} activeCategory={activeCategory} onProductOpen={setSelectedProduct} />
+          <ProductGrid products={filteredProducts} activeCategory={activeCategory} categories={sortedCategories} onProductOpen={setSelectedProduct} />
         )}
       </main>
 

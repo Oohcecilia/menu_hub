@@ -18,10 +18,10 @@ export const branchesData = {
     buid: 1154,
     name: `Giuseppe Pizzeria Sicilian Roast - ${server}`,
     categories: [
+      'Antipasti',
       'Main Course',
       'Pasta E Risotti',
       'Pizze',
-      'Antipasti',
       'Appetizers',
       'Salad',
       'Soup',
