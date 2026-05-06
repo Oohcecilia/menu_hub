@@ -60,7 +60,7 @@ export default function ProductGrid({ products, activeCategory, categories = [],
   const showGrouped = activeCategory === "__all__" && categories.length > 0;
 
 
-  const isFeatured = (product) => Number(product.website_picture) === 1;
+  const isFeatured = (product) => Number(product.website_picture) === 1 && product.image;
   const featured = products.filter(isFeatured);
   const rest = products.filter(product => !isFeatured(product));
 
