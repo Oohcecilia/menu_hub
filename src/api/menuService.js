@@ -16,9 +16,7 @@ export async function getMenuData(buid, order) {
 
     const categories = formatCategories(data.categories, order);
     const products = formatProducts(data.products);
-
-    console.log(JSON.stringify(categories));
-
+    
     return {categories: categories, products: products}
 
   } catch (error) {
