@@ -6,6 +6,7 @@ import { useLanguage } from '@/lib/i18n.jsx';
 import { useCart } from '@/lib/cartStore.jsx';
 import { Plus, Minus, Sparkles } from 'lucide-react';
 import { useBranch } from '@/lib/BranchContext.jsx';
+// import { json } from 'node:stream/consumers';
 
 
 
@@ -283,7 +284,12 @@ function TextListItem({ product, onOpen }) {
 
 /* ─── Renders one category section ───────────────────────────── */
 function CategorySection({ products, onProductOpen, catDelay = 0 }) {
-  const withImage = products.filter(p => p.image.length > 0);
+
+  console.log(JSON.stringify(products));
+  const withImage = products.filter(
+    p =>
+      (p.image?.length ?? 0) > 0 && (p.website_picture)
+  );
   const withoutImage = products.filter(p => !p.image.length);
   const activeCategory = '';
 
