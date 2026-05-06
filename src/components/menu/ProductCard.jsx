@@ -30,18 +30,26 @@ export default function ProductCard({ product, onOpen }) {
     addItem(product, 1);
   };
 
+  
+  const fitCategories = new Set(["[13]", "[5]"]);
+
+  const imageStyle = fitCategories.has(product.category_id)
+    ? "object-contain"
+    : "object-cover";
+
+    
   return (
     <div
       onClick={() => onOpen(product)}
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/40 bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] cursor-pointer"
     >
       {/* Image Container */}
-    <div className="relative aspect-square min-h-[150px] w-full overflow-hidden bg-muted/30 p-4 flex items-center justify-center">
+    <div className="relative aspect-square min-h-[150px] w-full overflow-hidden bg-muted/30 flex items-center justify-center">
       {product.image ? (
         <img
           src={product.image}
           alt={getLocalizedField(product, "name")}
-          className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-110"
+          className={`h-full w-full transition-transform  duration-500 ease-out group-hover:scale-110 ${imageStyle}`}
         />
       ) : (
         <div className="flex flex-col items-center justify-center gap-2">
