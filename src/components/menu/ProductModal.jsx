@@ -243,7 +243,7 @@ export default function ProductModal({ product, onClose }) {
                 style={{ maxHeight: 240 }}
               />
             ) : (
-              <img src={noImage} alt="no-image" className="w-10 h-10 opacity-50" />
+              <img src={noImage} alt="no-image" className="w-10 h-10 opacity-50 dark:opacity-20" />
             )}
 
             <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-[#0f1117] to-transparent" />

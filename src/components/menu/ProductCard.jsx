@@ -36,19 +36,19 @@ export default function ProductCard({ product, onOpen }) {
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/40 bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] cursor-pointer"
     >
       {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-muted/30 p-4">
-        {product.image ? (
-          <img
-            src={product.image}
-            alt={getLocalizedField(product, 'name')}
-            className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-110"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <img src={noImage} alt="no-image" className="h-8 w-8 opacity-50" />
-          </div>
-        )}
-      </div>
+    <div className="relative aspect-square min-h-[150px] w-full overflow-hidden bg-muted/30 p-4 flex items-center justify-center">
+      {product.image ? (
+        <img
+          src={product.image}
+          alt={getLocalizedField(product, "name")}
+          className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-110"
+        />
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-2">
+          <img src={noImage} alt="no-image" className="h-8 w-8 opacity-50 dark:opacity-20" />
+        </div>
+      )}
+    </div>
 
       {/* Info Section */}
       <div className="flex flex-1 flex-col p-4">
