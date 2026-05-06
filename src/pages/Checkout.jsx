@@ -144,7 +144,7 @@ export default function Checkout() {
                   </div>
                 </div>
                 <span className="font-medium">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  {(item.price * item.quantity).toFixed(2)}
                 </span>
               </div>
             ))}

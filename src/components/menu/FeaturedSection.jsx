@@ -137,7 +137,7 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
                 <p className="font-serif font-light text-xs md:text-sm text-foreground/80 tracking-wide line-clamp-1">{name}</p>
                 <div className="flex items-center justify-center gap-2 mt-1">
                     <p className="text-xs font-light tracking-widest text-primary">
-                        ${product.price?.toFixed(2)}
+                        {product.price?.toFixed(2)}
                     </p>
                     {showAdd && <AddBtn product={product} onOpen={onOpen} />}
                 </div>
@@ -185,7 +185,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                             <div className="mt-4 text-center">
                                 <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{p0.name_en}</p>
                                 <div className="flex items-center justify-center gap-3 mt-1.5">
-                                    <p className="font-light tracking-widest text-base text-primary">${p0.price?.toFixed(2)}</p>
+                                    <p className="font-light tracking-widest text-base text-primary">{p0.price?.toFixed(2)}</p>
                                     <AddBtn product={p0} onOpen={onOpen} />
                                 </div>
                             </div>

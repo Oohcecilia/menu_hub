@@ -61,7 +61,7 @@ function OrderCard({ order, products }) {
                 </p>
 
                 <p className="text-xs text-muted-foreground mt-0.5">
-                    {itemCount} item{itemCount !== 1 ? 's' : ''} · <span className="font-semibold text-foreground">${subtotal.toFixed(2)}</span>
+                    {itemCount} item{itemCount !== 1 ? 's' : ''} · <span className="font-semibold text-foreground">{subtotal.toFixed(2)}</span>
                     <span className="ml-2">{format(new Date(order.created_at), 'MMM d, h:mm a')}</span>
                 </p>
             </div>

@@ -220,7 +220,7 @@ export default function OrderTracking() {
                 </div>
 
                 <span className="font-medium">
-                  ${ (item.price * item.quantity).toFixed(2) }
+                  { (item.price * item.quantity).toFixed(2) }
                 </span>
               </div>
             ))}
@@ -229,7 +229,7 @@ export default function OrderTracking() {
           <div className="border-t border-border/50 mt-4 pt-4 flex justify-between text-lg font-bold">
             <span>{t('total')}</span>
             <span className="text-primary">
-              ${order.total?.toFixed(2)}
+              {order.total?.toFixed(2)}
             </span>
           </div>
         </motion.div>

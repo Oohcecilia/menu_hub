@@ -107,7 +107,6 @@ function formatProducts(products = []) {
     .map((item) => {
       
       // if (item.website_picture)
-      //   console.log(`ITEMS PICTURE`, item.website_picture);
 
       // ✅ HARD GUARD: skip invalid products immediately
       if (!item?.groupuids || (Array.isArray(item.groupuids) && item.groupuids.length === 0)) {

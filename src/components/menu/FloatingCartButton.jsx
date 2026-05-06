@@ -29,7 +29,7 @@ export default function FloatingCartButton({ subtotal=0, onClick }) {
           </div>
           <span>{t('viewOrder')}</span>
           <span className="h-4 w-px bg-white/30" />
-          <span className="font-bold">${subtotal.toFixed(2)}</span>
+          <span className="font-bold">{subtotal.toFixed(2)}</span>
         </motion.button>
       )}
     </AnimatePresence>

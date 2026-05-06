@@ -45,7 +45,7 @@ export default function ProductCard({ product, onOpen }) {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <img src={noImage} alt="no-image" className="h-10 w-10 opacity-20" />
+            <img src={noImage} alt="no-image" className="h-8 w-8 opacity-50" />
           </div>
         )}
       </div>

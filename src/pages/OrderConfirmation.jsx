@@ -193,7 +193,7 @@ export default function OrderConfirmation() {
                 </div>
 
                 <span className="font-medium">
-                  ${item.total.toFixed(2)}
+                  {item.total.toFixed(2)}
                 </span>
               </div>
             ))}
@@ -202,7 +202,7 @@ export default function OrderConfirmation() {
           <div className="border-t border-border/50 mt-4 pt-4 flex justify-between text-lg font-bold">
             <span>{t('total')}</span>
             <span className="text-primary">
-              ${subtotal.toFixed(2)}
+              {subtotal.toFixed(2)}
             </span>
           </div>
         </motion.div>

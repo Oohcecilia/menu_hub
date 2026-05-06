@@ -305,7 +305,7 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0 }) {
                 <div className="flex justify-between font-bold text-lg">
                   <span>{t("total")}</span>
                   <span className="text-primary">
-                    ${subtotal.toFixed(2)}
+                    {subtotal.toFixed(2)}
                   </span>
                 </div>
 
