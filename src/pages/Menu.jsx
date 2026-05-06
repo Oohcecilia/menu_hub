@@ -22,7 +22,7 @@ export default function Menu() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const { products, categories, loading } = useBranch();
+  const { products, categories, loading, activeBranch } = useBranch();
 
   const ALL = "__all__";
 
@@ -36,43 +36,84 @@ export default function Menu() {
 
 
 
+  // const filteredProducts = useMemo(() => {
+  //   const active =
+  //     activeCategory === ALL ? ALL : Number(activeCategory);
+
+  //   return products.filter(p => {
+  //     // ---- normalize category ids ----
+  //     let groupIds = [];
+
+  //     try {
+  //       groupIds =
+  //         typeof p.category_id === "string"
+  //           ? JSON.parse(p.category_id)
+  //           : Array.isArray(p.category_id)
+  //             ? p.category_id
+  //             : [];
+  //     } catch {
+  //       groupIds = [];
+  //     }
+
+  //     const normalizedGroups = groupIds.map(Number);
+
+  //     // ---- category match ----
+  //     const matchCat =
+  //       active === ALL ||
+  //       normalizedGroups.includes(active);
+
+  //     // ---- search match ----
+  //     const search = searchQuery.toLowerCase();
+
+  //     const matchSearch =
+  //       !search ||
+  //       getLocalizedField(p, "name")?.toLowerCase().includes(search) ||
+  //       getLocalizedField(p, "description")?.toLowerCase().includes(search);
+
+  //     return matchCat && matchSearch;
+  //   });
+  // }, [products, activeCategory, searchQuery, getLocalizedField]);
+
+
   const filteredProducts = useMemo(() => {
-    const active =
-      activeCategory === ALL ? ALL : Number(activeCategory);
+    // 1. Pre-process the active category to ensure numerical comparison
+    const active = activeCategory === ALL ? ALL : Number(activeCategory);
 
     return products.filter(p => {
-      // ---- normalize category ids ----
-      let groupIds = [];
+      // ---- 1. Branch Match ----
+      // Checks if no branch is selected, or if the product belongs to the active branch
+      const matchBranch = !activeBranch ||
+        !p.branch_ids?.length ||
+        p.branch_ids.includes(activeBranch.id);
 
+      // ---- 2. Category Normalization & Match ----
+      let groupIds = [];
       try {
-        groupIds =
-          typeof p.category_id === "string"
-            ? JSON.parse(p.category_id)
-            : Array.isArray(p.category_id)
-              ? p.category_id
-              : [];
+        groupIds = typeof p.category_id === "string"
+          ? JSON.parse(p.category_id)
+          : Array.isArray(p.category_id)
+            ? p.category_id
+            : [p.category_id]; // Fallback for single numbers
       } catch {
         groupIds = [];
       }
 
       const normalizedGroups = groupIds.map(Number);
+      const matchCat = active === ALL || normalizedGroups.includes(active);
 
-      // ---- category match ----
-      const matchCat =
-        active === ALL ||
-        normalizedGroups.includes(active);
-
-      // ---- search match ----
+      // ---- 3. Search Match ----
       const search = searchQuery.toLowerCase();
+      const name = getLocalizedField(p, "name")?.toLowerCase() || "";
+      const description = getLocalizedField(p, "description")?.toLowerCase() || "";
 
-      const matchSearch =
-        !search ||
-        getLocalizedField(p, "name")?.toLowerCase().includes(search) ||
-        getLocalizedField(p, "description")?.toLowerCase().includes(search);
+      const matchSearch = !search ||
+        name.includes(search) ||
+        description.includes(search);
 
-      return matchCat && matchSearch;
+      // Only return true if all conditions pass
+      return matchBranch && matchCat && matchSearch;
     });
-  }, [products, activeCategory, searchQuery, getLocalizedField]);
+  }, [products, activeBranch, activeCategory, searchQuery, getLocalizedField]);
 
 
   const productMap = useMemo(() => {

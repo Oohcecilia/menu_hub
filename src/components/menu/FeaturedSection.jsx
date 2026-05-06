@@ -134,7 +134,10 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
                 <FloatImage src={product.image} alt={name} size={size} />
             </FloatWrap>
             <div className="mt-2 text-center">
-                <p className="font-serif font-light text-xs md:text-sm text-foreground/80 tracking-wide line-clamp-1">{name}</p>
+                <p className="font-serif font-light text-xs md:text-sm text-foreground/80 tracking-wide truncate">
+                {name.split(' ').slice(0, 3).join(' ')}
+                {name.split(' ').length > 3 ? '...' : ''}
+                </p>
                 <div className="flex items-center justify-center gap-2 mt-1">
                     <p className="text-xs font-light tracking-widest text-primary">
                         {product.price?.toFixed(2)}
@@ -182,13 +185,13 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
 //                             <FloatWrap delay={0} amplitude={9}>
 //                                 <FloatImage src={p0.image} alt={p0.name_en} size={220} />
 //                             </FloatWrap>
-//                             <div className="mt-4 text-center">
-//                                 <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{p0.name_en}</p>
-//                                 <div className="flex items-center justify-center gap-3 mt-1.5">
-//                                     <p className="font-light tracking-widest text-base text-primary">{p0.price?.toFixed(2)}</p>
-//                                     <AddBtn product={p0} onOpen={onOpen} />
-//                                 </div>
-//                             </div>
+                            // <div className="mt-4 text-center">
+                            //     <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{p0.name_en}</p>
+                            //     <div className="flex items-center justify-center gap-3 mt-1.5">
+                            //         <p className="font-light tracking-widest text-base text-primary">{p0.price?.toFixed(2)}</p>
+                            //         <AddBtn product={p0} onOpen={onOpen} />
+                            //     </div>
+                            // </div>
 //                         </motion.div>
 //                     )}
 //                 </div>
@@ -207,86 +210,75 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
 // }
 
 
-
 function LayoutGrandStage({ products, onOpen, isAll }) {
-  // Helper to split products into groups of 5
-  const chunks = [];
-  for (let i = 0; i < products.length; i += 5) {
-    chunks.push(products.slice(i, i + 5));
-  }
+    // 1. Grab the first 5 for the stage, and put everything else (index 5+) into extraProducts
+    const [p0, p1, p2, p3, p4, ...extraProducts] = products;
 
-  return (
-    <div className="flex flex-col gap-24 py-12">
-      {chunks.map((group, index) => {
-        const [p0, p1, p2, p3, p4] = group;
-        
-        return (
-          <div key={index} className="relative w-full">
+    return (
+        <div className="relative w-full">
             {/* Subtle radial glow background */}
-            <div 
-              className="absolute inset-0 pointer-events-none opacity-20"
-              style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 60%, var(--primary) 0%, transparent 70%)' }} 
-            />
+            <div className="absolute inset-0 pointer-events-none"
+                style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 60%, var(--primary) 0%, transparent 70%)' }} />
 
-            {/* Main Stage Row */}
-            <div className="flex items-center justify-center gap-4 sm:gap-8 md:gap-12 flex-wrap sm:flex-nowrap">
-              
-              {/* Left small column (p1 & p3) */}
-              <div className="flex flex-col gap-12 items-center order-2 sm:order-1">
-                {p1 && <SmallCard product={p1} onOpen={onOpen} size={130} delay={0.2} />}
-                {p3 && <SmallCard product={p3} onOpen={onOpen} size={130} delay={0.4} />}
-              </div>
+            {/* --- MAIN STAGE (Untouched to preserve layout) --- */}
+            <div className="flex items-start justify-evenly gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
+                {/* Left small */}
+                <div className="flex flex-col gap-10 items-center mb-6 sm:mb-0 sm:mr-2">
+                    {p1 && <SmallCard product={p1} onOpen={onOpen} size={125} delay={0.6} />}
+                    {p3 && <SmallCard product={p3} onOpen={onOpen} size={125} delay={1.2} />}
+                </div>
 
-              {/* Center Hero (p0) */}
-              <div className="relative flex flex-col items-center z-10 mx-4 order-1 sm:order-2 min-w-[280px]">
-                {p0 && (
-                  <motion.div 
-                    onClick={() => onOpen(p0)} 
-                    className="flex flex-col items-center cursor-pointer"
-                    whileHover={{ scale: 1.02 }} 
-                    transition={{ duration: 0.4 }}
-                  >
-                    {isAll && (
-                      <span className="mb-4 text-[10px] font-bold tracking-[0.25em] uppercase px-4 py-1.5 rounded-full text-primary bg-primary/5 border border-primary/20 backdrop-blur-sm">
-                        Chef's Selection
-                      </span>
+                {/* Center hero */}
+                <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6 pt-16">
+                    {p0 && (
+                        <motion.div onClick={() => onOpen(p0)} className="flex flex-col items-center cursor-pointer"
+                            whileHover={{ scale: 1.03 }} transition={{ duration: 0.4 }}>
+                            {/* {isAll && (
+                                <span className="mb-2 text-[9px] font-bold tracking-[0.22em] uppercase px-3 py-1 rounded-full text-primary bg-primary/10 border border-primary/25">
+                                    Chef's Selection
+                                </span>
+                            )} */}
+                            <FloatWrap delay={0} amplitude={9}>
+                                <FloatImage src={p0.image} alt={p0.name_en} size={220} />
+                            </FloatWrap>
+                            <div className="mt-4 text-center">
+                                <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{p0.name.en}</p>
+                                <div className="flex items-center justify-center gap-3 mt-1.5">
+                                    <p className="font-light tracking-widest text-base text-primary">{p0.price?.toFixed(2)}</p>
+                                    <AddBtn product={p0} onOpen={onOpen} />
+                                </div>
+                            </div>
+                        </motion.div>
                     )}
-                    
-                    <FloatWrap delay={0} amplitude={10}>
-                      <FloatImage src={p0.image} alt={p0.name_en} size={240} />
-                    </FloatWrap>
+                </div>
 
-                    <div className="mt-6 text-center">
-                      <h3 className="font-serif text-2xl text-foreground/90 tracking-tight leading-tight">
-                        {p0.name_en}
-                      </h3>
-                      <div className="flex items-center justify-center gap-4 mt-3">
-                        <p className="font-medium tracking-wide text-lg text-primary">
-                          ${p0.price?.toFixed(2)}
-                        </p>
-                        <AddBtn product={p0} onOpen={onOpen} />
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-
-              {/* Right small column (p2 & p4) */}
-              <div className="flex flex-col gap-12 items-center order-3 sm:order-3">
-                {p2 && <SmallCard product={p2} onOpen={onOpen} size={130} delay={0.3} />}
-                {p4 && <SmallCard product={p4} onOpen={onOpen} size={130} delay={0.5} />}
-              </div>
+                {/* Right small */}
+                <div className="flex flex-row sm:flex-col gap-12 sm:gap-10 items-center mb-6 sm:mb-0 sm:ml-2">
+                    {p2 && <SmallCard product={p2} onOpen={onOpen} size={125} delay={0.9} />}
+                    {p4 && <SmallCard product={p4} onOpen={onOpen} size={125} delay={1.5} />}
+                </div>
             </div>
 
-            {/* Decorative Divider between stages (only if not the last one) */}
-            {index !== chunks.length - 1 && (
-              <div className="mt-20 mx-auto w-32 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+            {/* --- EXTRA PRODUCTS ROW (Responsive) --- */}
+            {extraProducts.length > 0 && (
+                <div className="mt-10 sm:mt-12 flex flex-wrap justify-evenly items-center gap-10 sm:gap-14 w-full px-4">
+                    {extraProducts.map((product, idx) => (
+                        <SmallCard 
+                            key={product.id || idx} 
+                            product={product} 
+                            onOpen={onOpen} 
+                            size={150} 
+                            // Stagger the entrance animation for the extra items
+                            delay={1.8 + (idx * 0.2)} 
+                        />
+                    ))}
+                </div>
             )}
-          </div>
-        );
-      })}
-    </div>
-  );
+
+            {/* Thin decorative line */}
+            <div className="mt-8 mx-auto w-24 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        </div>
+    );
 }
 
 /* ══════════════════════════════════════════════════════
@@ -366,13 +358,13 @@ export default function FeaturedSection({ products, activeCategory, onProductOpe
             className="mb-12"
         >
             {/* Section label */}
-            <div className="flex items-center gap-4 mb-8">
+            {/* <div className="flex items-center gap-4 mb-8">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/70">
                     ✦✦ {t("featured")} ✦✦
                 </span>
                 <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
-            </div>
+            </div> */}
 
             <LayoutComponent products={products} onOpen={onProductOpen} isAll={isAll} />
         </motion.section>
