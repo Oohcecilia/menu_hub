@@ -9,6 +9,7 @@ import ProductGrid from '@/components/menu/ProductGrid.jsx';
 import ProductModal from '@/components/menu/ProductModal.jsx';
 import CartDrawer from '@/components/menu/CartDrawer.jsx';
 import FloatingCartButton from '@/components/menu/FloatingCartButton.jsx';
+import ScrollButtons from '@/components/menu/ScrollButtons.jsx';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -143,6 +144,7 @@ export default function Menu() {
         subtotal={subtotal}
         onClick={() => setIsOpen(true)}
       />
+      <ScrollButtons />
     </div>
   );
 }
