@@ -170,6 +170,7 @@ export default function Menu() {
 
       {selectedProduct && (
         <ProductModal
+          open={isOpen}
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
         />

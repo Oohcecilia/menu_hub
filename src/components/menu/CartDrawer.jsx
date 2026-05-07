@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -142,6 +142,19 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0 }) {
   const navigate = useNavigate();
 
   const [placing, setPlacing] = useState(false);
+
+
+  useEffect(() => {
+    if (open) {
+      document.documentElement.classList.add("overflow-hidden");
+    } else {
+      document.documentElement.classList.remove("overflow-hidden");
+    }
+
+    return () => {
+      document.documentElement.classList.remove("overflow-hidden");
+    };
+  }, [open]);
 
   // ---------------------------
   // FAST PRODUCT LOOKUP (IMPORTANT)

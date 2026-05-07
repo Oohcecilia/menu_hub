@@ -108,7 +108,7 @@ function OptionGroup({ group, selections, onChange }) {
 }
 
 
-export default function ProductModal({ product, onClose }) {
+export default function ProductModal({ open, product, onClose }) {
   const { activeBranch } = useBranch();
   const { addItem } = useCart();
   const { t, getLocalizedField } = useLanguage();
@@ -120,6 +120,9 @@ export default function ProductModal({ product, onClose }) {
   const [selections, setSelections] = useState({});
 
   const noImage = activeBranch?.no_image;
+
+
+
 
   // 🔥 FIXED GROUPS (stable ID + clean structure)
   const groups = useMemo(() => {
@@ -151,16 +154,6 @@ export default function ProductModal({ product, onClose }) {
     });
   }, [product]);
 
-  // 🔥 VALIDATION FIXED
-  // const isValid = useMemo(() => {
-  //   return groups.every((group) => {
-  //     if (!group.required) return true;
-
-  //     const sel = selections[group.id];
-
-  //     return sel !== undefined && sel !== null && sel !== "";
-  //   });
-  // }, [selections, groups]);
 
   const hasGroups = groups.length > 0;
 
@@ -195,7 +188,7 @@ export default function ProductModal({ product, onClose }) {
         transition={{ duration: 0.2 }}
         className="
         fixed inset-0 z-50 flex items-end sm:items-center justify-center
-        bg-black/20 backdrop-blur-md
+        bg-white/100 dark:bg-black/90 backdrop-blur-md
       "
         onClick={onClose}
       >
@@ -223,7 +216,7 @@ export default function ProductModal({ product, onClose }) {
             className="
             absolute top-4 right-4 z-10 h-8 w-8 rounded-full
             flex items-center justify-center
-            bg-black/5 dark:bg-white/10
+            bg-white dark:bg-black
             border border-black/10 dark:border-white/10
             hover:bg-black/10 dark:hover:bg-white/20
           "

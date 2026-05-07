@@ -64,12 +64,12 @@ function ListBanner({ spacing = 2, start = false }) {
           <span>&#10171;</span>
 
           {start ? (
-            <span className='text-4xl'>&#9880;</span>
+            <span className='text-2xl'>&#9737;</span>
           ) : (
-            <span>&#9737;</span>
+            <span className='text-md'>&#9737;</span>
           )}
 
-          <span className="inline-block scale-x-[-1]">
+          <span className="inline-block scale-x-[-1] ">
             &#10171;
           </span>
         </span>

@@ -8,75 +8,75 @@ import { useBranch } from '@/lib/BranchContext.jsx';
 import { useLanguage } from '@/lib/i18n';
 
 const STATUS_CONFIG = {
-    pending: { label: 'Pending', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-    preparing: { label: 'Preparing', icon: ChefHat, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    ready: { label: 'Ready', icon: Bell, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-    completed: { label: 'Done', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
-    cancelled: { label: 'Cancelled', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
+  pending: { label: 'Pending', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+  preparing: { label: 'Preparing', icon: ChefHat, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+  ready: { label: 'Ready', icon: Bell, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
+  completed: { label: 'Done', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
+  cancelled: { label: 'Cancelled', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
 };
 
 function OrderCard({ order, products }) {
 
-    const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+  const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
 
-    const itemCount = order.items?.reduce((s, i) => s + i.quantity, 0) || 0;
-    
-
-    // 🔥 FAST LOOKUP MAP
-    const productMap = useMemo(() => {
-        return Object.fromEntries(
-            (products || []).map(p => [String(p.id), p])
-        );
-    }, [products]);
+  const itemCount = order.items?.reduce((s, i) => s + i.quantity, 0) || 0;
 
 
-    const { prodInfo, subtotal } = useMemo(() => {
-        return buildOrderSummary(order?.items, productMap);
-    }, [order?.items, productMap]);
-
-
-
-    return (
-        <div className="bg-background rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-colors">
-            {/* Top row */}
-            <div className="flex items-center justify-between px-4 pt-3 pb-2">
-                <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-sm text-primary">{order.order_number}</span>
-                    {order.table_number && (
-                        <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                            Table {order.table_number}
-                        </span>
-                    )}
-                </div>
-                <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-500">
-                    <CheckCircle className="h-3 w-3" />
-                    Order placed
-                </div>
-            </div>
-
-            {/* Items preview */}
-            <div className="px-4 pb-2">
-                <p className="text-xs text-muted-foreground truncate">
-                    {prodInfo.map(i => `${i.quantity}× ${i.name}`).join(', ')}
-                </p>
-
-                <p className="text-xs text-muted-foreground mt-0.5">
-                    {itemCount} item{itemCount !== 1 ? 's' : ''} · <span className="font-semibold text-foreground">{subtotal.toFixed(2)}</span>
-                    <span className="ml-2">{format(new Date(order.created_at), 'MMM d, h:mm a')}</span>
-                </p>
-            </div>
-
-            {/* Action links */}
-            <div className="flex border-t border-border/40">
-                <Link
-                    to={`/order-confirmation/${order.id}`}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-                >
-                    View receipt <ArrowRight className="h-3 w-3" />
-                </Link>
-            </div>
-        </div>
+  // 🔥 FAST LOOKUP MAP
+  const productMap = useMemo(() => {
+    return Object.fromEntries(
+      (products || []).map(p => [String(p.id), p])
     );
+  }, [products]);
+
+
+  const { prodInfo, subtotal } = useMemo(() => {
+    return buildOrderSummary(order?.items, productMap);
+  }, [order?.items, productMap]);
+
+
+
+  return (
+    <div className="bg-background rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-colors">
+      {/* Top row */}
+      <div className="flex items-center justify-between px-4 pt-3 pb-2">
+        <div className="flex items-center gap-2">
+          <span className="font-mono font-bold text-sm text-primary">{order.order_number}</span>
+          {order.table_number && (
+            <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
+              Table {order.table_number}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-500">
+          <CheckCircle className="h-3 w-3" />
+          Order placed
+        </div>
+      </div>
+
+      {/* Items preview */}
+      <div className="px-4 pb-2">
+        <p className="text-xs text-muted-foreground truncate">
+          {prodInfo.map(i => `${i.quantity}× ${i.name}`).join(', ')}
+        </p>
+
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {itemCount} item{itemCount !== 1 ? 's' : ''} · <span className="font-semibold text-foreground">{subtotal.toFixed(2)}</span>
+          <span className="ml-2">{format(new Date(order.created_at), 'MMM d, h:mm a')}</span>
+        </p>
+      </div>
+
+      {/* Action links */}
+      <div className="flex border-t border-border/40">
+        <Link
+          to={`/order-confirmation/${order.id}`}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+        >
+          View receipt <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
+    </div>
+  );
 }
 
 export default function OrderHistoryDrawer({ products, open, onClose }) {
@@ -120,7 +120,19 @@ export default function OrderHistoryDrawer({ products, open, onClose }) {
     } finally {
       setLoading(false);
     }
+
+
+    if (open) {
+      document.documentElement.classList.add("overflow-hidden");
+    } else {
+      document.documentElement.classList.remove("overflow-hidden");
+    }
+
+    return () => {
+      document.documentElement.classList.remove("overflow-hidden");
+    };
   }, [open]);
+
 
   // ✅ FILTER BY BRANCH (CORRECT PLACE)
   const visibleOrders = useMemo(() => {
@@ -191,27 +203,27 @@ export default function OrderHistoryDrawer({ products, open, onClose }) {
                 </div>
 
               ) : /* NO ORDERS AT ALL */
-              !hasAnyOrders || !hasVisibleOrders ? (
-                <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                  <ShoppingBag className="h-12 w-12 text-muted-foreground/25 mb-4" />
-                  <p className="font-medium text-sm">
-                    {t("no_past_orders")}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {t("orders_placeholder")}
-                  </p>
-                </div>
+                !hasAnyOrders || !hasVisibleOrders ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center py-16">
+                    <ShoppingBag className="h-12 w-12 text-muted-foreground/25 mb-4" />
+                    <p className="font-medium text-sm">
+                      {t("no_past_orders")}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("orders_placeholder")}
+                    </p>
+                  </div>
 
-              ) : (
-                /* ORDERS LIST */
-                visibleOrders.map(order => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    products={products}
-                  />
-                ))
-              )}
+                ) : (
+                  /* ORDERS LIST */
+                  visibleOrders.map(order => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      products={products}
+                    />
+                  ))
+                )}
             </div>
           </motion.div>
         </>
