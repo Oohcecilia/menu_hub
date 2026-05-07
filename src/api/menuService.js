@@ -64,6 +64,7 @@ function formatCategories(apiData, order) {
         properties = {};
       }
 
+
       const nameObj = properties?.name || {};
       const rawName = nameObj.en || nameObj.def || item.name || "";
 

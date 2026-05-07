@@ -6,7 +6,7 @@ export default function SearchBar({ value, onChange }) {
   const { t } = useLanguage();
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-3">
+    <div className="max-w-5xl mx-auto px-4 pt-3">
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input

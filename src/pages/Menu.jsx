@@ -147,7 +147,7 @@ export default function Menu() {
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
 
-      <main className="max-w-5xl mx-auto px-4 py-6 pb-28">
+      <main className="max-w-5xl mx-auto px-4 pb-16">
         {loading ? (
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-3">

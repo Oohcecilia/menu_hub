@@ -101,6 +101,15 @@ export default function ProductCard({ product, onOpen }) {
       </div>
     </div>
   );
+}
+
+
+
+
+
+
+
+
 
   // return (
   //   <div
@@ -154,4 +163,3 @@ export default function ProductCard({ product, onOpen }) {
   //     </div>
   //   </div>
   // );
-}

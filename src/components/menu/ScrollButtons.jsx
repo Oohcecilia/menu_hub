@@ -31,7 +31,7 @@ export default function ScrollButtons() {
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="h-8 w-8 rounded-full bg-card border border-border/60 shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:shadow-lg transition-all"
           >
-            <ArrowUp className="h-4 w-4 text-primary/30" />
+            <ArrowUp className="h-4 w-4 text-primary/80" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -46,7 +46,7 @@ export default function ScrollButtons() {
             onClick={() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' })}
             className="h-8 w-8 rounded-full bg-card border border-border/60 shadow-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:shadow-lg transition-all"
           >
-            <ArrowDown className="h-4 w-4 text-primary/30" />
+            <ArrowDown className="h-4 w-4 text-primary/80" />
           </motion.button>
         )}
       </AnimatePresence>
