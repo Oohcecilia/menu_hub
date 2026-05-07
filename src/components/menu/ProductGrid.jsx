@@ -10,14 +10,14 @@ import { getCategoryIcon } from '@/utils/icons';
 
 
 const map = {
-    1: "py-1",
-    2: "py-2",
-    3: "py-3",
-    4: "py-4",
-    5: "py-5",
-    6: "py-6",
-    8: "py-8",
-    10: "py-10",
+  1: "py-1",
+  2: "py-2",
+  3: "py-3",
+  4: "py-4",
+  5: "py-5",
+  6: "py-6",
+  8: "py-8",
+  10: "py-10",
 };
 
 
@@ -49,43 +49,58 @@ function SpaceY({ y = 4 }) {
   return <div className={map[y] || "py-4"} />;
 }
 
-function ListBanner({spacing = 2}) {
-    return (
-      <div className={`flex items-center ${map[spacing]} gap-3`}>
-        <span className=" text-lg text-primary">&#10171;</span>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
+function ListBanner({ spacing = 2, start = false }) {
 
-        <div className="flex items-center justify-center shrink-0">
-          <span className="flex items-center font-1xl gap-1 text-primary">
-            <span>&#10171;</span>
+  return (
+    <div className={`flex items-center ${map[spacing]} gap-3`}>
+      <span className="text-lg text-primary">
+        &#10171;
+      </span>
+
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
+
+      <div className="flex items-center justify-center shrink-0">
+        <span className="flex items-center gap-1 text-primary text-xl">
+          <span>&#10171;</span>
+
+          {start ? (
+            <span className='text-4xl'>&#9880;</span>
+          ) : (
             <span>&#9737;</span>
-            <span className="inline-block scale-x-[-1]">&#10171;</span>
-          </span>
-        </div>
+          )}
 
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
-        <span className=" text-lg inline-block scale-x-[-1] text-primary">&#10171;</span>
+          <span className="inline-block scale-x-[-1]">
+            &#10171;
+          </span>
+        </span>
       </div>
-    );
+
+      <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
+
+      <span className="text-lg inline-block scale-x-[-1] text-primary">
+        &#10171;
+      </span>
+    </div>
+  );
 }
 
-function ListSpace({spacing = 2}) {
-    return (
-      <div className={`flex items-center ${map[spacing]} gap-3`}>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
+function ListSpace({ spacing = 2 }) {
+  return (
+    <div className={`flex items-center ${map[spacing]} gap-3`}>
+      <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
 
-        <div className="flex items-center justify-center shrink-0">
-          <span className="flex items-center font-xl gap-1 text-primary">
-            <span>&#10171;</span>
-            <span className="inline-block scale-x-[-1]">
-              &#10171;
-            </span>
+      <div className="flex items-center justify-center shrink-0">
+        <span className="flex items-center font-xl gap-1 text-primary">
+          <span>&#10171;</span>
+          <span className="inline-block scale-x-[-1]">
+            &#10171;
           </span>
-        </div>
-
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
+        </span>
       </div>
-    );
+
+      <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
+    </div>
+  );
 }
 
 function EndBanner() {
@@ -105,13 +120,13 @@ function CategoryBanner({ icon: Icon, label }) {
 
   return (
     <div className="flex items-center justify-center gap-5 mt-24 mb-4">
-    
-      <span className="text-primary text-2xl" >&#10170;</span>
-      <span className="flex items-center gap-4 text-lg font-serif font-bold uppercase tracking-[0.35em] text-primary">
-        {Icon && <Icon size={20} className="text-current" />}
+
+      {/* <span className="text-primary text-2xl" >&#10170;</span> */}
+      <span className="flex items-center gap-4 text-2xl font-serif font-bold uppercase tracking-[0.15em] text-primary">
+        {Icon && <Icon size={24} className="text-current" />}
         {label}
       </span>
-      <span className="inline-block scale-x-[-1] text-2xl text-primary " >&#10170;</span>
+      {/* <span className="inline-block scale-x-[-1] text-2xl text-primary " >&#10170;</span> */}
     </div>
   );
 }
@@ -154,12 +169,12 @@ function TextListItem({ product, onOpen, delay = 0 }) {
     >
       {/* Left: Name + Description */}
       <div className="min-w-0">
-        <p className="font-serif text-sm font-medium leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300">
+        <p className="font-serif uppercase font-medium  leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300">
           {name}
         </p>
 
         {desc && (
-          <p className="text-[11px] text-muted-foreground/70 mt-1 line-clamp-2 leading-relaxed font-light">
+          <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed font-light">
             {desc}
           </p>
         )}
@@ -167,7 +182,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
 
       {/* Right: Price + Controls */}
       <div className="flex items-center justify-between sm:justify-end gap-3 sm:min-w-[110px]">
-        <span className="text-primary font-light tracking-widest text-sm whitespace-nowrap">
+        <span className="text-primary font-light tracking-widest text-base whitespace-nowrap">
           {product.price?.toFixed(2)}
         </span>
 
@@ -233,7 +248,7 @@ function TextList({ products, onProductOpen }) {
   return (
     <div className="rounded-lg  overflow-hidden ">
       {/* Mobile: single column, all items stacked */}
-      <ListBanner  spacing={6} /> 
+      <ListBanner spacing={6} start={true} />
       <div className="sm:hidden  divide-y divide-border/25 ">
         {products.map((p, i) => (
           <TextListItem key={p.id} product={p} onOpen={onProductOpen} delay={i * 0.04} />
@@ -254,7 +269,7 @@ function TextList({ products, onProductOpen }) {
             >
               {isSingle ? (
                 <div className="w-1/2 mx-auto">
-                  <ListSpace spacing={2} /> 
+                  <ListSpace spacing={2} />
                   <TextListItem product={a} onOpen={onProductOpen} delay={rowIdx * 2 * 0.04} />
                 </div>
               ) : (
@@ -272,7 +287,7 @@ function TextList({ products, onProductOpen }) {
           );
         })}
       </div>
-      <ListBanner  spacing={6} /> 
+      <ListBanner spacing={6} />
     </div>
   );
 }
@@ -312,12 +327,22 @@ function CategorySection({ products, onProductOpen }) {
 /* ─── Main export ─────────────────────────────────────────────── */
 export default function ProductGrid({ products, activeCategory, categories = [], onProductOpen }) {
   const { t, getLocalizedField } = useLanguage();
+  const { activeBranch } = useBranch();
+
+  const noImage = activeBranch?.no_image;
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-24 text-muted-foreground">
-        <p className="text-5xl mb-4">🍽️</p>
-        <p className="text-sm font-medium tracking-wide">{t('noResults')}</p>
+      <div className="flex flex-col items-center justify-center py-24 text-muted-foreground text-center">
+        <img
+          src={noImage}
+          alt="no-image"
+          className="h-10 w-10 opacity-60 dark:opacity-20"
+        />
+
+        <p className="text-base font-medium tracking-wide mt-3">
+          {t('noResults')}
+        </p>
       </div>
     );
   }
@@ -354,7 +379,7 @@ export default function ProductGrid({ products, activeCategory, categories = [],
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-      <SpaceY y={4} /> 
+      <SpaceY y={4} />
       <CategorySection products={products} onProductOpen={onProductOpen} />
       {/* <EndBanner />  */}
     </motion.div>
@@ -601,7 +626,7 @@ export default function ProductGrid({ products, activeCategory, categories = [],
 //     return (
 //       <div className="text-center py-24 text-muted-foreground">
 //         <p className="text-5xl mb-4">🍽️</p>
-//         <p className="text-sm font-medium tracking-wide">{t('noResults')}</p>
+//         <p className="text-base font-medium tracking-wide">{t('noResults')}</p>
 //       </div>
 //     );
 //   }
@@ -698,11 +723,11 @@ export default function ProductGrid({ products, activeCategory, categories = [],
 //       animate={{ opacity: 1, x: 0 }}
 //     >
 //       <div className="flex-1 min-w-0">
-//         <p className="font-medium text-sm leading-tight">{name}</p>
+//         <p className="font-medium text-base leading-tight">{name}</p>
 //         {desc && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{desc}</p>}
 //       </div>
 //       <div className="flex items-center gap-2 flex-shrink-0">
-//         <span className="font-bold text-primary text-sm">${product.price?.toFixed(2)}</span>
+//         <span className="font-bold text-primary text-base">${product.price?.toFixed(2)}</span>
 //         {qty === 0 ? (
 //           <button
 //             onClick={handlePlus}
@@ -715,7 +740,7 @@ export default function ProductGrid({ products, activeCategory, categories = [],
 //             <button onClick={handleMinus} className="h-6 w-6 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors">
 //               <Minus className="h-3 w-3" />
 //             </button>
-//             <span className="text-sm font-bold w-4 text-center">{qty}</span>
+//             <span className="text-base font-bold w-4 text-center">{qty}</span>
 //             <button onClick={handlePlus} className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors">
 //               <Plus className="h-3 w-3" />
 //             </button>
@@ -769,7 +794,7 @@ export default function ProductGrid({ products, activeCategory, categories = [],
 //     return (
 //       <div className="text-center py-24 text-muted-foreground">
 //         <p className="text-5xl mb-4">🍽️</p>
-//         <p className="text-sm font-medium tracking-wide">{t('noResults')}</p>
+//         <p className="text-base font-medium tracking-wide">{t('noResults')}</p>
 //       </div>
 //     );
 //   }
