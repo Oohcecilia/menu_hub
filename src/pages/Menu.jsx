@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
@@ -18,102 +18,215 @@ export default function Menu() {
   const { getLocalizedField } = useLanguage();
   const { isOpen, setIsOpen, items } = useCart();
 
-  const [activeCategory, setActiveCategory] = useState("__all__");
+  const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const userClickedRef = useRef(false);
+  const clickTimeoutRef = useRef(null);
+
+  const sectionRefs = useRef({});
 
   const { products, categories, loading, activeBranch } = useBranch();
 
-  const ALL = "__all__";
 
-  // ✅ now categories come from backend
   const sortedCategories = useMemo(() => {
     return categories
       .filter(c => c.is_active)
       .sort((a, b) => a.sort_order - b.sort_order);
   }, [categories]);
 
-
+  // console.log(`CAT ${JSON.stringify(sortedCategories)}`);
 
 
   // const filteredProducts = useMemo(() => {
-  //   const active =
-  //     activeCategory === ALL ? ALL : Number(activeCategory);
 
   //   return products.filter(p => {
-  //     // ---- normalize category ids ----
-  //     let groupIds = [];
+  //     // ---- 1. Branch Match ----
+  //     // Checks if no branch is selected, or if the product belongs to the active branch
+  //     const matchBranch = !activeBranch ||
+  //       !p.branch_ids?.length ||
+  //       p.branch_ids.includes(activeBranch.id);
 
+  //     // ---- 2. Category Normalization & Match ----
+  //     let groupIds = [];
   //     try {
-  //       groupIds =
-  //         typeof p.category_id === "string"
-  //           ? JSON.parse(p.category_id)
-  //           : Array.isArray(p.category_id)
-  //             ? p.category_id
-  //             : [];
+  //       groupIds = typeof p.category_id === "string"
+  //         ? JSON.parse(p.category_id)
+  //         : Array.isArray(p.category_id)
+  //           ? p.category_id
+  //           : [p.category_id]; // Fallback for single numbers
   //     } catch {
   //       groupIds = [];
   //     }
 
-  //     const normalizedGroups = groupIds.map(Number);
-
-  //     // ---- category match ----
-  //     const matchCat =
-  //       active === ALL ||
-  //       normalizedGroups.includes(active);
-
-  //     // ---- search match ----
+  //     // ---- 3. Search Match ----
   //     const search = searchQuery.toLowerCase();
+  //     const name = getLocalizedField(p, "name")?.toLowerCase() || "";
+  //     const description = getLocalizedField(p, "description")?.toLowerCase() || "";
 
-  //     const matchSearch =
-  //       !search ||
-  //       getLocalizedField(p, "name")?.toLowerCase().includes(search) ||
-  //       getLocalizedField(p, "description")?.toLowerCase().includes(search);
+  //     const matchSearch = !search ||
+  //       name.includes(search) ||
+  //       description.includes(search);
 
-  //     return matchCat && matchSearch;
+  //     // Only return true if all conditions pass
+  //     return matchBranch && matchSearch;
   //   });
-  // }, [products, activeCategory, searchQuery, getLocalizedField]);
+  // }, [products, activeBranch, activeCategory, searchQuery, getLocalizedField]);
 
 
-  const filteredProducts = useMemo(() => {
-    // 1. Pre-process the active category to ensure numerical comparison
-    const active = activeCategory === ALL ? ALL : Number(activeCategory);
+  const groupedProducts = useMemo(() => {
+    const groups = {};
 
-    return products.filter(p => {
-      // ---- 1. Branch Match ----
-      // Checks if no branch is selected, or if the product belongs to the active branch
-      const matchBranch = !activeBranch ||
-        !p.branch_ids?.length ||
-        p.branch_ids.includes(activeBranch.id);
+    sortedCategories.forEach(category => {
+      groups[category.id] = [];
+    });
 
-      // ---- 2. Category Normalization & Match ----
-      let groupIds = [];
-      try {
-        groupIds = typeof p.category_id === "string"
-          ? JSON.parse(p.category_id)
-          : Array.isArray(p.category_id)
-            ? p.category_id
-            : [p.category_id]; // Fallback for single numbers
-      } catch {
-        groupIds = [];
-      }
+    products.forEach(product => {
+      // Branch filter
+      const matchBranch =
+        !activeBranch ||
+        !product.branch_ids?.length ||
+        product.branch_ids.includes(activeBranch.id);
 
-      const normalizedGroups = groupIds.map(Number);
-      const matchCat = active === ALL || normalizedGroups.includes(active);
+      if (!matchBranch) return;
 
-      // ---- 3. Search Match ----
+      // Search filter
       const search = searchQuery.toLowerCase();
-      const name = getLocalizedField(p, "name")?.toLowerCase() || "";
-      const description = getLocalizedField(p, "description")?.toLowerCase() || "";
 
-      const matchSearch = !search ||
+      const name =
+        getLocalizedField(product, "name")?.toLowerCase() || "";
+
+      const description =
+        getLocalizedField(product, "description")?.toLowerCase() || "";
+
+      const matchSearch =
+        !search ||
         name.includes(search) ||
         description.includes(search);
 
-      // Only return true if all conditions pass
-      return matchBranch && matchCat && matchSearch;
+      if (!matchSearch) return;
+
+      // Normalize categories
+      let categoryIds = [];
+
+      try {
+        categoryIds =
+          typeof product.category_id === "string"
+            ? JSON.parse(product.category_id)
+            : Array.isArray(product.category_id)
+              ? product.category_id
+              : [product.category_id];
+      } catch {
+        categoryIds = [];
+      }
+
+      categoryIds.forEach(catId => {
+        if (groups[catId]) {
+          groups[catId].push(product);
+        }
+      });
     });
-  }, [products, activeBranch, activeCategory, searchQuery, getLocalizedField]);
+
+    return groups;
+  }, [
+    products,
+    sortedCategories,
+    activeBranch,
+    searchQuery,
+    getLocalizedField,
+  ]);
+
+
+  // useEffect(() => {
+  //   if (searchQuery) return;
+
+  //   const sections = Object.values(sectionRefs.current);
+
+  //   if (!sections.length) return;
+
+  //   const observer = new IntersectionObserver(
+  //     entries => {
+  //       if (userClickedRef.current) return;
+
+  //       const visibleSections = entries
+  //         .filter(entry => entry.isIntersecting)
+  //         .sort(
+  //           (a, b) =>
+  //             a.boundingClientRect.top -
+  //             b.boundingClientRect.top
+  //         );
+
+
+  //         if (visibleSections.length > 0) {
+  //           const id = visibleSections[0].target.dataset.category;
+  //           console.log(visibleSections[0].target)
+  //         setActiveCategory(id);
+  //         console.log(id)
+  //       }
+  //     },
+  //     {
+  //       rootMargin: "-20% 0px -60% 0px",
+  //       threshold: 0.1,
+  //     }
+  //   );
+
+  //   sections.forEach(section => observer.observe(section));
+
+  //   return () => observer.disconnect();
+  // }, [groupedProducts, searchQuery]);
+
+  useEffect(() => {
+    if (searchQuery) return;
+
+    const sections = Object.values(sectionRefs.current);
+
+    if (!sections.length) return;
+
+    const visibleSections = new Map();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (userClickedRef.current) return;
+
+        entries.forEach((entry) => {
+          const id = entry.target.dataset.category;
+
+          if (entry.isIntersecting) {
+            visibleSections.set(id, entry);
+          } else {
+            visibleSections.delete(id);
+          }
+        });
+
+        if (visibleSections.size === 0) return;
+
+        const sorted = [...visibleSections.values()].sort(
+          (a, b) =>
+            Math.abs(a.boundingClientRect.top) -
+            Math.abs(b.boundingClientRect.top)
+        );
+
+        const activeId =
+          sorted[0]?.target?.dataset?.category;
+
+        if (activeId) {
+          setActiveCategory(activeId);
+        }
+      },
+      {
+        root: null,
+        threshold: [0, 0.1, 0.25, 0.5],
+        rootMargin: "-15% 0px -55% 0px",
+      }
+    );
+
+    sections.forEach((section) => {
+      observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, [groupedProducts, searchQuery]);
+
 
 
   const productMap = useMemo(() => {
@@ -133,24 +246,51 @@ export default function Menu() {
 
 
 
+  // ── Click handler: scroll to section ─────────────────────────
+  const handleCategorySelect = useCallback((catId) => {
+    setActiveCategory(catId);
+
+    userClickedRef.current = true;
+
+    clearTimeout(clickTimeoutRef.current);
+
+    clickTimeoutRef.current = setTimeout(() => {
+      userClickedRef.current = false;
+    }, 1000);
+
+    const section = sectionRefs.current[catId];
+
+    if (!section) return;
+
+    const offset = 200;
+
+    const top =
+      section.getBoundingClientRect().top +
+      window.pageYOffset -
+      offset;
+
+    window.scrollTo({
+      top,
+      behavior: "smooth",
+    });
+  }, []);
+
+
+
   return (
     <div className="min-h-screen bg-background">
       <Header products={products} />
       {/* <CoverHero /> */}
 
       <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-b border-border/30">
-        <CategoryNav
-          categories={sortedCategories}
-          activeCategory={activeCategory}
-          onSelect={setActiveCategory}
-        />
+        <CategoryNav categories={sortedCategories} activeCategory={activeCategory} onSelect={handleCategorySelect} />
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
 
       <main className="max-w-5xl mx-auto px-4 pb-16">
         {loading ? (
           <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3 mt-2">
               <Skeleton className="col-span-2 h-64 rounded-2xl" />
               <div className="flex flex-col gap-3">
                 <Skeleton className="flex-1 rounded-2xl" />
@@ -164,7 +304,12 @@ export default function Menu() {
             </div>
           </div>
         ) : (
-          <ProductGrid products={filteredProducts} activeCategory={activeCategory} categories={sortedCategories} onProductOpen={setSelectedProduct} />
+          <ProductGrid
+            products={groupedProducts}
+            categories={sortedCategories}
+            onProductOpen={setSelectedProduct}
+            sectionRefs={sectionRefs}
+          />
         )}
       </main>
 

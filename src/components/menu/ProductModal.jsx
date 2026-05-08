@@ -188,7 +188,7 @@ export default function ProductModal({ open, product, onClose }) {
         transition={{ duration: 0.2 }}
         className="
         fixed inset-0 z-50 flex items-end sm:items-center justify-center
-        bg-white/100 dark:bg-black/90 backdrop-blur-md
+        bg-white/50 dark:bg-black/50 backdrop-blur-md
       "
         onClick={onClose}
       >
