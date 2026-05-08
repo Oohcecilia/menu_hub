@@ -21,6 +21,7 @@ export default function Menu() {
   const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const scrollEndTimeout = useRef(null);
   const userClickedRef = useRef(false);
   const clickTimeoutRef = useRef(null);
 
@@ -137,44 +138,6 @@ export default function Menu() {
   ]);
 
 
-  // useEffect(() => {
-  //   if (searchQuery) return;
-
-  //   const sections = Object.values(sectionRefs.current);
-
-  //   if (!sections.length) return;
-
-  //   const observer = new IntersectionObserver(
-  //     entries => {
-  //       if (userClickedRef.current) return;
-
-  //       const visibleSections = entries
-  //         .filter(entry => entry.isIntersecting)
-  //         .sort(
-  //           (a, b) =>
-  //             a.boundingClientRect.top -
-  //             b.boundingClientRect.top
-  //         );
-
-
-  //         if (visibleSections.length > 0) {
-  //           const id = visibleSections[0].target.dataset.category;
-  //           console.log(visibleSections[0].target)
-  //         setActiveCategory(id);
-  //         console.log(id)
-  //       }
-  //     },
-  //     {
-  //       rootMargin: "-20% 0px -60% 0px",
-  //       threshold: 0.1,
-  //     }
-  //   );
-
-  //   sections.forEach(section => observer.observe(section));
-
-  //   return () => observer.disconnect();
-  // }, [groupedProducts, searchQuery]);
-
   useEffect(() => {
     if (searchQuery) return;
 
@@ -247,16 +210,38 @@ export default function Menu() {
 
 
   // ── Click handler: scroll to section ─────────────────────────
+  // const handleCategorySelect = useCallback((catId) => {
+  //   setActiveCategory(catId);
+
+  //   userClickedRef.current = true;
+
+  //   clearTimeout(clickTimeoutRef.current);
+
+  //   clickTimeoutRef.current = setTimeout(() => {
+  //     userClickedRef.current = false;
+  //   }, 1000);
+
+  //   const section = sectionRefs.current[catId];
+
+  //   if (!section) return;
+
+  //   const offset = 200;
+
+  //   const top =
+  //     section.getBoundingClientRect().top +
+  //     window.pageYOffset -
+  //     offset;
+
+  //   window.scrollTo({
+  //     top,
+  //     behavior: "smooth",
+  //   });
+  // }, []);
+
   const handleCategorySelect = useCallback((catId) => {
     setActiveCategory(catId);
 
     userClickedRef.current = true;
-
-    clearTimeout(clickTimeoutRef.current);
-
-    clickTimeoutRef.current = setTimeout(() => {
-      userClickedRef.current = false;
-    }, 1000);
 
     const section = sectionRefs.current[catId];
 
@@ -273,6 +258,24 @@ export default function Menu() {
       top,
       behavior: "smooth",
     });
+
+    const handleScrollEnd = () => {
+      clearTimeout(scrollEndTimeout.current);
+
+      scrollEndTimeout.current = setTimeout(() => {
+        userClickedRef.current = false;
+        window.removeEventListener(
+          "scroll",
+          handleScrollEnd
+        );
+      }, 120);
+    };
+
+    window.addEventListener(
+      "scroll",
+      handleScrollEnd,
+      { passive: true }
+    );
   }, []);
 
 
