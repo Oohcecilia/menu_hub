@@ -21,7 +21,6 @@ export default function Menu() {
   const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const scrollEndTimeout = useRef(null);
   const userClickedRef = useRef(false);
   const clickTimeoutRef = useRef(null);
 
@@ -138,58 +137,124 @@ export default function Menu() {
   ]);
 
 
+  // useEffect(() => {
+  //   if (searchQuery) return;
+
+  //   const handleScroll = () => {
+  //     if (userClickedRef.current) return;
+
+  //     const offset = 180;
+
+  //     let currentCategory = null;
+
+  //     for (const category of sortedCategories) {
+  //       const section =
+  //         sectionRefs.current[category.id];
+
+  //       if (!section) continue;
+
+  //       const rect =
+  //         section.getBoundingClientRect();
+
+  //       if (rect.top <= offset) {
+  //         currentCategory = category.id;
+  //       }
+  //     }
+
+  //     if (currentCategory) {
+  //       setActiveCategory(prev =>
+  //         prev === currentCategory
+  //           ? prev
+  //           : currentCategory
+  //       );
+  //     }
+  //   };
+
+  //   window.addEventListener(
+  //     "scroll",
+  //     handleScroll,
+  //     { passive: true }
+  //   );
+
+  //   handleScroll();
+
+  //   return () => {
+  //     window.removeEventListener(
+  //       "scroll",
+  //       handleScroll
+  //     );
+  //   };
+  // }, [sortedCategories, groupedProducts, searchQuery]);
   useEffect(() => {
     if (searchQuery) return;
 
-    const sections = Object.values(sectionRefs.current);
+    const handleScroll = () => {
+      if (userClickedRef.current) return;
 
-    if (!sections.length) return;
+      const offset = 200;
 
-    const visibleSections = new Map();
+      let currentCategory = null;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (userClickedRef.current) return;
+      for (const category of sortedCategories) {
+        const section =
+          sectionRefs.current[category.id];
 
-        entries.forEach((entry) => {
-          const id = entry.target.dataset.category;
+        if (!section) continue;
 
-          if (entry.isIntersecting) {
-            visibleSections.set(id, entry);
-          } else {
-            visibleSections.delete(id);
-          }
-        });
+        const rect =
+          section.getBoundingClientRect();
 
-        if (visibleSections.size === 0) return;
-
-        const sorted = [...visibleSections.values()].sort(
-          (a, b) =>
-            Math.abs(a.boundingClientRect.top) -
-            Math.abs(b.boundingClientRect.top)
-        );
-
-        const activeId =
-          sorted[0]?.target?.dataset?.category;
-
-        if (activeId) {
-          setActiveCategory(activeId);
+        // Section crossed sticky header
+        if (rect.top <= offset) {
+          currentCategory = category.id;
         }
-      },
-      {
-        root: null,
-        threshold: [0, 0.1, 0.25, 0.5],
-        rootMargin: "-15% 0px -55% 0px",
+
+        // First visible section fallback
+        else if (
+          !currentCategory &&
+          rect.top > offset
+        ) {
+          currentCategory = category.id;
+          break;
+        }
       }
+
+      // Final fallback
+      if (
+        !currentCategory &&
+        sortedCategories.length
+      ) {
+        currentCategory =
+          sortedCategories[0].id;
+      }
+
+      setActiveCategory(prev =>
+        prev === currentCategory
+          ? prev
+          : currentCategory
+      );
+    };
+
+    window.addEventListener(
+      "scroll",
+      handleScroll,
+      { passive: true }
     );
 
-    sections.forEach((section) => {
-      observer.observe(section);
-    });
+    // Delay ensures refs are mounted
+    requestAnimationFrame(handleScroll);
 
-    return () => observer.disconnect();
-  }, [groupedProducts, searchQuery]);
-
+    return () => {
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
+    };
+  }, [
+    sortedCategories,
+    groupedProducts,
+    searchQuery,
+  ]);
 
 
   const productMap = useMemo(() => {
@@ -210,40 +275,13 @@ export default function Menu() {
 
 
   // ── Click handler: scroll to section ─────────────────────────
-  // const handleCategorySelect = useCallback((catId) => {
-  //   setActiveCategory(catId);
-
-  //   userClickedRef.current = true;
-
-  //   clearTimeout(clickTimeoutRef.current);
-
-  //   clickTimeoutRef.current = setTimeout(() => {
-  //     userClickedRef.current = false;
-  //   }, 1000);
-
-  //   const section = sectionRefs.current[catId];
-
-  //   if (!section) return;
-
-  //   const offset = 200;
-
-  //   const top =
-  //     section.getBoundingClientRect().top +
-  //     window.pageYOffset -
-  //     offset;
-
-  //   window.scrollTo({
-  //     top,
-  //     behavior: "smooth",
-  //   });
-  // }, []);
-
   const handleCategorySelect = useCallback((catId) => {
     setActiveCategory(catId);
 
     userClickedRef.current = true;
 
-    const section = sectionRefs.current[catId];
+    const section =
+      sectionRefs.current[catId];
 
     if (!section) return;
 
@@ -259,21 +297,24 @@ export default function Menu() {
       behavior: "smooth",
     });
 
-    const handleScrollEnd = () => {
-      clearTimeout(scrollEndTimeout.current);
+    let timeout;
 
-      scrollEndTimeout.current = setTimeout(() => {
+    const onScroll = () => {
+      clearTimeout(timeout);
+
+      timeout = setTimeout(() => {
         userClickedRef.current = false;
+
         window.removeEventListener(
           "scroll",
-          handleScrollEnd
+          onScroll
         );
-      }, 120);
+      }, 100);
     };
 
     window.addEventListener(
       "scroll",
-      handleScrollEnd,
+      onScroll,
       { passive: true }
     );
   }, []);
