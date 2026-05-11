@@ -52,12 +52,14 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
         LEFT JOIN product_branches 
             ON product_branches.puid = products.uid
         WHERE 
-            JSON_EXTRACT(product_branches.prices, '$.PHP') > 0
+            CAST(
+                JSON_UNQUOTE(JSON_EXTRACT(product_branches.prices, '$.PHP'))
+                AS DECIMAL(10,2)
+            ) > 0
             AND product_branches.website = 1
             AND products.active = 1
             AND products.groupuid = pg.uid
             AND product_branches.buid = %s
-            AND JSON_CONTAINS(products.groupuids, pg.uid)
         GROUP BY products.groupuid
     ) > 0
     """
