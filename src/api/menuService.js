@@ -155,5 +155,5 @@ function formatProducts(products = []) {
       };
     })
     .filter(Boolean)
-    .sort((a, b) => a.price - b.price); // ✅ ascending price
+    .sort((a, b) => b.price - a.price); // ✅ ascending price
 }
