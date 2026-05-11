@@ -29,6 +29,79 @@ export async function getMenuData(buid, order) {
 /**
  * Transform backend → UI format
  */
+// function formatCategories(apiData, order) {
+//   if (!Array.isArray(apiData)) return [];
+
+//   const normalize = (str) => str?.toLowerCase().trim();
+
+//   // map inconsistent API names → your desired order names
+//   const categoryMap = {
+//     "pasta": "Pasta E Risotti",
+//     "pasta e risotti": "Pasta E Risotti",
+//     "pizzas": "Pizze",
+//     "pizza": "Pizze",
+//     "soups": "Soup",
+//     "soup": "Soup",
+//   };
+
+//   const normalizeName = (name) => {
+//     const key = normalize(name);
+//     return categoryMap[key] || name?.trim();
+//   };
+
+//   const orderNormalized = order.map(o => normalize(o));
+
+//   return apiData
+//     .filter((item) => item.website === 1)
+//     .map((item, index) => {
+//       let properties = {};
+
+//       try {
+//         properties =
+//           typeof item.properties === "string"
+//             ? JSON.parse(item.properties)
+//             : item.properties || {};
+//       } catch {
+//         properties = {};
+//       }
+
+
+//       const nameObj = properties?.name || {};
+//       const rawName = nameObj.en || nameObj.def || item.name || "";
+
+//       return {
+//         id: item.uid || index,
+//         name: {
+//           en: rawName,
+//           translation: nameObj,
+//         },
+//         is_active: true,
+//         raw_name: rawName,
+//         normalized_name: normalizeName(rawName),
+//         backend_sort: item.sort_order ?? null, // preserve backend sort
+//       };
+//     })
+//     .sort((a, b) => {
+//       // ✅ 1. prioritize backend sort if available
+//       if (a.backend_sort != null && b.backend_sort != null) {
+//         return a.backend_sort - b.backend_sort;
+//       }
+
+//       // ✅ 2. fallback to your custom order
+//       const aIndex = orderNormalized.indexOf(normalize(a.normalized_name));
+//       const bIndex = orderNormalized.indexOf(normalize(b.normalized_name));
+
+//       const aRank = aIndex === -1 ? 999 : aIndex;
+//       const bRank = bIndex === -1 ? 999 : bIndex;
+
+//       return aRank - bRank;
+//     })
+//     .map((item, index) => ({
+//       ...item,
+//       sort_order: index + 1,
+//     }));
+// }
+
 function formatCategories(apiData, order) {
   if (!Array.isArray(apiData)) return [];
 
@@ -49,7 +122,7 @@ function formatCategories(apiData, order) {
     return categoryMap[key] || name?.trim();
   };
 
-  const orderNormalized = order.map(o => normalize(o));
+  const orderNormalized = order.map((o) => normalize(o));
 
   return apiData
     .filter((item) => item.website === 1)
@@ -65,7 +138,6 @@ function formatCategories(apiData, order) {
         properties = {};
       }
 
-
       const nameObj = properties?.name || {};
       const rawName = nameObj.en || nameObj.def || item.name || "";
 
@@ -78,24 +150,35 @@ function formatCategories(apiData, order) {
         is_active: true,
         raw_name: rawName,
         normalized_name: normalizeName(rawName),
-        backend_sort: item.sort_order ?? null, // preserve backend sort
+        backend_sort: item.sort_order ?? null,
       };
     })
+
+    // ✅ only include categories found in order
+    .filter((item) =>
+      orderNormalized.includes(
+        normalize(item.normalized_name)
+      )
+    )
+
     .sort((a, b) => {
-      // ✅ 1. prioritize backend sort if available
+      // ✅ prioritize backend sort if available
       if (a.backend_sort != null && b.backend_sort != null) {
         return a.backend_sort - b.backend_sort;
       }
 
-      // ✅ 2. fallback to your custom order
-      const aIndex = orderNormalized.indexOf(normalize(a.normalized_name));
-      const bIndex = orderNormalized.indexOf(normalize(b.normalized_name));
+      // ✅ fallback to custom order
+      const aIndex = orderNormalized.indexOf(
+        normalize(a.normalized_name)
+      );
 
-      const aRank = aIndex === -1 ? 999 : aIndex;
-      const bRank = bIndex === -1 ? 999 : bIndex;
+      const bIndex = orderNormalized.indexOf(
+        normalize(b.normalized_name)
+      );
 
-      return aRank - bRank;
+      return aIndex - bIndex;
     })
+
     .map((item, index) => ({
       ...item,
       sort_order: index + 1,

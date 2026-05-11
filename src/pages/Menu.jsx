@@ -96,7 +96,7 @@ export default function Menu() {
     searchQuery,
     getLocalizedField,
   ]);
-
+  
 
   useEffect(() => {
     if (searchQuery) return;
