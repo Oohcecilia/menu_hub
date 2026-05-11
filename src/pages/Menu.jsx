@@ -137,59 +137,36 @@ export default function Menu() {
   ]);
 
 
-  // useEffect(() => {
-  //   if (searchQuery) return;
-
-  //   const handleScroll = () => {
-  //     if (userClickedRef.current) return;
-
-  //     const offset = 180;
-
-  //     let currentCategory = null;
-
-  //     for (const category of sortedCategories) {
-  //       const section =
-  //         sectionRefs.current[category.id];
-
-  //       if (!section) continue;
-
-  //       const rect =
-  //         section.getBoundingClientRect();
-
-  //       if (rect.top <= offset) {
-  //         currentCategory = category.id;
-  //       }
-  //     }
-
-  //     if (currentCategory) {
-  //       setActiveCategory(prev =>
-  //         prev === currentCategory
-  //           ? prev
-  //           : currentCategory
-  //       );
-  //     }
-  //   };
-
-  //   window.addEventListener(
-  //     "scroll",
-  //     handleScroll,
-  //     { passive: true }
-  //   );
-
-  //   handleScroll();
-
-  //   return () => {
-  //     window.removeEventListener(
-  //       "scroll",
-  //       handleScroll
-  //     );
-  //   };
-  // }, [sortedCategories, groupedProducts, searchQuery]);
   useEffect(() => {
     if (searchQuery) return;
 
     const handleScroll = () => {
       if (userClickedRef.current) return;
+
+      // Detect bottom of page
+      const scrollBottom =
+        window.innerHeight + window.scrollY;
+
+      const pageHeight =
+        document.documentElement.scrollHeight;
+
+      // If near bottom → activate last category
+      if (scrollBottom >= pageHeight - 20) {
+        const lastCategory =
+          sortedCategories[
+          sortedCategories.length - 1
+          ];
+
+        if (lastCategory) {
+          setActiveCategory(prev =>
+            prev === lastCategory.id
+              ? prev
+              : lastCategory.id
+          );
+        }
+
+        return;
+      }
 
       const offset = 200;
 
