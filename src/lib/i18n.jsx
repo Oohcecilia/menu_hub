@@ -22,9 +22,14 @@ const translations = {
     language: "Language", darkMode: "Dark Mode", lightMode: "Light Mode",
     searchMenu: "Search dishes...", noResults: "No items found", viewOrder: "View Order",
     optional: "optional", continueToPayment: "Review & Place Order",
-    guestInfo: "Guest Info", yourOrder: "Your Order", orderHistory: "Order History", recentOrder: "Your recent orders", more: "more", featured: "featured",
+    guestInfo: "Guest Info", yourOrder: "Your Order", orderHistory: "Order History", 
+    recentOrder: "Your recent orders", 
+    more: "more", 
+    featured: "featured",
     no_past_orders: "No past orders",
-    orders_placeholder: "Orders you place will appear here"
+    orders_placeholder: "Orders you place will appear here",
+    historyPlaced: "Order placed",
+    viewReceipt: "View Receipt",
   },
   es: {
     menu: "Menú", categories: "Categorías", all: "Todo", popular: "Popular",
@@ -51,7 +56,9 @@ const translations = {
     more: "más",
     featured: "destacado",
     no_past_orders: "No hay pedidos anteriores",
-    orders_placeholder: "Los pedidos que realices aparecerán aquí"
+    orders_placeholder: "Los pedidos que realices aparecerán aquí",
+    historyPlaced: "Pedido realizado",
+    viewReceipt: "Ver recibo",
   },
   de: {
     menu: "Speisekarte", categories: "Kategorien", all: "Alle", popular: "Beliebt",
@@ -77,7 +84,9 @@ const translations = {
     guestInfo: "Gastinfo", yourOrder: "Ihre Bestellung", orderHistory: "Bestellhistorie", recentOrder: 'Ihre letzten Bestellungen',  more: "mehr",
     featured: "empfohlen",
     no_past_orders: "Keine vergangenen Bestellungen",
-    orders_placeholder: "Deine Bestellungen werden hier angezeigt"
+    orders_placeholder: "Deine Bestellungen werden hier angezeigt",
+    historyPlaced: "Bestellung aufgegeben",
+    viewReceipt: "Beleg anzeigen",
   },
   fr: {
     menu: "Menu", categories: "Catégories", all: "Tout", popular: "Populaire",
@@ -103,7 +112,9 @@ const translations = {
     guestInfo: "Info invité", yourOrder: "Votre Commande", orderHistory: "Historique des commandes", recentOrder: 'Vos commandes récentes',     more: "plus",
     featured: "en vedette",
     no_past_orders: "Aucune commande précédente",
-    orders_placeholder: "Les commandes que vous passez apparaîtront ici"
+    orders_placeholder: "Les commandes que vous passez apparaîtront ici",
+    historyPlaced: "Commande passée",
+    viewReceipt: "Voir le reçu",
   },
   it: {
     menu: "Menu", categories: "Categorie", all: "Tutto", popular: "Popolare",
@@ -129,7 +140,9 @@ const translations = {
     guestInfo: "Info ospite", yourOrder: "Il tuo Ordine", orderHistory: "Cronologia degli ordini", recentOrder: "I tuoi ordini recenti", more: "altro",
     featured: "in evidenza",
     no_past_orders: "Nessun ordine precedente",
-    orders_placeholder: "Gli ordini effettuati appariranno qui"
+    orders_placeholder: "Gli ordini effettuati appariranno qui",
+    historyPlaced: "Ordine effettuato",
+    viewReceipt: "Visualizza ricevuta",
   },
   zh: {
     menu: "菜单", categories: "分类", all: "全部", popular: "热门",
@@ -155,7 +168,9 @@ const translations = {
     guestInfo: "访客信息", yourOrder: "我的订单", orderHistory: "订单记录", recentOrder: "您最近的订单",    more: "更多",
     featured: "精选",
     no_past_orders: "没有历史订单",
-    orders_placeholder: "您下的订单将显示在这里"
+    orders_placeholder: "您下的订单将显示在这里",
+    historyPlaced: "订单已提交",
+    viewReceipt: "查看收据",
   },
   ja: {
     menu: "メニュー", categories: "カテゴリー", all: "すべて", popular: "人気",
@@ -181,7 +196,9 @@ const translations = {
     guestInfo: "ゲスト情報", yourOrder: "ご注文", orderHistory: "注文履歴", recentOrder: "最近のご注文", more: "もっと",
     featured: "おすすめ",
     no_past_orders: "過去の注文はありません",
-    orders_placeholder: "ここに注文が表示されます"
+    orders_placeholder: "ここに注文が表示されます",
+    historyPlaced: "注文が完了しました",
+    viewReceipt: "領収書を表示",
   },
   ko: {
     menu: "메뉴", categories: "카테고리", all: "전체", popular: "인기",
@@ -207,7 +224,9 @@ const translations = {
     guestInfo: "게스트 정보", yourOrder: "내 주문", orderHistory: "주문 내역", recentOrder: "최근 주문", more: "더보기",
     featured: "추천",
     no_past_orders: "이전 주문이 없습니다",
-    orders_placeholder: "주문한 항목이 여기에 표시됩니다"
+    orders_placeholder: "주문한 항목이 여기에 표시됩니다",
+    historyPlaced: "주문이 접수되었습니다",
+    viewReceipt: "영수증 보기",
   },
   ru: {
     menu: "Меню", categories: "Категории", all: "Все", popular: "Популярное",
@@ -233,7 +252,9 @@ const translations = {
     guestInfo: "Данные гостя", yourOrder: "Ваш заказ", orderHistory: "История заказов", recentOrder: "Ваши недавние заказы 주문", more: "ещё",
     featured: "рекомендуемое",
     no_past_orders: "Нет прошлых заказов",
-    orders_placeholder: "Ваши заказы будут отображаться здесь"
+    orders_placeholder: "Ваши заказы будут отображаться здесь",
+    historyPlaced: "Заказ оформлен",
+    viewReceipt: "Просмотреть чек",
   },
   fil: {
     menu: "Menu", categories: "Mga Kategorya", all: "Lahat", popular: "Sikat",
@@ -259,7 +280,9 @@ const translations = {
     guestInfo: "Impormasyon ng Guest", yourOrder: "Iyong Order", orderHistory: "Kasaysayan ng Order", recentOrder: "Ang iyong mga kamakailang order", more: "higit pa",
     featured: "itinatampok",
     no_past_orders: "Walang nakaraang mga order",
-    orders_placeholder: "Lalabas dito ang iyong mga order"
+    orders_placeholder: "Lalabas dito ang iyong mga order",
+    historyPlaced: "Nailagay na ang order",
+    viewReceipt: "Tingnan ang resibo",
   }
 };
 

@@ -20,10 +20,17 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
     });
   }, [activeCategory]);
 
-  const items = categories.map(c => ({
-    id: c.id,
-    label: getLocalizedField(c, "name"),
-  }));
+  const items = categories.map((c) => {
+    const trans = c.name?.translation;
+
+    return {
+      id: c.id,
+      iconName: getLocalizedField(c, 'name'),
+      label: trans
+        ? getLocalizedField(c?.name, "translation")
+        : c?.name?.en,
+    };
+  });
 
 
   return (
@@ -32,7 +39,7 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
         <nav ref={navRef} className="flex gap-1 overflow-x-auto scrollbar-none pb-0.5 no-scrollbar">
           {items.map(item => {
             const isActive = activeCategory === item.id;
-            const Icon = getCategoryIcon(item.label);
+            const Icon = getCategoryIcon(item.iconName);
 
             return (
               <button

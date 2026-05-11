@@ -16,6 +16,7 @@ export async function getMenuData(buid, order) {
 
     const categories = formatCategories(data.categories, order);
     const products = formatProducts(data.products);
+
     
     return {categories: categories, products: products}
 

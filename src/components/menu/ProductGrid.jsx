@@ -116,7 +116,11 @@ function EndBanner() {
 }
 
 
-function CategoryBanner({ icon: Icon, label }) {
+function CategoryBanner({ category, icon: Icon }) {
+
+  const { getLocalizedField } = useLanguage();
+
+  const categoryName = category?.name?.translation ? getLocalizedField(category?.name, "translation") : category?.en;
 
   return (
     <div className="flex items-center justify-center gap-5 mt-24 mb-4">
@@ -124,7 +128,7 @@ function CategoryBanner({ icon: Icon, label }) {
       {/* <span className="text-primary text-2xl" >&#10170;</span> */}
       <span className="flex items-center gap-4 text-2xl font-serif font-bold uppercase tracking-[0.15em] text-primary">
         {Icon && <Icon size={24} className="text-current" />}
-        {label}
+        {categoryName}
       </span>
       {/* <span className="inline-block scale-x-[-1] text-2xl text-primary " >&#10170;</span> */}
     </div>
@@ -321,6 +325,90 @@ function CategorySection({ products, onProductOpen }) {
 }
 
 
+export default function ProductGrid({
+  products,
+  categories = [],
+  onProductOpen,
+  sectionRefs,
+}) {
+
+  const hasProducts = Object.values(products).some(
+    arr => arr.length > 0
+  );
+
+  const { t, getLocalizedField } = useLanguage();
+  const { activeBranch } = useBranch();
+
+  const noImage = activeBranch?.no_image;
+
+  if (!hasProducts) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-muted-foreground text-center">
+        <img
+          src={noImage}
+          alt="no-image"
+          className="h-10 w-10 opacity-60 dark:opacity-20"
+        />
+
+        <p className="text-base font-medium tracking-wide mt-3">
+          {t('noResults')}
+        </p>
+      </div>
+    );
+  }
+
+  if (categories.length > 0)
+  {
+    return (
+      <div className="space-y-12">
+        {categories.map((cat, ci) => {
+          const cName = cat.name?.en;
+
+          const icon = getCategoryIcon(cName);
+
+
+          const catProducts =
+            products[cat.id] || [];
+
+          if (!catProducts.length) return null;
+
+          return (
+            <section
+              key={cat.id}
+              ref={(el) => {
+                if (el) {
+                  sectionRefs.current[cat.id] = el;
+                }
+              }}
+              data-category={cat.id}
+              id={`cat-section-${cat.id}`}
+            >
+              <CategoryBanner category={cat} icon={icon}></CategoryBanner>
+
+              <CategorySection
+                products={catProducts}
+                onProductOpen={onProductOpen}
+              ></CategorySection>
+            </section>
+          );
+        })}
+      </div>
+    );
+  }
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+      <SpaceY y={4} />
+      <CategorySection products={products} onProductOpen={onProductOpen} />
+      {/* <EndBanner />  */}
+    </motion.div>
+  );
+}
+
+
+
+
+
+
 
 
 
@@ -383,83 +471,3 @@ function CategorySection({ products, onProductOpen }) {
 //     </motion.div>
 //   );
 // }
-
-
-export default function ProductGrid({
-  products,
-  categories = [],
-  onProductOpen,
-  sectionRefs,
-}) {
-
-  const hasProducts = Object.values(products).some(
-    arr => arr.length > 0
-  );
-
-  const { t, getLocalizedField } = useLanguage();
-  const { activeBranch } = useBranch();
-
-  const noImage = activeBranch?.no_image;
-
-  if (!hasProducts) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-muted-foreground text-center">
-        <img
-          src={noImage}
-          alt="no-image"
-          className="h-10 w-10 opacity-60 dark:opacity-20"
-        />
-
-        <p className="text-base font-medium tracking-wide mt-3">
-          {t('noResults')}
-        </p>
-      </div>
-    );
-  }
-
-  if (categories.length > 0)
-  {
-    return (
-      <div className="space-y-12">
-        {categories.map((cat, ci) => {
-          const cName = cat.name?.en;
-
-          const icon = getCategoryIcon(cName);
-
-
-          const catProducts =
-            products[cat.id] || [];
-
-          if (!catProducts.length) return null;
-
-          return (
-            <section
-              key={cat.id}
-              ref={(el) => {
-                if (el) {
-                  sectionRefs.current[cat.id] = el;
-                }
-              }}
-              data-category={cat.id}
-              id={`cat-section-${cat.id}`}
-            >
-              <CategoryBanner icon={icon} label={cName}></CategoryBanner>
-
-              <CategorySection
-                products={catProducts}
-                onProductOpen={onProductOpen}
-              ></CategorySection>
-            </section>
-          );
-        })}
-      </div>
-    );
-  }
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-      <SpaceY y={4} />
-      <CategorySection products={products} onProductOpen={onProductOpen} />
-      {/* <EndBanner />  */}
-    </motion.div>
-  );
-}

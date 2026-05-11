@@ -25,12 +25,12 @@ function CartItem({
 }) {
   if (!product) return null;
 
-
   const { activeBranch } = useBranch();
+  const { getLocalizedField } = useLanguage();
 
   const price = product.price || 0;
   const total = price * item.quantity;
-  const name = product.name?.def;
+  const name = getLocalizedField(product, 'name');
   const image = product.image;
   const noImage = activeBranch?.no_image
 
@@ -58,7 +58,7 @@ function CartItem({
         {Boolean(image) && (
           <img
             src={image}
-            alt={product.product_name}
+            alt={name}
             className="h-14 w-14 rounded-lg object-contain bg-muted flex-shrink-0 p-1"
           />
         )}
@@ -198,24 +198,6 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0 }) {
         JSON.stringify([orderData, ...existingOrders])
       );
 
-      // Save lightweight history (IDs only)
-      // try {
-      //   const prev = JSON.parse(localStorage.getItem("order_history") || "[]");
-
-      //   const updatedHistory = [
-      //     orderData.id,
-      //     ...prev.filter((id) => id !== orderData.id),
-      //   ].slice(0, 20);
-
-      //   localStorage.setItem(
-      //     "order_history",
-      //     JSON.stringify(updatedHistory)
-      //   );
-      // } catch (e) {
-      //   console.warn("Failed to save order history", e);
-      // }
-
-      // clearCart?.();
       onClose?.();
 
       navigate(`/order-confirmation/${orderData.id}`);
@@ -294,20 +276,6 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0 }) {
                     );
                   })}
 
-                  {/* ORDER NOTE */}
-                  {/* <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1.5 px-0.5">
-                      {t("orderNote")}
-                    </p>
-
-                    <textarea
-                      placeholder={t("orderNotePlaceholder")}
-                      value={orderNote}
-                      onChange={(e) => setOrderNote(e.target.value)}
-                      rows={2}
-                      className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
-                    />
-                  </div> */}
                 </>
               )}
             </div>

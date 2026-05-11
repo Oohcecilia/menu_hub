@@ -35,45 +35,6 @@ export default function Menu() {
       .sort((a, b) => a.sort_order - b.sort_order);
   }, [categories]);
 
-  // console.log(`CAT ${JSON.stringify(sortedCategories)}`);
-
-
-  // const filteredProducts = useMemo(() => {
-
-  //   return products.filter(p => {
-  //     // ---- 1. Branch Match ----
-  //     // Checks if no branch is selected, or if the product belongs to the active branch
-  //     const matchBranch = !activeBranch ||
-  //       !p.branch_ids?.length ||
-  //       p.branch_ids.includes(activeBranch.id);
-
-  //     // ---- 2. Category Normalization & Match ----
-  //     let groupIds = [];
-  //     try {
-  //       groupIds = typeof p.category_id === "string"
-  //         ? JSON.parse(p.category_id)
-  //         : Array.isArray(p.category_id)
-  //           ? p.category_id
-  //           : [p.category_id]; // Fallback for single numbers
-  //     } catch {
-  //       groupIds = [];
-  //     }
-
-  //     // ---- 3. Search Match ----
-  //     const search = searchQuery.toLowerCase();
-  //     const name = getLocalizedField(p, "name")?.toLowerCase() || "";
-  //     const description = getLocalizedField(p, "description")?.toLowerCase() || "";
-
-  //     const matchSearch = !search ||
-  //       name.includes(search) ||
-  //       description.includes(search);
-
-  //     // Only return true if all conditions pass
-  //     return matchBranch && matchSearch;
-  //   });
-  // }, [products, activeBranch, activeCategory, searchQuery, getLocalizedField]);
-
-
   const groupedProducts = useMemo(() => {
     const groups = {};
 
@@ -168,7 +129,7 @@ export default function Menu() {
         return;
       }
 
-      const offset = 200;
+      const offset = 225;
 
       let currentCategory = null;
 
@@ -262,7 +223,7 @@ export default function Menu() {
 
     if (!section) return;
 
-    const offset = 200;
+    const offset = 225;
 
     const top =
       section.getBoundingClientRect().top +

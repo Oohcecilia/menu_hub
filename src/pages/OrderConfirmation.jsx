@@ -11,7 +11,7 @@ import { buildOrderSummary } from '@/utils/orderUtils';
 
 export default function OrderConfirmation() {
   const { orderId } = useParams();
-  const { t } = useLanguage();
+  const { t, getLocalizedField } = useLanguage();
   const { products } = useBranch();
 
   const [order, setOrder] = useState(null);
@@ -76,9 +76,9 @@ export default function OrderConfirmation() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-5xl mb-4">🔍</p>
-          <p className="text-lg font-medium mb-4">Order not found</p>
+          <p className="text-lg font-medium mb-4">{t("noResults")}</p>
           <Link to="/">
-            <Button variant="outline" className="rounded-full">
+            <Button variant="outline" className="rounded-full hover:bg-green-400/10 hover:text-white transition-colors">
               <ArrowLeft className="mr-2 h-4 w-4" />
               {t('backToMenu')}
             </Button>
@@ -183,20 +183,29 @@ export default function OrderConfirmation() {
         >
           <h2 className="font-semibold mb-4">{t('orderSummary')}</h2>
           <div className="space-y-3">
-            {prodInfo?.map((item, index) => (
-              <div key={index} className="flex justify-between text-sm">
-                <div className="flex gap-2">
-                  <span className="text-muted-foreground">
-                    {item.quantity}x
-                  </span>
-                  <span>{item.name}</span>
-                </div>
+            {(prodInfo || []).map((item, index) => {
+              const product = productMap[String(item.product_id)];
 
-                <span className="font-medium">
-                  {item.total.toFixed(2)}
-                </span>
-              </div>
-            ))}
+              return (
+                <div key={index} className="flex justify-between text-sm">
+                  <div className="flex gap-2">
+                    <span className="text-muted-foreground">
+                      {item.quantity}x
+                    </span>
+
+                    <span>
+                      {product
+                        ? getLocalizedField(product, "name")
+                        : item.name}
+                    </span>
+                  </div>
+
+                  <span className="font-medium">
+                    {item.total.toFixed(2)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
           <div className="border-t border-border/50 mt-4 pt-4 flex justify-between text-lg font-bold">
@@ -217,7 +226,7 @@ export default function OrderConfirmation() {
         >
 
           <Link to="/" className="block">
-            <Button variant="outline" className="w-full h-12 rounded-2xl font-semibold">
+            <Button variant="outline" className="w-full h-12 rounded-2xl font-semibold hover:bg-green-400/10 hover:text-white transition-colors">
               <ArrowLeft className="mr-2 h-4 w-4" />
               {t('backToMenu')}
             </Button>

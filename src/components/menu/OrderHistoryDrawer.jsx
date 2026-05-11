@@ -18,6 +18,7 @@ const STATUS_CONFIG = {
 function OrderCard({ order, products }) {
 
   const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+  const { t, getLocalizedField } = useLanguage();
 
   const itemCount = order.items?.reduce((s, i) => s + i.quantity, 0) || 0;
 
@@ -35,7 +36,6 @@ function OrderCard({ order, products }) {
   }, [order?.items, productMap]);
 
 
-
   return (
     <div className="bg-background rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-colors">
       {/* Top row */}
@@ -50,18 +50,28 @@ function OrderCard({ order, products }) {
         </div>
         <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-500">
           <CheckCircle className="h-3 w-3" />
-          Order placed
+          {t("historyPlaced")}
         </div>
       </div>
 
       {/* Items preview */}
       <div className="px-4 pb-2">
-        <p className="text-xs text-muted-foreground truncate">
-          {prodInfo.map(i => `${i.quantity}× ${i.name}`).join(', ')}
+       <p className="text-xs text-muted-foreground truncate">
+          {(prodInfo || [])
+            .map((i) => {
+              const product = productMap[String(i.product_id)];
+
+              return `${i.quantity}×${
+                product
+                  ? getLocalizedField(product, "name")
+                  : i.name
+              }`;
+            })
+            .join(", ")}
         </p>
 
         <p className="text-xs text-muted-foreground mt-0.5">
-          {itemCount} item{itemCount !== 1 ? 's' : ''} · <span className="font-semibold text-foreground">{subtotal.toFixed(2)}</span>
+          {itemCount} {itemCount !== 1 ? t("items") : t("item")} · <span className="font-semibold text-foreground">{subtotal.toFixed(2)}</span>
           <span className="ml-2">{format(new Date(order.created_at), 'MMM d, h:mm a')}</span>
         </p>
       </div>
@@ -72,7 +82,7 @@ function OrderCard({ order, products }) {
           to={`/order-confirmation/${order.id}`}
           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
         >
-          View receipt <ArrowRight className="h-3 w-3" />
+          {t("viewReceipt")} <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
     </div>
