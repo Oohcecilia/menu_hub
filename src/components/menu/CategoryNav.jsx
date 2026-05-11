@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { getCategoryIcon } from '@/utils/icons';
 import { motion } from 'framer-motion';
@@ -7,6 +7,18 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
   const { getLocalizedField } = useLanguage();
   const navRef = useRef(null);
   const activeButtonRef = useRef(null);
+  const [showRight, setShowRight] = useState(false);
+
+  // ✅ optimized scroll checker
+  const checkOverflow = useCallback(() => {
+    const el = navRef.current;
+    if (!el) return;
+
+    const hasOverflow = el.scrollWidth > el.clientWidth;
+    const notAtEnd = el.scrollLeft + el.clientWidth < el.scrollWidth - 5;
+
+    setShowRight(hasOverflow && notAtEnd);
+  }, []);
 
   useEffect(() => {
     const activeEl = activeButtonRef.current;
@@ -18,7 +30,24 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
       inline: "center",
       block: "nearest",
     });
+
+
   }, [activeCategory]);
+
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+
+    checkOverflow();
+
+    el.addEventListener("scroll", checkOverflow);
+    window.addEventListener("resize", checkOverflow);
+
+    return () => {
+      el.removeEventListener("scroll", checkOverflow);
+      window.removeEventListener("resize", checkOverflow);
+    };
+  }, [checkOverflow, categories]);
 
   const items = categories.map((c) => {
     const trans = c.name?.translation;
@@ -35,7 +64,7 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
 
   return (
     <div className="bg-background/95 backdrop-blur-xl border-b border-border/30">
-      <div className="max-w-5xl mx-auto px-4 py-2.5">
+      <div className="max-w-5xl mx-auto px-4 py-2.5 relative">
         <nav ref={navRef} className="flex gap-1 overflow-x-auto scrollbar-none pb-0.5 no-scrollbar">
           {items.map(item => {
             const isActive = activeCategory === item.id;
@@ -71,6 +100,11 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
             );
           })}
         </nav>
+        {showRight && (
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-10 flex items-center justify-end bg-gradient-to-l from-background to-transparent">
+            <span className="pl-2 text-muted-foreground text-lg">›</span>
+          </div>
+        )}
       </div>
     </div>
   );
