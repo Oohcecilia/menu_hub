@@ -22,6 +22,7 @@ function CartItem({
   updateNote,
   removeItem,
   t,
+  onProductOpen
 }) {
   if (!product) return null;
 
@@ -50,6 +51,7 @@ function CartItem({
 
 
   return (
+    // onClick={() => onProductOpen(product)}
     <div className="bg-background rounded-xl border border-border/50 overflow-hidden">
 
       {/* TOP ROW */}
@@ -66,7 +68,7 @@ function CartItem({
 
         {/* NAME + PRICE */}
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm truncate">
+          <p className="font-medium text-sm truncate uppercase">
             {name}
           </p>
 
@@ -94,7 +96,10 @@ function CartItem({
           </span>
 
           <button
-            onClick={() => updateQuantity(index, item.quantity + 1)}
+            onClick={(e) => {
+              e.stopPropagation();
+              updateQuantity(index, item.quantity - 1);
+            }}
             className="h-6 w-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold hover:bg-secondary/80 transition-colors"
           >
             +
@@ -124,7 +129,7 @@ function CartItem({
 }
 
 
-export default function CartDrawer({ open, onClose, products, subtotal = 0 }) {
+export default function CartDrawer({ open, onClose, products, subtotal = 0, onProductOpen }) {
   const {
     items,
     updateQuantity,
@@ -264,7 +269,7 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0 }) {
 
                     return (
                       <CartItem
-                        key={item.product_id || index}
+                        key={item.card_id || index}
                         item={item}
                         product={product}
                         index={index}
@@ -272,6 +277,7 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0 }) {
                         updateNote={updateNote}
                         removeItem={removeItem}
                         t={t}
+                        onProductOpen={onProductOpen}
                       />
                     );
                   })}

@@ -107,14 +107,14 @@ function formatCategories(apiData, order) {
 function formatProducts(products = []) {
   return products
     .map((item) => {
-      
-      // if (item.website_picture)
 
       // ✅ HARD GUARD: skip invalid products immediately
-      if (!item?.groupuids || (Array.isArray(item.groupuids) && item.groupuids.length === 0)) {
+      if (
+        !item?.groupuids ||
+        (Array.isArray(item.groupuids) && item.groupuids.length === 0)
+      ) {
         return null;
       }
-
 
       let props = {};
 
@@ -127,7 +127,7 @@ function formatProducts(products = []) {
       const name = props.name || {};
       const description = props.description || {};
       const details = props.details || {};
-      const image = props.image || '';
+      const image = props.image || "";
       const variations = item.variations || [];
 
       const price =
@@ -141,7 +141,7 @@ function formatProducts(products = []) {
 
       return {
         id: item.uid,
-        name: name,
+        name,
         description: details || description,
         price,
         image: image || "",
@@ -151,8 +151,9 @@ function formatProducts(products = []) {
         variations,
         sort_order: item.sort_order || 0,
         options: [],
-        website_picture: item.website_picture
+        website_picture: item.website_picture,
       };
     })
-    .filter(Boolean); // remove skipped items
+    .filter(Boolean)
+    .sort((a, b) => a.price - b.price); // ✅ ascending price
 }

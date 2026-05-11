@@ -264,7 +264,7 @@ export default function Menu() {
       <Header products={products} />
       {/* <CoverHero /> */}
 
-      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-b border-border/30">
+      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-border/30">
         <CategoryNav categories={sortedCategories} activeCategory={activeCategory} onSelect={handleCategorySelect} />
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
@@ -308,6 +308,7 @@ export default function Menu() {
         onClose={() => setIsOpen(false)}
         products={products}
         subtotal={subtotal}
+        onProductOpen={setSelectedProduct}
       />
       <FloatingCartButton
         subtotal={subtotal}

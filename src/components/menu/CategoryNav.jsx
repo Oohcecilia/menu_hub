@@ -63,7 +63,7 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
 
 
   return (
-    <div className="bg-background/95 backdrop-blur-xl border-b border-border/30">
+    <div className="bg-background/95 backdrop-blur-xl border-border/30">
       <div className="max-w-5xl mx-auto px-4 py-2.5 relative">
         <nav ref={navRef} className="flex gap-1 overflow-x-auto scrollbar-none pb-0.5 no-scrollbar">
           {items.map(item => {
@@ -102,7 +102,7 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
         </nav>
         {showRight && (
           <div className="pointer-events-none absolute right-0 top-0 h-full w-10 flex items-center justify-end bg-gradient-to-l from-background to-transparent">
-            <span className="pl-2 text-muted-foreground text-lg">›</span>
+            <span className="pl-1 text-muted-foreground text-lg">›</span>
           </div>
         )}
       </div>

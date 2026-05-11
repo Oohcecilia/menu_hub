@@ -135,7 +135,7 @@ function CategoryBanner({ category, icon: Icon }) {
   );
 }
 
-/* ─── Text list item (no-image products) ──────────────────────── */
+/* ─── Text list item (no-image products) ── */
 function TextListItem({ product, onOpen, delay = 0 }) {
   const { getLocalizedField } = useLanguage();
   const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
@@ -273,7 +273,7 @@ function TextList({ products, onProductOpen }) {
             >
               {isSingle ? (
                 <div className="w-1/2 mx-auto">
-                  <ListSpace spacing={2} />
+                  { products.length > 1 && <ListSpace spacing={2} />}
                   <TextListItem product={a} onOpen={onProductOpen} delay={rowIdx * 2 * 0.04} />
                 </div>
               ) : (

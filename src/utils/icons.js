@@ -14,7 +14,10 @@ import {
   Package,
   Sandwich,
   ChefHat,
-  GlassWater
+  GlassWater,
+  Sparkles,
+  IceCreamBowl,
+  Cookie
 } from "lucide-react";
 
 const CATEGORY_ICON_MAP = {
@@ -26,13 +29,17 @@ const CATEGORY_ICON_MAP = {
   "bar food": Beef,
   "salad": Salad,
   "soups": Soup,
-  "desserts": Cake,
+  "desserts": IceCreamBowl,
   "drinks": GlassWater,
   "coffee": Coffee,
   "beers": Beer,
   "wines": Wine,
   "cocktails": Martini,
   "beverages": CupSoda,
+
+  "dips": Cookie,
+  "tapas": Utensils, 
+  "specials": Sparkles,
 };
 
 export function getCategoryIcon(name = "") {

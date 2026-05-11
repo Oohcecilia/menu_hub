@@ -108,7 +108,7 @@ function OptionGroup({ group, selections, onChange }) {
 }
 
 
-export default function ProductModal({ open, product, onClose }) {
+export default function ProductModal({ open, product, onClose ,cart_id = "" }) {
   const { activeBranch } = useBranch();
   const { addItem } = useCart();
   const { t, getLocalizedField } = useLanguage();
@@ -143,7 +143,7 @@ export default function ProductModal({ open, product, onClose }) {
 
       return {
         id: `group-${gi}`, // ✅ IMPORTANT FIX
-        name: `Option ${gi + 1}`,
+        name: `${t("option")} ${gi + 1}`,
         required: true,
         multiple: false, // single select per group
         items: options.map(opt => ({
@@ -173,7 +173,7 @@ export default function ProductModal({ open, product, onClose }) {
         .map(item => item.name?.def);
     });
 
-    addItem(product, quantity, note, selectedVariations);
+    addItem(product, quantity, note, selectedVariations, cart_id);
     onClose();
   };
 
@@ -187,7 +187,7 @@ export default function ProductModal({ open, product, onClose }) {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         className="
-        fixed inset-0 z-50 flex items-end sm:items-center justify-center
+        fixed inset-0 z-[60] flex items-end sm:items-center justify-center
         bg-white/50 dark:bg-black/50 backdrop-blur-md
       "
         onClick={onClose}
@@ -245,13 +245,13 @@ export default function ProductModal({ open, product, onClose }) {
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-5 space-y-5">
             <div>
-              <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">
+              <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white uppercase">
                 {getLocalizedField(product, "name")}
               </h2>
 
               {product?.name?.def &&
                 product?.name?.def !== getLocalizedField(product, "name") && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground uppercase">
                     {product.name.def}
                   </span>
                 )}
@@ -277,7 +277,7 @@ export default function ProductModal({ open, product, onClose }) {
                 flex items-center gap-1 text-xs rounded-xl
               ">
                 <AlertCircle className="h-3.5 w-3.5" />
-                <span>Please review your selections.</span>
+                <span>{t("pleaseReviewYourSelection")}</span>
               </div>
             )}
 

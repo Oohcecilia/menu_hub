@@ -30,6 +30,8 @@ const translations = {
     orders_placeholder: "Orders you place will appear here",
     historyPlaced: "Order placed",
     viewReceipt: "View Receipt",
+    option: "Option",
+    pleaseReviewYourSelection: "Please review your selection",
   },
   es: {
     menu: "Menú", categories: "Categorías", all: "Todo", popular: "Popular",
@@ -59,6 +61,8 @@ const translations = {
     orders_placeholder: "Los pedidos que realices aparecerán aquí",
     historyPlaced: "Pedido realizado",
     viewReceipt: "Ver recibo",
+    option: "Opción",
+    pleaseReviewYourSelection: "Por favor revisa tu selección",
   },
   de: {
     menu: "Speisekarte", categories: "Kategorien", all: "Alle", popular: "Beliebt",
@@ -87,6 +91,8 @@ const translations = {
     orders_placeholder: "Deine Bestellungen werden hier angezeigt",
     historyPlaced: "Bestellung aufgegeben",
     viewReceipt: "Beleg anzeigen",
+    option: "Option",
+    pleaseReviewYourSelection: "Bitte überprüfen Sie Ihre Auswahl",
   },
   fr: {
     menu: "Menu", categories: "Catégories", all: "Tout", popular: "Populaire",
@@ -115,6 +121,8 @@ const translations = {
     orders_placeholder: "Les commandes que vous passez apparaîtront ici",
     historyPlaced: "Commande passée",
     viewReceipt: "Voir le reçu",
+    option: "Option",
+    pleaseReviewYourSelection: "Veuillez vérifier votre sélection",
   },
   it: {
     menu: "Menu", categories: "Categorie", all: "Tutto", popular: "Popolare",
@@ -143,6 +151,8 @@ const translations = {
     orders_placeholder: "Gli ordini effettuati appariranno qui",
     historyPlaced: "Ordine effettuato",
     viewReceipt: "Visualizza ricevuta",
+    option: "Opzione",
+    pleaseReviewYourSelection: "Si prega di rivedere la tua selezione",
   },
   zh: {
     menu: "菜单", categories: "分类", all: "全部", popular: "热门",
@@ -171,6 +181,8 @@ const translations = {
     orders_placeholder: "您下的订单将显示在这里",
     historyPlaced: "订单已提交",
     viewReceipt: "查看收据",
+    option: "选项",
+    pleaseReviewYourSelection: "请检查您的选择",
   },
   ja: {
     menu: "メニュー", categories: "カテゴリー", all: "すべて", popular: "人気",
@@ -199,6 +211,8 @@ const translations = {
     orders_placeholder: "ここに注文が表示されます",
     historyPlaced: "注文が完了しました",
     viewReceipt: "領収書を表示",
+    option: "オプション",
+    pleaseReviewYourSelection: "選択内容をご確認ください",
   },
   ko: {
     menu: "메뉴", categories: "카테고리", all: "전체", popular: "인기",
@@ -227,6 +241,8 @@ const translations = {
     orders_placeholder: "주문한 항목이 여기에 표시됩니다",
     historyPlaced: "주문이 접수되었습니다",
     viewReceipt: "영수증 보기",
+    option: "옵션",
+    pleaseReviewYourSelection: "선택을 검토해 주세요",
   },
   ru: {
     menu: "Меню", categories: "Категории", all: "Все", popular: "Популярное",
@@ -255,6 +271,8 @@ const translations = {
     orders_placeholder: "Ваши заказы будут отображаться здесь",
     historyPlaced: "Заказ оформлен",
     viewReceipt: "Просмотреть чек",
+    option: "Опция",
+    pleaseReviewYourSelection: "Пожалуйста, проверьте ваш выбор",
   },
   fil: {
     menu: "Menu", categories: "Mga Kategorya", all: "Lahat", popular: "Sikat",
@@ -283,6 +301,8 @@ const translations = {
     orders_placeholder: "Lalabas dito ang iyong mga order",
     historyPlaced: "Nailagay na ang order",
     viewReceipt: "Tingnan ang resibo",
+    option: "Pagpipilian",
+    pleaseReviewYourSelection: "Pakisuri ang iyong napili",
   }
 };
 

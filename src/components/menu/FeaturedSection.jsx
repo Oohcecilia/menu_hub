@@ -152,6 +152,8 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
 
 function LayoutGrandStage({ products, onOpen, isAll }) {
     // 1. Grab the first 5 for the stage, and put everything else (index 5+) into extraProducts
+
+    const { getLocalizedField } = useLanguage();
     const [p0, p1, p2, p3, p4, ...extraProducts] = products;
 
     return (
@@ -182,7 +184,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                 <FloatImage src={p0.image} alt={p0.name_en} size={220} />
                             </FloatWrap>
                             <div className="w-full  text-center">
-                                <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{p0?.name?.def || p0?.name?.en}</p>
+                                <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{getLocalizedField(p0, 'name') || p0?.name?.def}</p>
                                 <div className="flex items-center justify-between gap-3 mt-1.5">
                                     <p className="font-light tracking-widest text-base text-primary">{p0.price?.toFixed(2)}</p>
                                     <AddBtn product={p0} onOpen={onOpen} />
