@@ -125,32 +125,20 @@ function formatCategories(apiData, order) {
   const orderNormalized = order.map((o) => normalize(o));
 
   return apiData
-    .filter((item) => item.website === 1)
     .map((item, index) => {
-      let properties = {};
 
-      try {
-        properties =
-          typeof item.properties === "string"
-            ? JSON.parse(item.properties)
-            : item.properties || {};
-      } catch {
-        properties = {};
-      }
 
-      const nameObj = properties?.name || {};
+      const nameObj = item.properties?.name || {};
       const rawName = nameObj.en || nameObj.def || item.name || "";
 
       return {
-        id: item.uid || index,
+        id: item.uid,
         name: {
           en: rawName,
           translation: nameObj,
         },
-        is_active: true,
         raw_name: rawName,
         normalized_name: normalizeName(rawName),
-        backend_sort: item.sort_order ?? null,
       };
     })
 
@@ -163,9 +151,6 @@ function formatCategories(apiData, order) {
 
     .sort((a, b) => {
       // ✅ prioritize backend sort if available
-      if (a.backend_sort != null && b.backend_sort != null) {
-        return a.backend_sort - b.backend_sort;
-      }
 
       // ✅ fallback to custom order
       const aIndex = orderNormalized.indexOf(
@@ -188,49 +173,27 @@ function formatCategories(apiData, order) {
 
 
 function formatProducts(products = []) {
+
+  
   return products
     .map((item) => {
 
-      // ✅ HARD GUARD: skip invalid products immediately
-      if (
-        !item?.groupuids ||
-        (Array.isArray(item.groupuids) && item.groupuids.length === 0)
-      ) {
-        return null;
-      }
+      const name = item.properties.name || {};
+      const description = item.properties.description || {};
+      const details = item.properties.details || {};
+      const variations = item.properties.variations || [];
 
-      let props = {};
+      const price = Number(item.price); 
 
-      try {
-        props = item.properties ? JSON.parse(item.properties) : {};
-      } catch (e) {
-        console.warn("Invalid JSON for product:", item.uid);
-      }
-
-      const name = props.name || {};
-      const description = props.description || {};
-      const details = props.details || {};
-      const image = props.image || "";
-      const variations = item.variations || [];
-
-      const price =
-        Number(props?.sales_prices?.PHP) ||
-        Number((item.pricing || "").match(/\d+/)?.[0]) ||
-        0;
-
-      const categoryIds = Array.isArray(item.groupuids)
-        ? item.groupuids
-        : [item.groupuids];
 
       return {
         id: item.uid,
         name,
         description: details || description,
         price,
-        image: image || "",
-        category_id: categoryIds.map(String),
+        image: `https://pp.d3.net/image.php?a=product-${item.uid}`,
+        category_id: item.groupuid,
         is_available: true,
-        branch: props.Branch || "",
         variations,
         sort_order: item.sort_order || 0,
         options: [],

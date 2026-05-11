@@ -31,7 +31,6 @@ export default function Menu() {
 
   const sortedCategories = useMemo(() => {
     return categories
-      .filter(c => c.is_active)
       .sort((a, b) => a.sort_order - b.sort_order);
   }, [categories]);
 
@@ -43,19 +42,11 @@ export default function Menu() {
     });
 
     products.forEach(product => {
-      // Branch filter
-      const matchBranch =
-        !activeBranch ||
-        !product.branch_ids?.length ||
-        product.branch_ids.includes(activeBranch.id);
-
-      if (!matchBranch) return;
-
+      
       // Search filter
       const search = searchQuery.toLowerCase();
 
-      const name =
-        getLocalizedField(product, "name")?.toLowerCase() || "";
+      const name = getLocalizedField(product, "name")?.toLowerCase() || "";
 
       const description =
         getLocalizedField(product, "description")?.toLowerCase() || "";
@@ -67,25 +58,10 @@ export default function Menu() {
 
       if (!matchSearch) return;
 
-      // Normalize categories
-      let categoryIds = [];
-
-      try {
-        categoryIds =
-          typeof product.category_id === "string"
-            ? JSON.parse(product.category_id)
-            : Array.isArray(product.category_id)
-              ? product.category_id
-              : [product.category_id];
-      } catch {
-        categoryIds = [];
+      
+      if (groups[product.category_id]) {
+        groups[product.category_id].push(product);
       }
-
-      categoryIds.forEach(catId => {
-        if (groups[catId]) {
-          groups[catId].push(product);
-        }
-      });
     });
 
     return groups;

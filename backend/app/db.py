@@ -39,7 +39,7 @@ async def init_db_pool():
         print("\n\n ✅ Successfully connected to MariaDB (pool created) \n\n")
 
     except Exception as e:
-        logger.exception("❌ Failed to initialize DB pool")
+        print("❌ Failed to initialize DB pool")
         raise
 
 
