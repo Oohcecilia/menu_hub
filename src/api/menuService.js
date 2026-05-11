@@ -178,9 +178,9 @@ function formatProducts(products = []) {
   return products
     .map((item) => {
 
-      const name = item.properties.name || {};
-      const description = item.properties.description || {};
-      const details = item.properties.details || {};
+      const name = item.properties.name || null;
+      const description = item.properties.description || null;
+      const details = item.properties.details || null;
       const variations = item.properties.variations || [];
 
       const price = Number(item.price); 
@@ -188,6 +188,7 @@ function formatProducts(products = []) {
 
       return {
         id: item.uid,
+        default_name: item.name,
         name,
         description: details || description,
         price,

@@ -365,6 +365,7 @@ export function LanguageProvider({ children }) {
 
     return "";
   };
+  
   return (
     <LanguageContext.Provider value={{ lang, setLang, t, getLocalizedField }}>
       {children}

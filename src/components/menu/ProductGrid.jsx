@@ -135,12 +135,12 @@ function CategoryBanner({ category, icon: Icon }) {
   );
 }
 
-/* ─── Text list item (no-image products) ── */
+/* ─── Text list item (no-image products) ──*/
 function TextListItem({ product, onOpen, delay = 0 }) {
   const { getLocalizedField } = useLanguage();
   const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
   const qty = getProductQuantity(product.id);
-  const name = getLocalizedField(product, 'name');
+  const name = getLocalizedField(product, 'name') || product.default_name;
   const desc = getLocalizedField(product, 'description');
 
   const handleMinus = (e) => {
@@ -182,6 +182,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
             {desc}
           </p>
         )}
+
       </div>
 
       {/* Right: Price + Controls */}

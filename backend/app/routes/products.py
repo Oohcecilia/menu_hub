@@ -68,6 +68,7 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
                 }
             products.append({
                 "uid": row["uid"],
+                "name": row["name"],
                 "properties": json.loads(row["properties"]) if row["properties"] else [],
                 "price": prices["PHP"],
                 "groupuid": row["groupuid"]

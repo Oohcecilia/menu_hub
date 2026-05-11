@@ -46,7 +46,7 @@ export default function Menu() {
       // Search filter
       const search = searchQuery.toLowerCase();
 
-      const name = getLocalizedField(product, "name")?.toLowerCase() || "";
+      const name = getLocalizedField(product, "name")?.toLowerCase() || product.default_name;
 
       const description =
         getLocalizedField(product, "description")?.toLowerCase() || "";
