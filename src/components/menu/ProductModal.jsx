@@ -350,7 +350,7 @@ export default function ProductModal({ open, product, onClose ,cart_id = "" }) {
                 disabled:opacity-40 disabled:cursor-not-allowed
               "
             >
-              {t('addToCart')} — {totalPrice.toFixed(2)}
+              {t('addToCart')}
             </Button>
           </div>
         </motion.div>

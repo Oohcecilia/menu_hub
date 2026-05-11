@@ -81,7 +81,7 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
         SELECT 
             p.uid,
             p.properties,
-            p.groupuids,
+            p.groupuid,
             pg.properties as pgproperties,
             GROUP_CONCAT(
                 CONCAT(pb.prices, '|', pb.remark)
@@ -90,7 +90,7 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
             pb.website_picture
         FROM products AS p
         LEFT JOIN product_groups AS pg 
-            ON JSON_CONTAINS(p.groupuids, JSON_QUOTE(pg.uid))
+            ON p.groupuid = pg.uid
         LEFT JOIN product_branches AS pb 
             ON pb.puid = p.uid
         WHERE 
