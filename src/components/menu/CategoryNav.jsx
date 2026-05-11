@@ -9,8 +9,6 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
   const activeButtonRef = useRef(null);
   const [showRight, setShowRight] = useState(false);
 
-  console.log("CATEGORIES : ", categories);
-
   // ✅ optimized scroll checker
   const checkOverflow = useCallback(() => {
     const el = navRef.current;
