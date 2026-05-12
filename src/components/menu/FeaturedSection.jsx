@@ -209,7 +209,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                             key={product.id || idx}
                             product={product}
                             onOpen={onOpen}
-                            size={150}
+                            size={200}
                             // Stagger the entrance animation for the extra items
                             delay={1.8 + (idx * 0.2)}
                         />
