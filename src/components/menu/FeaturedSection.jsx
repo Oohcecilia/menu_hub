@@ -171,7 +171,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                 </div>
 
                 {/* Center hero */}
-                <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6 pt-16">
+                <div className="relative flex flex-col items-center z-10 mx-2 pt-16">
                     {p0 && (
                         <motion.div onClick={() => onOpen(p0)} className="flex flex-col items-center cursor-pointer"
                             whileHover={{ scale: 1.03 }} transition={{ duration: 0.4 }}>
@@ -195,7 +195,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                 </div>
 
                 {/* Right small */}
-                <div className="flex flex-row sm:flex-col gap-12 sm:gap-10 items-center mb-6 sm:mb-0 sm:ml-2">
+                <div className="flex flex-row gap-12 items-center mb-6">
                     {p2 && <SmallCard product={p2} onOpen={onOpen} size={200} delay={0.9} />}
                     {p4 && <SmallCard product={p4} onOpen={onOpen} size={200} delay={1.5} />}
                 </div>
