@@ -157,7 +157,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
     const [p0, p1, p2, p3, p4, ...extraProducts] = products;
 
     return (
-        <div className="relative w-full">
+        <div className="relative w-full overflow-hidden sm:overflow-visible">
             {/* Subtle radial glow background */}
             <div className="absolute inset-0 pointer-events-none"
                 style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 60%, var(--primary) 0%, transparent 70%)' }} />
