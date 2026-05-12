@@ -34,47 +34,6 @@ export default function Menu() {
       .sort((a, b) => a.sort_order - b.sort_order);
   }, [categories]);
 
-  // const groupedProducts = useMemo(() => {
-  //   const groups = {};
-
-  //   sortedCategories.forEach(category => {
-  //     groups[category.id] = [];
-  //   });
-
-  //   products.forEach(product => {
-
-  //     // Search filter
-  //     const search = searchQuery.toLowerCase();
-
-  //     const name = getLocalizedField(product, "name")?.toLowerCase() || product.default_name;
-
-  //     const description =
-  //       getLocalizedField(product, "description")?.toLowerCase() || "";
-
-  //     const matchSearch =
-  //       !search ||
-  //       name.includes(search) ||
-  //       description.includes(search);
-
-  //     if (!matchSearch) return;
-
-
-  //     if (groups[product.category_id]) {
-  //       groups[product.category_id].push(product);
-  //     }
-  //   });
-
-  //   return groups;
-  // }, [
-  //   products,
-  //   sortedCategories,
-  //   activeBranch,
-  //   searchQuery,
-  //   getLocalizedField,
-  // ]);
-
-
-
   const groupedProducts = useMemo(() => {
     const groups = {};
 
@@ -121,102 +80,6 @@ export default function Menu() {
     searchQuery,
     getLocalizedField,
   ]);
-
-  // useEffect(() => {
-  //   if (searchQuery) return;
-
-  //   const handleScroll = () => {
-  //     if (userClickedRef.current) return;
-
-  //     // Detect bottom of page
-  //     const scrollBottom =
-  //       window.innerHeight + window.scrollY;
-
-  //     const pageHeight =
-  //       document.documentElement.scrollHeight;
-
-  //     // If near bottom → activate last category
-  //     if (scrollBottom >= pageHeight - 20) {
-  //       const lastCategory =
-  //         sortedCategories[
-  //         sortedCategories.length - 1
-  //         ];
-
-  //       if (lastCategory) {
-  //         setActiveCategory(prev =>
-  //           prev === lastCategory.id
-  //             ? prev
-  //             : lastCategory.id
-  //         );
-  //       }
-
-  //       return;
-  //     }
-
-  //     const offset = 225;
-
-  //     let currentCategory = null;
-
-  //     for (const category of sortedCategories) {
-  //       const section =
-  //         sectionRefs.current[category.id];
-
-  //       if (!section) continue;
-
-  //       const rect =
-  //         section.getBoundingClientRect();
-
-  //       // Section crossed sticky header
-  //       if (rect.top <= offset) {
-  //         currentCategory = category.id;
-  //       }
-
-  //       // First visible section fallback
-  //       else if (
-  //         !currentCategory &&
-  //         rect.top > offset
-  //       ) {
-  //         currentCategory = category.id;
-  //         break;
-  //       }
-  //     }
-
-  //     // Final fallback
-  //     if (
-  //       !currentCategory &&
-  //       sortedCategories.length
-  //     ) {
-  //       currentCategory =
-  //         sortedCategories[0].id;
-  //     }
-
-  //     setActiveCategory(prev =>
-  //       prev === currentCategory
-  //         ? prev
-  //         : currentCategory
-  //     );
-  //   };
-
-  //   window.addEventListener(
-  //     "scroll",
-  //     handleScroll,
-  //     { passive: true }
-  //   );
-
-  //   // Delay ensures refs are mounted
-  //   requestAnimationFrame(handleScroll);
-
-  //   return () => {
-  //     window.removeEventListener(
-  //       "scroll",
-  //       handleScroll
-  //     );
-  //   };
-  // }, [
-  //   sortedCategories,
-  //   groupedProducts,
-  //   searchQuery,
-  // ]);
 
   useEffect(() => {
     // SEARCH MODE
@@ -350,49 +213,61 @@ export default function Menu() {
 
   // ── Click handler: scroll to section ─────────────────────────
   const handleCategorySelect = useCallback((catId) => {
-    setActiveCategory(catId);
+    const hasSearch = searchQuery?.trim()?.length > 0;
 
+    if (hasSearch) {
+      setSearchQuery("");
+    }
+
+    setActiveCategory(catId);
     userClickedRef.current = true;
 
-    const section =
-      sectionRefs.current[catId];
+    let tries = 0;
 
-    if (!section) return;
+    const tryScroll = () => {
+      const section = sectionRefs.current[catId];
 
-    const offset = 225;
+      if (!section && tries < 10) {
+        tries++;
+        requestAnimationFrame(tryScroll);
+        return;
+      }
 
-    const top =
-      section.getBoundingClientRect().top +
-      window.pageYOffset -
-      offset;
+      if (!section) return;
 
-    window.scrollTo({
-      top,
-      behavior: "smooth",
-    });
+      const offset = 225;
 
-    let timeout;
+      const top =
+        section.getBoundingClientRect().top +
+        window.pageYOffset -
+        offset;
 
-    const onScroll = () => {
-      clearTimeout(timeout);
+      window.scrollTo({
+        top,
+        behavior: "smooth",
+      });
 
-      timeout = setTimeout(() => {
-        userClickedRef.current = false;
+      let timeout;
 
-        window.removeEventListener(
-          "scroll",
-          onScroll
-        );
-      }, 100);
+      const onScroll = () => {
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+          userClickedRef.current = false;
+          window.removeEventListener("scroll", onScroll);
+        }, 100);
+      };
+
+      window.addEventListener("scroll", onScroll, {
+        passive: true,
+      });
     };
 
-    window.addEventListener(
-      "scroll",
-      onScroll,
-      { passive: true }
-    );
-  }, []);
-
+    // wait for React to flush search reset + re-render
+    requestAnimationFrame(() => {
+      requestAnimationFrame(tryScroll);
+    });
+  }, [searchQuery]);
 
 
   return (

@@ -9,10 +9,10 @@ export default function SearchBar({ value, onChange }) {
     onChange(newValue);
 
     // Scroll to top smoothly
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    // window.scrollTo({
+    //   top: 0,
+    //   behavior: 'smooth',
+    // });
   };
 
   return (
