@@ -307,7 +307,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
 
                 {/* HERO CENTER */}
                 {hero && (
-                    <div className="flex flex-col items-center z-10 pt-4">
+                    <div className="flex flex-col items-center z-10">
                         <motion.div
                             onClick={() => onOpen(hero)}
                             className="flex flex-col items-center cursor-pointer"
@@ -315,7 +315,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                             transition={{ duration: 0.4 }}
                         >
                             <FloatWrap delay={0} amplitude={9}>
-                                <FloatImage src={hero.image} alt={hero.name_en} size={220} />
+                                <FloatImage src={hero.image} alt={hero.name_en} size={200} />
                             </FloatWrap>
 
                             <div className="text-center mt-2">
