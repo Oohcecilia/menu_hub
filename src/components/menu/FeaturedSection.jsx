@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
@@ -150,79 +151,200 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
     );
 }
 
+// function LayoutGrandStage({ products, onOpen, isAll }) {
+//     // 1. Grab the first 5 for the stage, and put everything else (index 5+) into extraProducts
+
+//     const { getLocalizedField } = useLanguage();
+//     const [p0, p1, p2, p3, p4, ...extraProducts] = products;
+
+//     return (
+//         <div className="relative w-full overflow-hidden sm:overflow-visible">
+//             {/* Subtle radial glow background */}
+//             <div className="absolute inset-0 pointer-events-none"
+//                 style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 60%, var(--primary) 0%, transparent 70%)' }} />
+
+//             {/* --- MAIN STAGE (Untouched to preserve layout) --- */}
+//             <div className="flex items-start justify-evenly gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
+//                 {/* Left small */}
+//                 <div className="flex flex-col gap-10 items-center mb-6 sm:mb-0 sm:mr-2">
+//                     {p1 && <SmallCard product={p1} onOpen={onOpen} size={200} delay={0.6} />}
+//                     {p3 && <SmallCard product={p3} onOpen={onOpen} size={200} delay={1.2} />}
+//                 </div>
+
+//                 {/* Center hero */}
+//                 <div className="relative flex flex-col items-center z-10 mx-2 pt-16">
+//                     {p0 && (
+//                         <motion.div onClick={() => onOpen(p0)} className="flex flex-col items-center cursor-pointer"
+//                             whileHover={{ scale: 1.03 }} transition={{ duration: 0.4 }}>
+//                             {/* {isAll && (
+//                                 <span className="mb-2 text-[9px] font-bold tracking-[0.22em] uppercase px-3 py-1 rounded-full text-primary bg-primary/10 border border-primary/25">
+//                                     Chef's Selection
+//                                 </span>
+//                             )} */}
+//                             <FloatWrap delay={0} amplitude={9}>
+//                                 <FloatImage src={p0.image} alt={p0.name_en} size={200} />
+//                             </FloatWrap>
+//                             <div className="w-full  text-center">
+//                                 <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{getLocalizedField(p0, 'name') || p0?.name?.def}</p>
+//                                 <div className="flex items-center justify-between gap-3 mt-1.5">
+//                                     <p className="font-light tracking-widest text-base text-primary">{p0.price?.toFixed(2)}</p>
+//                                     <AddBtn product={p0} onOpen={onOpen} />
+//                                 </div>
+//                             </div>
+//                         </motion.div>
+//                     )}
+//                 </div>
+
+//                 {/* Right small */}
+//                 <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6 pt-16">
+//                     {p2 && <SmallCard product={p2} onOpen={onOpen} size={200} delay={0.9} />}
+//                     {p4 && <SmallCard product={p4} onOpen={onOpen} size={200} delay={1.5} />}
+//                 </div>
+//             </div>
+
+//             {/* --- EXTRA PRODUCTS ROW (Responsive) --- */}
+//             {extraProducts.length > 0 && (
+//                 <div className="mt-10 sm:mt-12 flex flex-wrap justify-evenly items-center gap-10 sm:gap-14 w-full px-4">
+//                     {extraProducts.map((product, idx) => (
+//                         <SmallCard
+//                             key={product.id || idx}
+//                             product={product}
+//                             onOpen={onOpen}
+//                             size={200}
+//                             // Stagger the entrance animation for the extra items
+//                             delay={1.8 + (idx * 0.2)}
+//                         />
+//                     ))}
+//                 </div>
+//             )}
+
+//             {/* Thin decorative line */}
+//             <div className="mt-8 mx-auto w-24 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+//         </div>
+//     );
+// }
+
+
+
 function LayoutGrandStage({ products, onOpen, isAll }) {
-    // 1. Grab the first 5 for the stage, and put everything else (index 5+) into extraProducts
+  const { getLocalizedField } = useLanguage();
 
-    const { getLocalizedField } = useLanguage();
-    const [p0, p1, p2, p3, p4, ...extraProducts] = products;
+  const layout = useMemo(() => {
+    const items = [...products];
 
-    return (
-        <div className="relative w-full overflow-hidden sm:overflow-visible">
-            {/* Subtle radial glow background */}
-            <div className="absolute inset-0 pointer-events-none"
-                style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 60%, var(--primary) 0%, transparent 70%)' }} />
+    if (items.length === 1) {
+      return { hero: items[0], left: [], right: [], extra: [] };
+    }
 
-            {/* --- MAIN STAGE (Untouched to preserve layout) --- */}
-            <div className="flex items-start justify-evenly gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
-                {/* Left small */}
-                <div className="flex flex-col gap-10 items-center mb-6 sm:mb-0 sm:mr-2">
-                    {p1 && <SmallCard product={p1} onOpen={onOpen} size={200} delay={0.6} />}
-                    {p3 && <SmallCard product={p3} onOpen={onOpen} size={200} delay={1.2} />}
-                </div>
+    if (items.length === 2) {
+      return { hero: null, left: [items[0]], right: [items[1]], extra: [] };
+    }
 
-                {/* Center hero */}
-                <div className="relative flex flex-col items-center z-10 mx-2 pt-16">
-                    {p0 && (
-                        <motion.div onClick={() => onOpen(p0)} className="flex flex-col items-center cursor-pointer"
-                            whileHover={{ scale: 1.03 }} transition={{ duration: 0.4 }}>
-                            {/* {isAll && (
-                                <span className="mb-2 text-[9px] font-bold tracking-[0.22em] uppercase px-3 py-1 rounded-full text-primary bg-primary/10 border border-primary/25">
-                                    Chef's Selection
-                                </span>
-                            )} */}
-                            <FloatWrap delay={0} amplitude={9}>
-                                <FloatImage src={p0.image} alt={p0.name_en} size={200} />
-                            </FloatWrap>
-                            <div className="w-full  text-center">
-                                <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{getLocalizedField(p0, 'name') || p0?.name?.def}</p>
-                                <div className="flex items-center justify-between gap-3 mt-1.5">
-                                    <p className="font-light tracking-widest text-base text-primary">{p0.price?.toFixed(2)}</p>
-                                    <AddBtn product={p0} onOpen={onOpen} />
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </div>
+    if (items.length === 3) {
+      return { hero: items[1], left: [items[0]], right: [items[2]], extra: [] };
+    }
 
-                {/* Right small */}
-                <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6 pt-16">
-                    {p2 && <SmallCard product={p2} onOpen={onOpen} size={200} delay={0.9} />}
-                    {p4 && <SmallCard product={p4} onOpen={onOpen} size={200} delay={1.5} />}
-                </div>
-            </div>
+    if (items.length === 4) {
+      return { hero: null, left: [items[0], items[1]], right: [items[2], items[3]], extra: [] };
+    }
 
-            {/* --- EXTRA PRODUCTS ROW (Responsive) --- */}
-            {extraProducts.length > 0 && (
-                <div className="mt-10 sm:mt-12 flex flex-wrap justify-evenly items-center gap-10 sm:gap-14 w-full px-4">
-                    {extraProducts.map((product, idx) => (
-                        <SmallCard
-                            key={product.id || idx}
-                            product={product}
-                            onOpen={onOpen}
-                            size={200}
-                            // Stagger the entrance animation for the extra items
-                            delay={1.8 + (idx * 0.2)}
-                        />
-                    ))}
-                </div>
-            )}
+    if (items.length === 5) {
+      return { hero: items[2], left: [items[0], items[1]], right: [items[3], items[4]], extra: [] };
+    }
 
-            {/* Thin decorative line */}
-            <div className="mt-8 mx-auto w-24 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+    return {
+      hero: items[2],
+      left: [items[0], items[1]],
+      right: [items[3], items[4]],
+      extra: items.slice(5),
+    };
+  }, [products]);
+
+  const renderCards = (items, delayStart = 0) =>
+    items.map((product, idx) => (
+      <SmallCard
+        key={product.id || idx}
+        product={product}
+        onOpen={onOpen}
+        size={200}
+        delay={delayStart + idx * 0.2}
+      />
+    ));
+
+  const { hero, left, right, extra } = layout;
+
+  return (
+    <div className="relative w-full overflow-hidden sm:overflow-visible">
+
+      {/* background glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 50% at 50% 60%, var(--primary) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* ================= MAIN STAGE ================= */}
+      <div className="flex items-start justify-evenly gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
+
+        {/* LEFT (FIXED: horizontal alignment) */}
+        <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6 pt-16">
+          <div className="flex justify-center gap-6 flex-wrap sm:flex-nowrap">
+            {renderCards(left, 0.6)}
+          </div>
         </div>
-    );
-}
 
+        {/* HERO */}
+        {hero && (
+          <div className="relative flex flex-col items-center z-10 mx-2 pt-16">
+            <motion.div
+              onClick={() => onOpen(hero)}
+              className="flex flex-col items-center cursor-pointer"
+              whileHover={{ scale: 1.03 }}
+              transition={{ duration: 0.4 }}
+            >
+              <FloatWrap delay={0} amplitude={9}>
+                <FloatImage src={hero.image} alt={hero.name_en} size={200} />
+              </FloatWrap>
+
+              <div className="w-full text-center">
+                <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">
+                  {getLocalizedField(hero, "name") || hero?.name?.def}
+                </p>
+
+                <div className="flex items-center justify-between gap-3 mt-1.5">
+                  <p className="font-light tracking-widest text-base text-primary">
+                    {hero.price?.toFixed(2)}
+                  </p>
+                  <AddBtn product={hero} onOpen={onOpen} />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* RIGHT (FIXED: horizontal alignment) */}
+        <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6 pt-16">
+          <div className="flex justify-center gap-6 flex-wrap sm:flex-nowrap">
+            {renderCards(right, 0.9)}
+          </div>
+        </div>
+
+      </div>
+
+      {/* ================= EXTRA PRODUCTS ================= */}
+      {extra.length > 0 && (
+        <div className="mt-10 sm:mt-12 flex flex-wrap justify-evenly items-center gap-10 sm:gap-14 w-full px-4">
+          {renderCards(extra, 1.8)}
+        </div>
+      )}
+
+      {/* decorative line */}
+      <div className="mt-8 mx-auto w-24 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+    </div>
+  );
+}
 /* ─── Layout registry ────────────────────────────────────────────── */
 const LAYOUTS = [LayoutGrandStage];
 
