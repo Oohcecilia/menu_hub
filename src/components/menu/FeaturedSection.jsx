@@ -136,7 +136,7 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
                 <FloatImage src={product.image} alt={name} size={size} />
             </FloatWrap>
             <div className="mt-2 w-full text-center">
-                <p className="font-serif font-light text-sm md:text-sm text-foreground/80 tracking-wide truncate">
+                <p className="font-serif font-light text-md text-foreground/80 tracking-wide truncate">
                     {name}
                 </p>
                 <div className="flex items-center justify-between">
@@ -324,68 +324,6 @@ export default function FeaturedSection({ products, activeCategory, onProductOpe
 //                     </motion.div>
 //                 ))}
 //             </div>
-//         </div>
-//     );
-// }
-
-
-
-/* ══════════════════════════════════════════════════════
-   LAYOUT 1 — Grand Stage
-   1 large center hero flanked by 2 medium + 2 small floating
-══════════════════════════════════════════════════════ */
-// function LayoutGrandStage({ products, onOpen, isAll }) {
-
-//     const [p0, p1, p2, p3, p4] = products;
-//     return (
-//         <div className="relative w-full">
-//             {/* Subtle radial glow background */}
-//             <div className="absolute inset-0 pointer-events-none"
-//                 style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 60%, --primary) 0%, transparent 70%)' }} />
-
-//             {/* Main row */}
-//             <div className="flex items-start justify-evenly gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
-//                 {/* Left small */}
-//                 <div className="flex flex-col gap-10 items-center mb-6 sm:mb-0 sm:mr-2">
-//                     {p1 && <SmallCard product={p1} onOpen={onOpen} size={125} delay={0.6} />}
-//                     {p3 && <SmallCard product={p3} onOpen={onOpen} size={125} delay={1.2} />}
-//                 </div>
-
-//                 {/* Center hero */}
-//                 <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6">
-//                     {p0 && (
-//                         <motion.div onClick={() => onOpen(p0)} className="flex flex-col items-center cursor-pointer"
-//                             whileHover={{ scale: 1.03 }} transition={{ duration: 0.4 }}>
-//                             {/* {p0.is_popular && ( */}
-//                             {isAll && (
-//                                 <span className="mb-2 text-[9px] font-bold tracking-[0.22em] uppercase px-3 py-1 rounded-full text-primary bg-primary/10 border border-primary/25">
-//                                     Chef's Selection
-//                                 </span>
-//                             )}
-//                             {/* )} */}
-//                             <FloatWrap delay={0} amplitude={9}>
-//                                 <FloatImage src={p0.image} alt={p0.name_en} size={220} />
-//                             </FloatWrap>
-// <div className="mt-4 text-center">
-//     <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{p0.name_en}</p>
-//     <div className="flex items-center justify-center gap-3 mt-1.5">
-//         <p className="font-light tracking-widest text-base text-primary">{p0.price?.toFixed(2)}</p>
-//         <AddBtn product={p0} onOpen={onOpen} />
-//     </div>
-// </div>
-//                         </motion.div>
-//                     )}
-//                 </div>
-
-//                 {/* Right small */}
-//                 <div className="flex flex-row sm:flex-col gap-12 sm:gap-10 items-center mb-6 sm:mb-0 sm:ml-2">
-//                     {p2 && <SmallCard product={p2} onOpen={onOpen} size={125} delay={0.9} />}
-//                     {p4 && <SmallCard product={p4} onOpen={onOpen} size={125} delay={1.5} />}
-//                 </div>
-//             </div>
-
-//             {/* Thin decorative line */}
-//             <div className="mt-8 mx-auto w-24 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 //         </div>
 //     );
 // }

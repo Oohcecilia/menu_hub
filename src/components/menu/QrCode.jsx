@@ -1,24 +1,29 @@
-import { useEffect, useRef } from "react";
-import QRCodeLib from "qrcode";
+import { useEffect, useMemo, useRef } from "react";
+import { QRCode } from "react-qrcode-logo";
 import { useCart } from '@/lib/cartStore.jsx';
+import { useBranch } from '@/lib/BranchContext';
 
-export default function QRCode({ order = {}, size = 200, cuid = "" }) {
-  const canvasRef = useRef(null);
 
-  const buid = order.buid || "";
-
+export default function QRCodeComponent({ order = {}, size = 200, cuid = "" }) {
+  const { activeBranch } = useBranch();
   const { clearCart } = useCart();
 
-  useEffect(() => {
-    if (!canvasRef.current) return;
+  const buid = order?.buid || "";
+  const noImage = activeBranch?.no_image || null;
 
+  // 🔒 prevent duplicate cart clearing (fix loop risk)
+  const hasClearedRef = useRef(false);
 
-    const payload = {
+  // ✅ stable items reference
+  const items = order?.items || [];
+
+  const payload = useMemo(() => {
+    return {
       branch_id: buid,
       cuid: cuid || "",
-      items: order?.items?.map(item => {
+      items: items.map((item) => {
         const options = (item.variations || [])
-          .map(v => (typeof v === "string" ? v : v?.name))
+          .map((v) => (typeof v === "string" ? v : v?.name))
           .filter(Boolean)
           .join(", ");
 
@@ -27,29 +32,35 @@ export default function QRCode({ order = {}, size = 200, cuid = "" }) {
         return {
           id: item.product_id,
           qty: item.quantity,
-          rem: `${options}${options && note ? ", " : ""}${note}`.trim()
+          rem: `${options}${options && note ? ", " : ""}${note}`.trim(),
         };
-      })
+      }),
     };
+  }, [items, buid, cuid]);
 
-    const text = JSON.stringify(payload);
-
-    QRCodeLib.toCanvas(canvasRef.current, text, {
-      width: size,
-      margin: 1,
-      errorCorrectionLevel: "M"
-    });
+  // ⚠️ FIXED: prevents infinite re-render loop
+  useEffect(() => {
+    if (!items.length) return;
+    if (hasClearedRef.current) return;
 
     clearCart();
-
-  }, [order, size, cuid]);
+    hasClearedRef.current = true;
+  }, [items.length, clearCart]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={size}
-      height={size}
-      className="rounded-xl"
+    <QRCode
+      value={JSON.stringify(payload)}
+      size={size}
+      ecLevel="H"
+      quietZone={10}
+      logoImage={noImage}
+      logoWidth={size * 0.25}
+      logoHeight={size * 0.25}
+      removeQrCodeBehindLogo={true}
+      qrStyle="dots"
+      eyeRadius={8}
+      fgColor="#000000"
+      bgColor="#ffffff"
     />
   );
 }

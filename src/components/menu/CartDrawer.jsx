@@ -28,6 +28,7 @@ function CartItem({
 
   const { activeBranch } = useBranch();
   const { getLocalizedField } = useLanguage();
+  const [imgError, setImgError] = useState(false);
 
   const price = product.price || 0;
   const total = price * item.quantity;
@@ -57,11 +58,20 @@ function CartItem({
       {/* TOP ROW */}
       <div className="flex gap-3 p-3">
 
-        {Boolean(image) && (
+        {!imgError && (
           <img
             src={image}
             alt={name}
             className="h-14 w-14 rounded-lg object-contain bg-muted flex-shrink-0 p-1"
+            onError={() => setImgError(true)}
+          />
+        )}
+
+        {imgError && (
+          <img
+            src={noImage}
+            alt="no-image"
+            className="h-14 w-14 p-4 rounded-lg object-contain bg-muted flex-shrink-0 p-1 opacity-50 dark:opacity-20"
           />
         )}
 

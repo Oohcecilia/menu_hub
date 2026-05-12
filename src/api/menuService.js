@@ -178,10 +178,12 @@ function formatProducts(products = []) {
   return products
     .map((item) => {
 
+
       const name = item.properties.name || null;
       const description = item.properties.description || null;
       const details = item.properties.details || null;
-      const variations = item.properties.variations || [];
+      const variations = item.variations || [];
+
 
       const price = Number(item.price); 
 

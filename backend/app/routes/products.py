@@ -52,28 +52,57 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
     await conn.execute(query, (buid))
     results = await conn.fetchall()
 
+    def safe_float(value):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0
 
 
     products = []
     categories = {}
+
     for row in results:
-        prices = json.loads(row["prices"])
-        if not "PHP" in prices: continue
-        if float(prices["PHP"]) > 0:
-            if not row["groupuid"] in categories:
-                categories[row["groupuid"]] = {
-                    "uid": row["groupuid"],
-                    "name": row["pgname"],
-                    "properties": json.loads(row["pgproperties"]) if row["pgproperties"] else []
-                }
-            products.append({
-                "uid": row["uid"],
-                "name": row["name"],
-                "properties": json.loads(row["properties"]) if row["properties"] else [],
-                "price": prices["PHP"],
-                "groupuid": row["groupuid"],
-                "website_picture": row["website_picture"]
-            })
+        # Parse once, safely
+        try:
+            prices = json.loads(row["prices"] or "{}")
+        except Exception:
+            continue
+
+        php_price = prices.get("PHP")
+
+        # Skip invalid prices early
+        try:
+            if float(php_price or 0) <= 0:
+                continue
+        except (TypeError, ValueError):
+            continue
+
+        groupuid = row["groupuid"]
+
+        # Build category once
+        if groupuid not in categories:
+            categories[groupuid] = {
+                "uid": groupuid,
+                "name": row["pgname"],
+                "properties": json.loads(row["pgproperties"] or "[]")
+            }
+
+        # Parse product properties safely once
+        try:
+            properties = json.loads(row["properties"] or "[]")
+        except Exception:
+            properties = []
+
+        products.append({
+            "uid": row["uid"],
+            "name": row["name"],
+            "properties": properties,
+            "price": php_price,
+            "groupuid": groupuid,
+            "variations": row["variations"],
+            "website_picture": row["website_picture"]
+        })
 
 
     # --------------------------------------------------

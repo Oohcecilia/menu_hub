@@ -108,13 +108,14 @@ function OptionGroup({ group, selections, onChange }) {
 }
 
 
-export default function ProductModal({ open, product, onClose ,cart_id = "" }) {
+export default function ProductModal({ open, product, onClose, cart_id = "" }) {
   const { activeBranch } = useBranch();
   const { addItem } = useCart();
   const { t, getLocalizedField } = useLanguage();
 
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
+  const [imgError, setImgError] = useState(false);
 
   // ✅ stable structure: { [groupId]: selectedOptionId }
   const [selections, setSelections] = useState({});
@@ -225,18 +226,25 @@ export default function ProductModal({ open, product, onClose ,cart_id = "" }) {
           </button>
 
           {/* Image */}
-          <div className="relative w-full flex items-center justify-center flex-shrink-0"
+          <div className="relative w-full flex items-center justify-center flex-shrink-0 "
             style={{ minHeight: 200, maxHeight: 240 }}
           >
-            {product.image ? (
+            {!imgError && (
               <img
                 src={product.image}
-                alt={getLocalizedField(product, 'name')}
-                className="w-full object-contain drop-shadow-xl"
+                alt={getLocalizedField(product, "name")}
+                className="w-full h-full object-contain drop-shadow-xl relative"
                 style={{ maxHeight: 240 }}
+                onError={() => setImgError(true)}
               />
-            ) : (
-              <img src={noImage} alt="no-image" className="w-10 h-10 opacity-50 dark:opacity-20" />
+            )}
+
+            {imgError && (
+              <img
+                src={noImage}
+                alt="no-image"
+                className="absolute w-10 h-10 opacity-50 dark:opacity-20"
+              />
             )}
 
             <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-[#0f1117] to-transparent" />

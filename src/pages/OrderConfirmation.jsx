@@ -104,7 +104,7 @@ export default function OrderConfirmation() {
                                   rounded-full h-9 w-9
                                   bg-transparent hover:bg-gray-100 text-gray
                                   hover:bg-green-400/10
-                                  hover:text-white
+                                  hover:text-primary
                                   transition-colors
                                 ">
               <ArrowLeft className="h-4 w-4" />
@@ -226,7 +226,7 @@ export default function OrderConfirmation() {
         >
 
           <Link to="/" className="block">
-            <Button variant="outline" className="w-full h-12 rounded-2xl font-semibold hover:bg-green-400/10 hover:text-white transition-colors">
+            <Button variant="outline" className="w-full h-12 rounded-2xl font-semibold hover:bg-green-400/10 hover:text-primary transition-colors">
               <ArrowLeft className="mr-2 h-4 w-4" />
               {t('backToMenu')}
             </Button>

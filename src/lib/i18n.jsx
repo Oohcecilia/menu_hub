@@ -5,7 +5,7 @@ const translations = {
   en: {
     menu: "Menu", categories: "Categories", all: "All", popular: "Popular",
     addToCart: "Add to Selection", added: "Added!", cart: "Cart", yourCart: "My Selections",
-    emptyCart: "Your cart is empty", emptyCartDesc: "Browse our menu and add delicious items",
+    emptyCart: "Nothing selected yet", emptyCartDesc: "Browse our menu and add delicious items",
     browseMenu: "Browse Menu", quantity: "Quantity", specialInstructions: "Any special instructions?",
     note: "Item Note", orderNote: "Order Note", orderNotePlaceholder: "Any notes for the entire order (allergies, preferences...)",
     subtotal: "Subtotal", total: "Total", checkout: "Checkout",
@@ -37,7 +37,7 @@ const translations = {
   es: {
     menu: "Menú", categories: "Categorías", all: "Todo", popular: "Popular",
     addToCart: "Añadir a la selección", added: "¡Agregado!", cart: "Carrito", yourCart: "Mis selecciones",
-    emptyCart: "Tu carrito está vacío", emptyCartDesc: "Explora nuestro menú y agrega platillos",
+    emptyCart: "Aún no se ha seleccionado nada", emptyCartDesc: "Explora nuestro menú y agrega platillos",
     browseMenu: "Ver Menú", quantity: "Cantidad", specialInstructions: "¿Instrucciones especiales?",
     note: "Nota del artículo", orderNote: "Nota del pedido", orderNotePlaceholder: "Notas para todo el pedido (alergias, preferencias...)",
     subtotal: "Subtotal", total: "Total", checkout: "Pagar",
@@ -68,7 +68,7 @@ const translations = {
   de: {
     menu: "Speisekarte", categories: "Kategorien", all: "Alle", popular: "Beliebt",
     addToCart: "Zur Auswahl hinzufügen", added: "Hinzugefügt!", cart: "Warenkorb", yourCart: "Meine Auswahl",
-    emptyCart: "Ihr Warenkorb ist leer", emptyCartDesc: "Stöbern Sie in unserer Speisekarte",
+    emptyCart: "Noch nichts ausgewählt", emptyCartDesc: "Stöbern Sie in unserer Speisekarte",
     browseMenu: "Speisekarte", quantity: "Menge", specialInstructions: "Besondere Wünsche?",
     note: "Artikelnotiz", orderNote: "Bestellnotiz", orderNotePlaceholder: "Hinweise zur gesamten Bestellung (Allergien, Präferenzen...)",
     subtotal: "Zwischensumme", total: "Gesamt", checkout: "Zur Kasse",
@@ -98,7 +98,7 @@ const translations = {
   fr: {
     menu: "Menu", categories: "Catégories", all: "Tout", popular: "Populaire",
     addToCart: "Ajouter à la sélection", added: "Ajouté!", cart: "Panier", yourCart: "Mes sélections",
-    emptyCart: "Votre panier est vide", emptyCartDesc: "Parcourez notre menu et ajoutez des plats",
+    emptyCart: "Rien de sélectionné pour le moment", emptyCartDesc: "Parcourez notre menu et ajoutez des plats",
     browseMenu: "Voir le menu", quantity: "Quantité", specialInstructions: "Instructions spéciales?",
     note: "Note article", orderNote: "Note de commande", orderNotePlaceholder: "Notes pour toute la commande (allergies, préférences...)",
     subtotal: "Sous-total", total: "Total", checkout: "Commander",
@@ -128,7 +128,7 @@ const translations = {
   it: {
     menu: "Menu", categories: "Categorie", all: "Tutto", popular: "Popolare",
     addToCart: "Aggiungi alla selezione", added: "Aggiunto!", cart: "Carrello", yourCart: "Le mie selezioni",
-    emptyCart: "Il carrello è vuoto", emptyCartDesc: "Sfoglia il menu e aggiungi piatti",
+    emptyCart: "Nulla selezionato al momento", emptyCartDesc: "Sfoglia il menu e aggiungi piatti",
     browseMenu: "Sfoglia menu", quantity: "Quantità", specialInstructions: "Istruzioni speciali?",
     note: "Nota articolo", orderNote: "Nota ordine", orderNotePlaceholder: "Note per tutto l'ordine (allergie, preferenze...)",
     subtotal: "Subtotale", total: "Totale", checkout: "Checkout",
@@ -158,7 +158,7 @@ const translations = {
   zh: {
     menu: "菜单", categories: "分类", all: "全部", popular: "热门",
     addToCart: "添加到选择", added: "已添加!", cart: "购物车", yourCart: "我的选择",
-    emptyCart: "购物车为空", emptyCartDesc: "浏览菜单并添加美食",
+    emptyCart: "尚未选择任何内容", emptyCartDesc: "浏览菜单并添加美食",
     browseMenu: "浏览菜单", quantity: "数量", specialInstructions: "特殊要求?",
     note: "备注", orderNote: "订单备注", orderNotePlaceholder: "整单备注（过敏、偏好等）",
     subtotal: "小计", total: "合计", checkout: "结账",
@@ -188,7 +188,7 @@ const translations = {
   ja: {
     menu: "メニュー", categories: "カテゴリー", all: "すべて", popular: "人気",
     addToCart: "選択に追加", added: "追加済み!", cart: "カート", yourCart: "私の選択",
-    emptyCart: "カートは空です", emptyCartDesc: "メニューを見て料理を追加してください",
+    emptyCart: "まだ何も選択されていません", emptyCartDesc: "メニューを見て料理を追加してください",
     browseMenu: "メニューを見る", quantity: "数量", specialInstructions: "特別なご要望は?",
     note: "メモ", orderNote: "注文メモ", orderNotePlaceholder: "注文全体へのメモ（アレルギー、好みなど）",
     subtotal: "小計", total: "合計", checkout: "注文する",
@@ -218,7 +218,7 @@ const translations = {
   ko: {
     menu: "메뉴", categories: "카테고리", all: "전체", popular: "인기",
     addToCart: "선택에 추가", added: "추가됨!", cart: "장바구니", yourCart: "내 선택",
-    emptyCart: "장바구니가 비어 있습니다", emptyCartDesc: "메뉴를 둘러보고 음식을 추가하세요",
+    emptyCart: "아직 선택된 항목이 없습니다", emptyCartDesc: "메뉴를 둘러보고 음식을 추가하세요",
     browseMenu: "메뉴 보기", quantity: "수량", specialInstructions: "특별 요청 사항?",
     note: "메모", orderNote: "주문 메모", orderNotePlaceholder: "전체 주문에 대한 메모 (알레르기, 기호 등)",
     subtotal: "소계", total: "합계", checkout: "주문하기",
@@ -248,7 +248,7 @@ const translations = {
   ru: {
     menu: "Меню", categories: "Категории", all: "Все", popular: "Популярное",
     addToCart: "Добавить в выбор", added: "Добавлено!", cart: "Корзина", yourCart: "Мои выборы",
-    emptyCart: "Корзина пуста", emptyCartDesc: "Просмотрите меню и добавьте блюда",
+    emptyCart: "Пока ничего не выбрано", emptyCartDesc: "Просмотрите меню и добавьте блюда",
     browseMenu: "Смотреть меню", quantity: "Количество", specialInstructions: "Особые пожелания?",
     note: "Заметка к блюду", orderNote: "Заметка к заказу", orderNotePlaceholder: "Заметки к заказу (аллергии, предпочтения...)",
     subtotal: "Подытог", total: "Итого", checkout: "Оформить",
@@ -278,7 +278,7 @@ const translations = {
   fil: {
     menu: "Menu", categories: "Mga Kategorya", all: "Lahat", popular: "Sikat",
     addToCart: "Idagdag sa Pinili", added: "Naidagdag!", cart: "Cart", yourCart: "Aking mga Pinili",
-    emptyCart: "Walang laman ang iyong cart", emptyCartDesc: "Mag-browse ng menu at magdagdag ng pagkain",
+    emptyCart: "Wala pang napipili", emptyCartDesc: "Mag-browse ng menu at magdagdag ng pagkain",
     browseMenu: "Tingnan ang Menu", quantity: "Dami", specialInstructions: "Espesyal na kahilingan?",
     note: "Tala ng aytem", orderNote: "Tala ng order", orderNotePlaceholder: "Mga tala para sa buong order (allergy, kagustuhan...)",
     subtotal: "Subtotal", total: "Kabuuan", checkout: "Mag-checkout",
