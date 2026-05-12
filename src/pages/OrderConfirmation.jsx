@@ -196,7 +196,7 @@ export default function OrderConfirmation() {
                     <span>
                       {product
                         ? getLocalizedField(product, "name")
-                        : item.name}
+                        : product.default_name}
                     </span>
                   </div>
 
