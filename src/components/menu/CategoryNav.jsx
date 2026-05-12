@@ -75,7 +75,7 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
                 key={item.id ?? '__all__'}
                 ref={isActive ? activeButtonRef : null}
                 onClick={() => onSelect(item.id)}
-                className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-300
+                className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-300 touch-manipulation
                 ${isActive
                     ? 'text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70'

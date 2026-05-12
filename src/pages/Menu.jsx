@@ -34,31 +34,80 @@ export default function Menu() {
       .sort((a, b) => a.sort_order - b.sort_order);
   }, [categories]);
 
+  // const groupedProducts = useMemo(() => {
+  //   const groups = {};
+
+  //   sortedCategories.forEach(category => {
+  //     groups[category.id] = [];
+  //   });
+
+  //   products.forEach(product => {
+
+  //     // Search filter
+  //     const search = searchQuery.toLowerCase();
+
+  //     const name = getLocalizedField(product, "name")?.toLowerCase() || product.default_name;
+
+  //     const description =
+  //       getLocalizedField(product, "description")?.toLowerCase() || "";
+
+  //     const matchSearch =
+  //       !search ||
+  //       name.includes(search) ||
+  //       description.includes(search);
+
+  //     if (!matchSearch) return;
+
+
+  //     if (groups[product.category_id]) {
+  //       groups[product.category_id].push(product);
+  //     }
+  //   });
+
+  //   return groups;
+  // }, [
+  //   products,
+  //   sortedCategories,
+  //   activeBranch,
+  //   searchQuery,
+  //   getLocalizedField,
+  // ]);
+
+
+
   const groupedProducts = useMemo(() => {
     const groups = {};
 
-    sortedCategories.forEach(category => {
+    sortedCategories.forEach((category) => {
       groups[category.id] = [];
     });
 
-    products.forEach(product => {
-      
-      // Search filter
-      const search = searchQuery.toLowerCase();
+    const search = searchQuery.toLowerCase().trim();
 
-      const name = getLocalizedField(product, "name")?.toLowerCase() || product.default_name;
+    products.forEach((product) => {
+      const name =
+        getLocalizedField(product, "name")?.toLowerCase() ||
+        product.default_name?.toLowerCase() ||
+        "";
 
-      const description =
-        getLocalizedField(product, "description")?.toLowerCase() || "";
+
+      // Find category of product
+      const category = sortedCategories.find(
+        (c) => String(c.id) === String(product.category_id)
+      );
+
+      const categoryName =
+        getLocalizedField(category, "name")?.toLowerCase() ||
+        category?.default_name?.toLowerCase() ||
+        "";
 
       const matchSearch =
         !search ||
         name.includes(search) ||
-        description.includes(search);
+        categoryName.includes(search);
 
       if (!matchSearch) return;
 
-      
       if (groups[product.category_id]) {
         groups[product.category_id].push(product);
       }
@@ -72,11 +121,124 @@ export default function Menu() {
     searchQuery,
     getLocalizedField,
   ]);
-  
+
+  // useEffect(() => {
+  //   if (searchQuery) return;
+
+  //   const handleScroll = () => {
+  //     if (userClickedRef.current) return;
+
+  //     // Detect bottom of page
+  //     const scrollBottom =
+  //       window.innerHeight + window.scrollY;
+
+  //     const pageHeight =
+  //       document.documentElement.scrollHeight;
+
+  //     // If near bottom → activate last category
+  //     if (scrollBottom >= pageHeight - 20) {
+  //       const lastCategory =
+  //         sortedCategories[
+  //         sortedCategories.length - 1
+  //         ];
+
+  //       if (lastCategory) {
+  //         setActiveCategory(prev =>
+  //           prev === lastCategory.id
+  //             ? prev
+  //             : lastCategory.id
+  //         );
+  //       }
+
+  //       return;
+  //     }
+
+  //     const offset = 225;
+
+  //     let currentCategory = null;
+
+  //     for (const category of sortedCategories) {
+  //       const section =
+  //         sectionRefs.current[category.id];
+
+  //       if (!section) continue;
+
+  //       const rect =
+  //         section.getBoundingClientRect();
+
+  //       // Section crossed sticky header
+  //       if (rect.top <= offset) {
+  //         currentCategory = category.id;
+  //       }
+
+  //       // First visible section fallback
+  //       else if (
+  //         !currentCategory &&
+  //         rect.top > offset
+  //       ) {
+  //         currentCategory = category.id;
+  //         break;
+  //       }
+  //     }
+
+  //     // Final fallback
+  //     if (
+  //       !currentCategory &&
+  //       sortedCategories.length
+  //     ) {
+  //       currentCategory =
+  //         sortedCategories[0].id;
+  //     }
+
+  //     setActiveCategory(prev =>
+  //       prev === currentCategory
+  //         ? prev
+  //         : currentCategory
+  //     );
+  //   };
+
+  //   window.addEventListener(
+  //     "scroll",
+  //     handleScroll,
+  //     { passive: true }
+  //   );
+
+  //   // Delay ensures refs are mounted
+  //   requestAnimationFrame(handleScroll);
+
+  //   return () => {
+  //     window.removeEventListener(
+  //       "scroll",
+  //       handleScroll
+  //     );
+  //   };
+  // }, [
+  //   sortedCategories,
+  //   groupedProducts,
+  //   searchQuery,
+  // ]);
 
   useEffect(() => {
-    if (searchQuery) return;
+    // SEARCH MODE
+    if (searchQuery) {
+      const firstMatchedCategory = sortedCategories.find(
+        (category) =>
+          groupedProducts[category.id] &&
+          groupedProducts[category.id].length > 0
+      );
 
+      if (firstMatchedCategory) {
+        setActiveCategory((prev) =>
+          prev === firstMatchedCategory.id
+            ? prev
+            : firstMatchedCategory.id
+        );
+      }
+
+      return;
+    }
+
+    // NORMAL SCROLL MODE
     const handleScroll = () => {
       if (userClickedRef.current) return;
 
@@ -95,7 +257,7 @@ export default function Menu() {
           ];
 
         if (lastCategory) {
-          setActiveCategory(prev =>
+          setActiveCategory((prev) =>
             prev === lastCategory.id
               ? prev
               : lastCategory.id
@@ -142,7 +304,7 @@ export default function Menu() {
           sortedCategories[0].id;
       }
 
-      setActiveCategory(prev =>
+      setActiveCategory((prev) =>
         prev === currentCategory
           ? prev
           : currentCategory
@@ -155,7 +317,6 @@ export default function Menu() {
       { passive: true }
     );
 
-    // Delay ensures refs are mounted
     requestAnimationFrame(handleScroll);
 
     return () => {
@@ -169,7 +330,6 @@ export default function Menu() {
     groupedProducts,
     searchQuery,
   ]);
-
 
   const productMap = useMemo(() => {
     return Object.fromEntries(

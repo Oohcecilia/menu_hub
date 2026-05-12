@@ -166,8 +166,8 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
             <div className="flex items-start justify-evenly gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
                 {/* Left small */}
                 <div className="flex flex-col gap-10 items-center mb-6 sm:mb-0 sm:mr-2">
-                    {p1 && <SmallCard product={p1} onOpen={onOpen} size={125} delay={0.6} />}
-                    {p3 && <SmallCard product={p3} onOpen={onOpen} size={125} delay={1.2} />}
+                    {p1 && <SmallCard product={p1} onOpen={onOpen} size={220} delay={0.6} />}
+                    {p3 && <SmallCard product={p3} onOpen={onOpen} size={220} delay={1.2} />}
                 </div>
 
                 {/* Center hero */}
@@ -196,8 +196,8 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
 
                 {/* Right small */}
                 <div className="flex flex-row sm:flex-col gap-12 sm:gap-10 items-center mb-6 sm:mb-0 sm:ml-2">
-                    {p2 && <SmallCard product={p2} onOpen={onOpen} size={125} delay={0.9} />}
-                    {p4 && <SmallCard product={p4} onOpen={onOpen} size={125} delay={1.5} />}
+                    {p2 && <SmallCard product={p2} onOpen={onOpen} size={220} delay={0.9} />}
+                    {p4 && <SmallCard product={p4} onOpen={onOpen} size={220} delay={1.5} />}
                 </div>
             </div>
 
