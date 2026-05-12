@@ -227,123 +227,123 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
 
 
 function LayoutGrandStage({ products, onOpen, isAll }) {
-  const { getLocalizedField } = useLanguage();
+    const { getLocalizedField } = useLanguage();
 
-  const layout = useMemo(() => {
-    const items = [...products];
+    const layout = useMemo(() => {
+        const items = [...products];
 
-    if (items.length === 1) {
-      return { hero: items[0], left: [], right: [], extra: [] };
-    }
+        const hero =
+            items.length === 1
+                ? items[0]
+                : items.length >= 3
+                    ? items[2]
+                    : null;
 
-    if (items.length === 2) {
-      return { hero: null, left: [items[0]], right: [items[1]], extra: [] };
-    }
+        let gridItems = [];
 
-    if (items.length === 3) {
-      return { hero: items[1], left: [items[0]], right: [items[2]], extra: [] };
-    }
+        if (items.length === 1) {
+            gridItems = [];
+        }
 
-    if (items.length === 4) {
-      return { hero: null, left: [items[0], items[1]], right: [items[2], items[3]], extra: [] };
-    }
+        if (items.length === 2) {
+            gridItems = [items[0], items[1]];
+        }
 
-    if (items.length === 5) {
-      return { hero: items[2], left: [items[0], items[1]], right: [items[3], items[4]], extra: [] };
-    }
+        if (items.length === 3) {
+            gridItems = [items[0], items[1]];
+        }
 
-    return {
-      hero: items[2],
-      left: [items[0], items[1]],
-      right: [items[3], items[4]],
-      extra: items.slice(5),
-    };
-  }, [products]);
+        if (items.length === 4) {
+            gridItems = [items[0], items[1], items[2], items[3]];
+        }
 
-  const renderCards = (items, delayStart = 0) =>
-    items.map((product, idx) => (
-      <SmallCard
-        key={product.id || idx}
-        product={product}
-        onOpen={onOpen}
-        size={200}
-        delay={delayStart + idx * 0.2}
-      />
-    ));
+        if (items.length === 5) {
+            gridItems = [items[0], items[1], items[3], items[4]];
+        }
 
-  const { hero, left, right, extra } = layout;
+        if (items.length > 5) {
+            const firstBatch = [items[0], items[1], items[3], items[4]];
+            const rest = items.slice(5);
+            gridItems = [...firstBatch, ...rest];
+        }
 
-  return (
-    <div className="relative w-full overflow-hidden sm:overflow-visible">
+        return { hero, gridItems };
+    }, [products]);
 
-      {/* background glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 50% 60%, var(--primary) 0%, transparent 70%)",
-        }}
-      />
+    const renderCard = (product, idx) => (
+        <SmallCard
+            key={product.id || idx}
+            product={product}
+            onOpen={onOpen}
+            size={200}
+            delay={0.3 + idx * 0.15}
+        />
+    );
 
-      {/* ================= MAIN STAGE ================= */}
-      <div className="flex items-start justify-evenly gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
+    const { hero, gridItems } = layout;
 
-        {/* LEFT (FIXED: horizontal alignment) */}
-        <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6 pt-16">
-          <div className="flex justify-center gap-6 flex-wrap sm:flex-nowrap">
-            {renderCards(left, 0.6)}
-          </div>
+    return (
+        <div className="relative w-full overflow-hidden sm:overflow-visible">
+
+            {/* background glow */}
+            <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                    background:
+                        "radial-gradient(ellipse 60% 50% at 50% 60%, var(--primary) 0%, transparent 70%)",
+                }}
+            />
+
+            {/* ================= GRID STAGE ================= */}
+            <div className="flex flex-col items-center gap-10 sm:gap-12">
+
+                {/* TOP GRID ROW (2 items max) */}
+                {gridItems.length >= 2 && (
+                    <div className="flex flex-col sm:flex-row justify-evenly items-center w-full gap-6 sm:gap-10">
+                        {renderCard(gridItems[0], 0)}
+                        {renderCard(gridItems[1], 1)}
+                    </div>
+                )}
+
+                {/* HERO CENTER */}
+                {hero && (
+                    <div className="flex flex-col items-center z-10 pt-4">
+                        <motion.div
+                            onClick={() => onOpen(hero)}
+                            className="flex flex-col items-center cursor-pointer"
+                            whileHover={{ scale: 1.03 }}
+                            transition={{ duration: 0.4 }}
+                        >
+                            <FloatWrap delay={0} amplitude={9}>
+                                <FloatImage src={hero.image} alt={hero.name_en} size={220} />
+                            </FloatWrap>
+
+                            <div className="text-center mt-2">
+                                <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">
+                                    {getLocalizedField(hero, "name") || hero?.name?.def}
+                                </p>
+
+                                <div className="flex items-center justify-center gap-3 mt-1.5">
+                                    <p className="font-light tracking-widest text-base text-primary">
+                                        {hero.price?.toFixed(2)}
+                                    </p>
+                                    <AddBtn product={hero} onOpen={onOpen} />
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* BOTTOM GRID (2 items per row, responsive wrap) */}
+                {gridItems.length > 2 && (
+                    <div className="flex flex-col sm:flex-row flex-wrap justify-evenly items-center w-full gap-6 sm:gap-10">
+                        {gridItems.slice(2).map((p, idx) => renderCard(p, idx + 2))}
+                    </div>
+                )}
+
+            </div>
         </div>
-
-        {/* HERO */}
-        {hero && (
-          <div className="relative flex flex-col items-center z-10 mx-2 pt-16">
-            <motion.div
-              onClick={() => onOpen(hero)}
-              className="flex flex-col items-center cursor-pointer"
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.4 }}
-            >
-              <FloatWrap delay={0} amplitude={9}>
-                <FloatImage src={hero.image} alt={hero.name_en} size={200} />
-              </FloatWrap>
-
-              <div className="w-full text-center">
-                <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">
-                  {getLocalizedField(hero, "name") || hero?.name?.def}
-                </p>
-
-                <div className="flex items-center justify-between gap-3 mt-1.5">
-                  <p className="font-light tracking-widest text-base text-primary">
-                    {hero.price?.toFixed(2)}
-                  </p>
-                  <AddBtn product={hero} onOpen={onOpen} />
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-
-        {/* RIGHT (FIXED: horizontal alignment) */}
-        <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6 pt-16">
-          <div className="flex justify-center gap-6 flex-wrap sm:flex-nowrap">
-            {renderCards(right, 0.9)}
-          </div>
-        </div>
-
-      </div>
-
-      {/* ================= EXTRA PRODUCTS ================= */}
-      {extra.length > 0 && (
-        <div className="mt-10 sm:mt-12 flex flex-wrap justify-evenly items-center gap-10 sm:gap-14 w-full px-4">
-          {renderCards(extra, 1.8)}
-        </div>
-      )}
-
-      {/* decorative line */}
-      <div className="mt-8 mx-auto w-24 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-    </div>
-  );
+    );
 }
 /* ─── Layout registry ────────────────────────────────────────────── */
 const LAYOUTS = [LayoutGrandStage];
