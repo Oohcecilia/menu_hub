@@ -32,7 +32,7 @@ function CartItem({
 
   const price = product.price || 0;
   const total = price * item.quantity;
-  const name = getLocalizedField(product, 'name');
+  const name = getLocalizedField(product, 'name') || product.default_name;
   const image = product.image;
   const noImage = activeBranch?.no_image
 
