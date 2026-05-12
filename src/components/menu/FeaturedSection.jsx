@@ -166,14 +166,14 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
             <div className="flex items-start justify-evenly gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
                 {/* Left small */}
                 <div className="flex flex-col gap-10 items-center mb-6 sm:mb-0 sm:mr-2">
-                    {p0 && <SmallCard product={p0} onOpen={onOpen} size={200} delay={0.6} />}
+                    {p1 && <SmallCard product={p1} onOpen={onOpen} size={200} delay={0.6} />}
                     {p3 && <SmallCard product={p3} onOpen={onOpen} size={200} delay={1.2} />}
                 </div>
 
                 {/* Center hero */}
                 <div className="relative flex flex-col items-center z-10 mx-2 pt-16">
-                    {p2 && (
-                        <motion.div onClick={() => onOpen(p2)} className="flex flex-col items-center cursor-pointer"
+                    {p0 && (
+                        <motion.div onClick={() => onOpen(p0)} className="flex flex-col items-center cursor-pointer"
                             whileHover={{ scale: 1.03 }} transition={{ duration: 0.4 }}>
                             {/* {isAll && (
                                 <span className="mb-2 text-[9px] font-bold tracking-[0.22em] uppercase px-3 py-1 rounded-full text-primary bg-primary/10 border border-primary/25">
@@ -181,13 +181,13 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                 </span>
                             )} */}
                             <FloatWrap delay={0} amplitude={9}>
-                                <FloatImage src={p2.image} alt={p2.name_en} size={200} />
+                                <FloatImage src={p0.image} alt={p0.name_en} size={200} />
                             </FloatWrap>
                             <div className="w-full  text-center">
-                                <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{getLocalizedField(p2, 'name') || p2?.name?.def}</p>
+                                <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">{getLocalizedField(p0, 'name') || p0?.name?.def}</p>
                                 <div className="flex items-center justify-between gap-3 mt-1.5">
-                                    <p className="font-light tracking-widest text-base text-primary">{p2.price?.toFixed(2)}</p>
-                                    <AddBtn product={p2} onOpen={onOpen} />
+                                    <p className="font-light tracking-widest text-base text-primary">{p0.price?.toFixed(2)}</p>
+                                    <AddBtn product={p0} onOpen={onOpen} />
                                 </div>
                             </div>
                         </motion.div>
@@ -196,7 +196,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
 
                 {/* Right small */}
                 <div className="relative flex flex-col items-center z-10 mx-2 sm:mx-6 pt-16">
-                    {p1 && <SmallCard product={p1} onOpen={onOpen} size={200} delay={0.9} />}
+                    {p2 && <SmallCard product={p2} onOpen={onOpen} size={200} delay={0.9} />}
                     {p4 && <SmallCard product={p4} onOpen={onOpen} size={200} delay={1.5} />}
                 </div>
             </div>
