@@ -169,7 +169,7 @@ export default function OrderConfirmation() {
           className="bg-card rounded-2xl p-8 border border-border/50 flex flex-col items-center justify-center mb-6"
         >
           <QRCode order={order} value={trackingUrl} size={200} />
-          <p className="font-serif  mt-4 text-center">
+          <p className="font-serif text-lg  mt-4 text-center">
             {t('scanQR')}
           </p>
         </motion.div>

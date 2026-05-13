@@ -306,7 +306,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
             ))}
 
 
-            <textarea
+            {/* <textarea
               placeholder={t('specialInstructions')}
               value={note}
               onChange={e => setNote(e.target.value)}
@@ -319,7 +319,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
               placeholder:text-gray-400 dark:placeholder:text-white/30
               focus:outline-none focus:ring-2 focus:ring-amber-400/40
             "
-            />
+            /> */}
           </div>
 
           {/* Bottom */}

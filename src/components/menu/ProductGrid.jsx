@@ -191,7 +191,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
           {product.price?.toFixed(2)}
         </span>
 
-        <div onClick={(e) => e.stopPropagation()}>
+        {/* <div onClick={(e) => e.stopPropagation()}>
           {qty === 0 ? (
             <motion.button
               whileTap={{ scale: 0.85 }}
@@ -240,7 +240,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
               </button>
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </motion.div>
   );

@@ -125,7 +125,7 @@ function CartItem({
       </div>
 
       {/* NOTE */}
-      <div className="px-3 pb-3">
+      {/* <div className="px-3 pb-3">
         <input
           type="text"
           placeholder={`📝 ${t("note")}...`}
@@ -133,7 +133,7 @@ function CartItem({
           onChange={(e) => updateNote(index, e.target.value)}
           className="w-full text-xs rounded-lg border border-input bg-secondary/50 px-2.5 py-1.5 placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/30"
         />
-      </div>
+      </div> */}
     </div>
   );
 }
