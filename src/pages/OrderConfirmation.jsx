@@ -90,147 +90,86 @@ export default function OrderConfirmation() {
 
   const trackingUrl = `${window.location.origin}/order/${orderId}`;
 
+
   return (
-    <div className="min-h-screen bg-background">
-{/* 
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50"
-      >
-        <div className="max-w-lg mx-auto px-4 h-16 flex items-center gap-3">
-          <Link to="/">
-            <Button size="icon" className="
-                                  rounded-full h-9 w-9
-                                  bg-transparent hover:bg-gray-100 text-gray
-                                  hover:bg-green-400/10
-                                  hover:text-primary
-                                  transition-colors
-                                ">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <h1 className="text-lg font-serif font-bold">{t('guestCheckout')}</h1>
-        </div>
-      </motion.div> */}
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-6">
+      <div className="w-full max-w-md">
 
-      <div className="max-w-lg mx-auto px-4 py-10">
-        {/* Success Animation */}
-        {/* <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
-          className="text-center mb-8"
-        >
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 200, delay: 0.4 }}
-            className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 mb-4"
-          >
-            <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="text-3xl font-serif font-bold text-foreground mb-2"
-          >
-            {t('orderPlaced')}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="text-muted-foreground"
-          >
-            {t('orderSuccess')}
-          </motion.p>
-        </motion.div> */}
-
-        {/* Order Number */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="bg-card rounded-2xl p-6 border border-border/50 text-center mb-6"
-        >
-          <p className="text-sm text-muted-foreground mb-1">{t('orderNumber')}</p>
-          <p className="text-2xl font-bold font-mono tracking-wider text-primary">
-            {order.order_number}
-          </p>
-        </motion.div> */}
-
-        {/* QR Code */}
+        {/* QR Card */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
-          className="bg-card rounded-2xl p-8 border border-border/50 flex flex-col items-center justify-center mb-6"
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="
+          relative overflow-hidden
+          rounded-3xl
+          border border-border/50
+          bg-card/80 backdrop-blur-xl
+          shadow-2xl
+          px-6 py-8
+        "
         >
-          <QRCode order={order} value={trackingUrl} size={200} />
-          <p className="font-serif text-lg  mt-4 text-center">
-            {t('scanQR')}
-          </p>
-        </motion.div>
+          {/* Glow Effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
 
-        {/* Order Summary */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1 }}
-          className="bg-card rounded-2xl p-5 border border-border/50 mb-6"
-        >
-          <h2 className="font-semibold mb-4">{t('orderSummary')}</h2>
-          <div className="space-y-3">
-            {(prodInfo || []).map((item, index) => {
-              const product = productMap[String(item.product_id)];
+          <div className="relative z-10 flex flex-col items-center">
 
-              return (
-                <div key={index} className="flex justify-between text-sm">
-                  <div className="flex gap-2">
-                    <span className="text-muted-foreground">
-                      {item.quantity}x
-                    </span>
+            {/* QR Wrapper */}
+            <div
+              className="
+              rounded-3xl
+              bg-white dark:bg-zinc-900
+              p-5
+              shadow-lg
+              border border-border/40
+            "
+            >
+              <QRCode
+                order={order}
+                value={trackingUrl}
+                size={220}
+              />
+            </div>
 
-                    <span>
-                      {product
-                        ? getLocalizedField(product, "name")
-                        : product.default_name}
-                    </span>
-                  </div>
+            {/* Title */}
+            <h1 className="mt-6 font-serif text-xl font-bold tracking-tight text-center">
+              {t("scanQR")}
+            </h1>
 
-                  <span className="font-medium">
-                    {item.total.toFixed(2)}
-                  </span>
-                </div>
-              );
-            })}
+            {/* Subtitle */}
+            {/* <p className="mt-2 text-sm text-muted-foreground text-center max-w-xs leading-relaxed">
+              {t("showQRCodeToWaiter")}
+            </p> */}
+
+            {/* Divider */}
+            <div className="w-16 h-1 rounded-full bg-primary/30 mt-6" />
+
+            {/* Actions */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="w-full mt-8"
+            >
+              <Link to="/" className="block w-full">
+                <Button
+                  variant="outline"
+                  className="
+                  w-full h-12 rounded-2xl
+                  font-semibold
+                  border-border/60
+                  bg-background/60
+                  hover:bg-primary/10
+                  hover:text-primary
+                  transition-all duration-200
+                "
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  {t("backToMenu")}
+                </Button>
+              </Link>
+            </motion.div>
           </div>
-
-          <div className="border-t border-border/50 mt-4 pt-4 flex justify-between text-lg font-bold">
-            <span>{t('total')}</span>
-            <span className="text-primary">
-              {subtotal.toFixed(2)}
-            </span>
-          </div>
-        </motion.div> */}
-
-
-        {/* Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.3 }}
-          className="space-y-3"
-        >
-
-          <Link to="/" className="block">
-            <Button variant="outline" className="w-full h-12 rounded-2xl font-semibold hover:bg-green-400/10 hover:text-primary transition-colors">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {t('backToMenu')}
-            </Button>
-          </Link>
         </motion.div>
       </div>
     </div>

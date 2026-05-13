@@ -23,7 +23,6 @@ export const moveToSelection = ( orders, orderId, products , addItem, onClose, s
     (o) => String(o.id) === String(orderId)
   );
 
-  console.log(`ORDERS ${JSON.stringify(orders)} ===== ORDER ${JSON.stringify(order)}`);
 
   if (!order?.items?.length) {
     console.warn("Order not found:", orderId);
@@ -89,7 +88,6 @@ function OrderCard({
   setIsOpen
 }) {
 
-  console.log("OD", orders)
   const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
   const { t, getLocalizedField } = useLanguage();
   const { addItem } = useCart();
