@@ -48,11 +48,6 @@ export default function Menu() {
         getLocalizedField(product, "name")?.toLowerCase() ||
         product.default_name?.toLowerCase() ||
         "";
-       
-      const description =
-        getLocalizedField(product, "description")?.toLowerCase() ||
-        product.default_name?.toLowerCase() ||
-        "";
 
 
       // Find category of product
@@ -68,7 +63,6 @@ export default function Menu() {
       const matchSearch =
         !search ||
         name.includes(search) ||
-        description.includes(search) ||
         categoryName.includes(search);
 
       if (!matchSearch) return;
