@@ -40,13 +40,13 @@ export default function QRCodeComponent({ order = {}, size = 200, cuid = "" }) {
   }, [items, buid, cuid]);
 
   // ⚠️ FIXED: prevents infinite re-render loop
-  useEffect(() => {
-    if (!items.length) return;
-    if (hasClearedRef.current) return;
+  // useEffect(() => {
+  //   if (!items.length) return;
+  //   if (hasClearedRef.current) return;
 
-    clearCart();
-    hasClearedRef.current = true;
-  }, [items.length, clearCart]);
+  //   // clearCart();
+  //   hasClearedRef.current = true;
+  // }, [items.length, clearCart]);
 
   return (
     <>

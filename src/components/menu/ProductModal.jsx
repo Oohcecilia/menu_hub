@@ -255,31 +255,31 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-5 space-y-5">
             <div>
-              <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white uppercase">
-                {name}
-              </h2>
+              <div className="flex justify-between items-start gap-3">
+                <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white uppercase">
+                  {name}
+                </h2>
 
-              {product?.name?.def &&
-                product?.name?.def !== getLocalizedField(product, "name") && (
-                  <span className="text-xs text-muted-foreground uppercase">
-                    {product.name.def}
-                  </span>
-                )}
+                <p className="text-xl font-bold text-primary">
+                  {product.price?.toFixed(2)}
+                </p>
+
+              </div>
+
+          
 
               <p className="text-gray-500 dark:text-white/60 text-sm mt-1">
                 {getLocalizedField(product, "description")}
               </p>
 
-              {product?.description?.def &&
+              {/* {product?.description?.def &&
                 product?.description?.def !== getLocalizedField(product, "description") && (
                   <span className="text-xs text-muted-foreground/70 block mt-0.5">
                     {product.description.def}
                   </span>
-                )}
+                )} */}
 
-              <p className="text-xl font-bold text-primary mt-2">
-                {product.price?.toFixed(2)}
-              </p>
+            
             </div>
 
             {groups.length > 0 && (

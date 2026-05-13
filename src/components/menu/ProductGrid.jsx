@@ -7,6 +7,7 @@ import { useCart } from '@/lib/cartStore.jsx';
 import { Plus, Minus, Sparkles } from 'lucide-react';
 import { useBranch } from '@/lib/BranchContext.jsx';
 import { getCategoryIcon } from '@/utils/icons';
+import { useLocation } from 'react-router-dom'
 
 
 const map = {
@@ -142,6 +143,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
   const qty = getProductQuantity(product.id);
   const name = getLocalizedField(product, 'name') || product.default_name;
   const desc = getLocalizedField(product, 'description');
+  const location = useLocation();
 
   const handleMinus = (e) => {
     e.stopPropagation();
@@ -173,9 +175,18 @@ function TextListItem({ product, onOpen, delay = 0 }) {
     >
       {/* Left: Name + Description */}
       <div className="min-w-0">
-        <p className="font-serif uppercase font-medium  leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300">
-          {name}
-        </p>
+
+        <div className="flex items-center justify-between">
+          <p className="font-serif uppercase font-medium  leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300">
+            {name}
+            {location.pathname.startsWith("/debug") && (
+              <span> - {product.id}</span>
+            )}
+          </p>
+          <span className="text-primary font-light tracking-widest text-base whitespace-nowrap">
+            {product.price}
+          </span>
+        </div>
 
         {desc && (
           <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed font-light">
@@ -185,63 +196,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
 
       </div>
 
-      {/* Right: Price + Controls */}
-      <div className="flex items-center justify-between sm:justify-end gap-3 sm:min-w-[110px]">
-        <span className="text-primary font-light tracking-widest text-base whitespace-nowrap">
-          {product.price?.toFixed(2)}
-        </span>
 
-        {/* <div onClick={(e) => e.stopPropagation()}>
-          {qty === 0 ? (
-            <motion.button
-              whileTap={{ scale: 0.85 }}
-              onClick={handlePlus}
-              className="
-              h-6 w-6 rounded-full
-              border border-primary/35
-              text-primary
-              flex items-center justify-center
-              hover:bg-primary hover:text-primary-foreground
-              transition-all duration-200
-            "
-            >
-              <Plus className="h-3 w-3" />
-            </motion.button>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={handleMinus}
-                className="
-                h-6 w-6 rounded-full
-                bg-secondary
-                flex items-center justify-center
-                hover:bg-secondary/80
-                transition-colors
-              "
-              >
-                <Minus className="h-2.5 w-2.5" />
-              </button>
-
-              <span className="text-xs font-bold w-4 text-center">
-                {qty}
-              </span>
-
-              <button
-                onClick={handlePlus}
-                className="
-                h-6 w-6 rounded-full
-                bg-primary text-primary-foreground
-                flex items-center justify-center
-                hover:bg-primary/90
-                transition-colors
-              "
-              >
-                <Plus className="h-2.5 w-2.5" />
-              </button>
-            </div>
-          )}
-        </div> */}
-      </div>
     </motion.div>
   );
 }
@@ -249,6 +204,8 @@ function TextListItem({ product, onOpen, delay = 0 }) {
 /* ─── 2-col on sm+, 1-col on mobile, last lone item centered ─── */
 function TextList({ products, onProductOpen }) {
   const isOdd = products.length % 2 !== 0;
+
+  
 
   return (
     <div className="rounded-lg  overflow-hidden ">
@@ -274,7 +231,7 @@ function TextList({ products, onProductOpen }) {
             >
               {isSingle ? (
                 <div className="w-1/2 mx-auto">
-                  { products.length > 1 && <ListSpace spacing={2} />}
+                  {products.length > 1 && <ListSpace spacing={2} />}
                   <TextListItem product={a} onOpen={onProductOpen} delay={rowIdx * 2 * 0.04} />
                 </div>
               ) : (
@@ -358,8 +315,7 @@ export default function ProductGrid({
     );
   }
 
-  if (categories.length > 0)
-  {
+  if (categories.length > 0) {
     return (
       <div className="space-y-12">
         {categories.map((cat, ci) => {
@@ -415,26 +371,26 @@ export default function ProductGrid({
 
 /* ─── Main export ─────────────────────────────────────────────── */
 // export default function ProductGrid({ products, categories = [], onProductOpen }) {
-  // const { t, getLocalizedField } = useLanguage();
-  // const { activeBranch } = useBranch();
+// const { t, getLocalizedField } = useLanguage();
+// const { activeBranch } = useBranch();
 
-  // const noImage = activeBranch?.no_image;
+// const noImage = activeBranch?.no_image;
 
-  // if (products.length === 0) {
-  //   return (
-  //     <div className="flex flex-col items-center justify-center py-24 text-muted-foreground text-center">
-  //       <img
-  //         src={noImage}
-  //         alt="no-image"
-  //         className="h-10 w-10 opacity-60 dark:opacity-20"
-  //       />
+// if (products.length === 0) {
+//   return (
+//     <div className="flex flex-col items-center justify-center py-24 text-muted-foreground text-center">
+//       <img
+//         src={noImage}
+//         alt="no-image"
+//         className="h-10 w-10 opacity-60 dark:opacity-20"
+//       />
 
-  //       <p className="text-base font-medium tracking-wide mt-3">
-  //         {t('noResults')}
-  //       </p>
-  //     </div>
-  //   );
-  // }
+//       <p className="text-base font-medium tracking-wide mt-3">
+//         {t('noResults')}
+//       </p>
+//     </div>
+//   );
+// }
 
 //   if (categories.length > 0) {
 //     return (

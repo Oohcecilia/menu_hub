@@ -28,6 +28,7 @@ const AuthenticatedApp = () => {
     <Routes>
       {/* ---------------- PUBLIC MENU (NO AUTH) ---------------- */}
       <Route path="/" element={<Menu />} />
+      <Route path="/debug" element={<Menu />} />
       <Route path="/branch/:branchSlug" element={<Menu />} />
 
       {/* ---------------- PUBLIC ORDER PAGES ---------------- */}

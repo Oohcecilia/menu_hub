@@ -311,11 +311,15 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0, onPr
                   disabled={placing || !items.length}
                   className="w-full h-12 rounded-2xl bg-primary font-semibold text-base"
                 >
-                  {placing
-                    ? t("placing")
-                    : `${t("placeOrder")}
-                    }`}
+                  {placing ? t("placing")  : `${t("placeOrder") }`}
                 </Button>
+
+                {/* <Button
+                  disabled={placing || !items.length}
+                  className="w-full h-10 rounded-xl bg-primary font-semibold text-base"
+                >
+                  Clear Selection
+                </Button> */}
               </div>
             )}
           </motion.div>
