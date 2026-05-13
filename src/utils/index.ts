@@ -28,3 +28,7 @@ export const getLocalizedField = (item, field) => {
 
     return "";
   };
+
+
+
+  

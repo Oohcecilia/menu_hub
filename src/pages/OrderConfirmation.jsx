@@ -116,7 +116,7 @@ export default function OrderConfirmation() {
 
       <div className="max-w-lg mx-auto px-4 py-10">
         {/* Success Animation */}
-        <motion.div
+        {/* <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
@@ -146,10 +146,10 @@ export default function OrderConfirmation() {
           >
             {t('orderSuccess')}
           </motion.p>
-        </motion.div>
+        </motion.div> */}
 
         {/* Order Number */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
@@ -159,23 +159,23 @@ export default function OrderConfirmation() {
           <p className="text-2xl font-bold font-mono tracking-wider text-primary">
             {order.order_number}
           </p>
-        </motion.div>
+        </motion.div> */}
 
         {/* QR Code */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1 }}
-          className="bg-card rounded-2xl p-8 border border-border/50 flex flex-col items-center mb-6"
+          className="bg-card rounded-2xl p-8 border border-border/50 flex flex-col items-center justify-center mb-6"
         >
           <QRCode order={order} value={trackingUrl} size={200} />
-          <p className="text-sm text-muted-foreground mt-4 text-center">
+          <p className="font-serif  mt-4 text-center">
             {t('scanQR')}
           </p>
         </motion.div>
 
         {/* Order Summary */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.1 }}
@@ -214,7 +214,7 @@ export default function OrderConfirmation() {
               {subtotal.toFixed(2)}
             </span>
           </div>
-        </motion.div>
+        </motion.div> */}
 
 
         {/* Actions */}

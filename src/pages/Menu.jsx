@@ -49,7 +49,6 @@ export default function Menu() {
         product.default_name?.toLowerCase() ||
         "";
 
-
       // Find category of product
       const category = sortedCategories.find(
         (c) => String(c.id) === String(product.category_id)
