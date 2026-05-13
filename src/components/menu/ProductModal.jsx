@@ -113,6 +113,8 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
   const { addItem } = useCart();
   const { t, getLocalizedField } = useLanguage();
 
+  const name = getLocalizedField(product, 'name') || product.default_name;
+
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
   const [imgError, setImgError] = useState(false);
@@ -254,7 +256,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
           <div className="flex-1 overflow-y-auto p-5 space-y-5">
             <div>
               <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white uppercase">
-                {getLocalizedField(product, "name")}
+                {name}
               </h2>
 
               {product?.name?.def &&
