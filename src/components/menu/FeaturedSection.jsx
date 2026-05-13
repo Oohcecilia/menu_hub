@@ -138,7 +138,7 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
             </FloatWrap>
             <div className="mt-2 w-full text-center">
                 <div className="flex items-center justify-between gap-4">
-                    <p className="font-serif font-light text-foreground/80 tracking-wide truncate">
+                    <p className="font-serif uppercase font-light text-foreground/80 tracking-wide truncate">
                         {name}
                     </p>
                     <p className=" font-light tracking-widest text-primary">
@@ -246,7 +246,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                             <div className="text-center mt-2">
 
                                 <div className="flex items-center justify-center gap-3 mt-1.5">
-                                    <p className="font-serif font-light text-xl text-foreground/95 tracking-wide">
+                                    <p className="font-serif uppercase font-light text-xl text-foreground/95 tracking-wide">
                                         {getLocalizedField(hero, "name") || hero?.name?.def}
                                     </p>
                                     <p className="font-light tracking-widest text-base text-primary">

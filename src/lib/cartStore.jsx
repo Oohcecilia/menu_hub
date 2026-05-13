@@ -43,55 +43,6 @@ export function CartProvider({ children }) {
   // =========================
   // ADD ITEM
   // =========================
-  // const addItem = (product, quantity = 1, note = '', variations = []) => {
-  //   if (!activeBranch?.buid) return;
-
-  //   setItems(prev => {
-  //     const hasDifferentBranch = prev.some(
-  //       item => item.buid && item.buid !== activeBranch.buid
-  //     );
-
-  //     if (hasDifferentBranch) {
-  //       alert('Cart contains items from another branch.');
-  //       return prev;
-  //     }
-
-  //     const isSameVariations = (a = [], b = []) =>
-  //       a.length === b.length &&
-  //       a.every(v => b.some(bv => bv.id === v.id));
-
-  //     const existing = prev.find(i =>
-  //       i.product_id === product.id &&
-  //       i.note === note &&
-  //       isSameVariations(i.variations, variations)
-  //     );
-
-  //     let updated;
-
-  //     if (existing) {
-  //       updated = prev.map(i =>
-  //         i.product_id === product.id &&
-  //         i.note === note &&
-  //         isSameVariations(i.variations, variations)
-  //           ? { ...i, quantity: i.quantity + quantity }
-  //           : i
-  //       );
-  //     } else {
-  //       updated = [
-  //         ...prev,
-  //         {
-  //           product_id: product.id,
-  //           buid: activeBranch.buid,
-  //           quantity,
-  //           note,
-  //           variations,
-  //         }
-  //       ];
-  //     }
-
-  //     return updated;
-  //   });
-  // };
   const addItem = (product, quantity = 1, note = "", variations = []) => {
     if (!activeBranch?.buid) return;
 
@@ -106,8 +57,6 @@ export function CartProvider({ children }) {
         return prev;
       }
 
-      // 2. Optimized Variation Comparison
-      // We stringify a sorted list of identifiers to create a unique "fingerprint"
       const getVariationKey = (vars) => {
         return vars
           .map((v) => (typeof v === 'object' ? (v.id || v.name || JSON.stringify(v)) : v))
@@ -139,7 +88,6 @@ export function CartProvider({ children }) {
         {
           cart_id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
           product_id: product.id,
-          product_name: product.name, // Good practice to keep a snapshot
           buid: activeBranch.buid,
           quantity,
           note,

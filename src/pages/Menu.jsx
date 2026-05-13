@@ -55,8 +55,8 @@ export default function Menu() {
       );
 
       const categoryName =
-        getLocalizedField(category, "name")?.toLowerCase() ||
-        category?.default_name?.toLowerCase() ||
+        getLocalizedField(category?.name, "translation")?.toLowerCase() ||
+        category?.name?.en?.toLowerCase() ||
         "";
 
       const matchSearch =
@@ -79,6 +79,7 @@ export default function Menu() {
     searchQuery,
     getLocalizedField,
   ]);
+
 
   useEffect(() => {
     // SEARCH MODE
@@ -271,7 +272,7 @@ export default function Menu() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header products={products} />
+      <Header products={products} setIsOpen={setIsOpen} />
       {/* <CoverHero /> */}
 
       <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-border/30">

@@ -62,7 +62,7 @@ function ListBanner({ spacing = 2, start = false }) {
 
       <div className="flex items-center justify-center shrink-0">
         <span className="flex items-center gap-1 text-primary text-xl">
-          <span>&#10171;</span>
+          <span className='inline-block scale-x-[-1]'>&#10171;</span>
 
           {start ? (
             <span className='text-2xl'>&#9737;</span>
@@ -70,7 +70,7 @@ function ListBanner({ spacing = 2, start = false }) {
             <span className='text-md'>&#9737;</span>
           )}
 
-          <span className="inline-block scale-x-[-1] ">
+          <span>
             &#10171;
           </span>
         </span>
@@ -360,71 +360,3 @@ export default function ProductGrid({
     </motion.div>
   );
 }
-
-
-
-
-
-
-
-
-
-/* ─── Main export ─────────────────────────────────────────────── */
-// export default function ProductGrid({ products, categories = [], onProductOpen }) {
-// const { t, getLocalizedField } = useLanguage();
-// const { activeBranch } = useBranch();
-
-// const noImage = activeBranch?.no_image;
-
-// if (products.length === 0) {
-//   return (
-//     <div className="flex flex-col items-center justify-center py-24 text-muted-foreground text-center">
-//       <img
-//         src={noImage}
-//         alt="no-image"
-//         className="h-10 w-10 opacity-60 dark:opacity-20"
-//       />
-
-//       <p className="text-base font-medium tracking-wide mt-3">
-//         {t('noResults')}
-//       </p>
-//     </div>
-//   );
-// }
-
-//   if (categories.length > 0) {
-//     return (
-//       <div className="space-y-12">
-//         {categories.map((cat, ci) => {
-//           const catProducts = products.filter(p => hasCategory(p, cat.id));
-//           const catName = cat.name?.en;
-
-//           const icon = getCategoryIcon(catName);
-
-//           if (catProducts.length === 0) return null;
-
-//           return (
-//             <motion.div
-//               key={cat.id}
-//               initial={{ opacity: 0 }}
-//               animate={{ opacity: 1 }}
-//               transition={{ duration: 0.4, delay: ci * 0.05 }}
-//             >
-//               <CategoryBanner icon={icon} label={catName} />
-//               <CategorySection products={catProducts} onProductOpen={onProductOpen} />
-//             </motion.div>
-//           );
-//         })}
-//         {/* <EndBanner />  */}
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-//       <SpaceY y={4} />
-//       <CategorySection products={products} onProductOpen={onProductOpen} />
-//       {/* <EndBanner />  */}
-//     </motion.div>
-//   );
-// }

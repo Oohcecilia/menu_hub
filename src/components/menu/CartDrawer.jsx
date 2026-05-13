@@ -108,7 +108,7 @@ function CartItem({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              updateQuantity(index, item.quantity - 1);
+              updateQuantity(index, item.quantity + 1);
             }}
             className="h-6 w-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold hover:bg-secondary/80 transition-colors"
           >

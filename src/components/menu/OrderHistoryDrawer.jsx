@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, ChefHat, Bell, CheckCircle, XCircle, ArrowRight, ShoppingBag } from 'lucide-react';
+import { QrCode, X, Clock, ChefHat, Bell, CheckCircle, XCircle, ArrowRight, ShoppingBag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { buildOrderSummary } from '@/utils/orderUtils'
 import { useBranch } from '@/lib/BranchContext.jsx';
 import { useLanguage } from '@/lib/i18n';
+import { Button } from '@/components/ui/button';
+import { useCart } from '@/lib/cartStore.jsx';
 
 const STATUS_CONFIG = {
   pending: { label: 'Pending', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
@@ -15,10 +17,82 @@ const STATUS_CONFIG = {
   cancelled: { label: 'Cancelled', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
 };
 
-function OrderCard({ order, products }) {
+export const moveToSelection = ( orders, orderId, products , addItem, onClose, setIsOpen,
+) => {
+  const order = orders.find(
+    (o) => String(o.id) === String(orderId)
+  );
 
+  console.log(`ORDERS ${JSON.stringify(orders)} ===== ORDER ${JSON.stringify(order)}`);
+
+  if (!order?.items?.length) {
+    console.warn("Order not found:", orderId);
+    return;
+  }
+
+  // 🔥 faster lookup map
+  const productMap = Object.fromEntries(
+    products.map((p) => [String(p.id), p])
+  );
+
+  order.items.forEach((item, index) => {
+    const product =
+      productMap[String(item.product_id)];
+
+    if (!product) {
+      console.warn(
+        "Product not found:",
+        item.product_id
+      );
+      return;
+    }
+
+    addItem(
+      product,
+      Number(item.quantity) || 1,
+      item.note || "",
+      item.variations || [],
+      `${Date.now()}-${index}-${Math.random()
+        .toString(16)
+        .slice(2)}`
+    );
+  });
+
+  onClose?.();
+  setIsOpen?.(true);
+};
+
+export const removeOrderById = (
+  orderId,
+  setOrders
+)=> {
+  setOrders((prev) => {
+    const updated = prev.filter(
+      (o) => String(o.id) !== String(orderId)
+    );
+
+    localStorage.setItem(
+      "orders",
+      JSON.stringify(updated)
+    );
+
+    return updated;
+  });
+};
+
+function OrderCard({
+  order,
+  products,
+  orders,
+  setOrders,
+  onClose,
+  setIsOpen
+}) {
+
+  console.log("OD", orders)
   const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
   const { t, getLocalizedField } = useLanguage();
+  const { addItem } = useCart();
 
   const itemCount = order.items?.reduce((s, i) => s + i.quantity, 0) || 0;
 
@@ -39,40 +113,32 @@ function OrderCard({ order, products }) {
   return (
     <div className="bg-background rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-colors">
       {/* Top row */}
-      <div className="flex items-center justify-between px-4 pt-3 pb-2">
-        <div className="flex items-center gap-2">
-          <span className="font-mono font-bold text-sm text-primary">{order.order_number}</span>
-          {order.table_number && (
-            <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-              Table {order.table_number}
-            </span>
-          )}
+      <div className="flex items-center justify-between pt-3 pb-2">
+        <span className="font-serif text-sm text-muted-foreground ml-2">{format(new Date(order.created_at), 'MMM d, h:mm a')}</span>
+        <div className="flex items-center text-xs font-medium p-1 rounded-full bg-red-50 dark:bg-red-900/20 text-red-500 mx-2">
+          <Trash2 onClick={() =>
+            removeOrderById(order.id, setOrders)
+          } className="h-3.5 w-3.5" />
         </div>
-        {/* <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-500">
-          <CheckCircle className="h-3 w-3" />
-          {t("historyPlaced")}
-        </div> */}
       </div>
 
       {/* Items preview */}
       <div className="px-4 pb-2">
-       <p className="text-xs text-muted-foreground truncate">
+        <p className="text-xs text-muted-foreground truncate">
           {(prodInfo || [])
             .map((i) => {
               const product = productMap[String(i.product_id)];
 
-              return `${i.quantity}×${
-                product
-                  ? getLocalizedField(product, "name")
-                  : i.name
-              }`;
+              return `${i.quantity}×${product
+                ? getLocalizedField(product, "name")
+                : i.name
+                }`;
             })
             .join(", ")}
         </p>
 
         <p className="text-xs text-muted-foreground mt-0.5">
           {itemCount} {itemCount !== 1 ? t("items") : t("item")} · <span className="font-semibold text-foreground">{subtotal.toFixed(2)}</span>
-          <span className="ml-2">{format(new Date(order.created_at), 'MMM d, h:mm a')}</span>
         </p>
       </div>
 
@@ -82,14 +148,31 @@ function OrderCard({ order, products }) {
           to={`/order-confirmation/${order.id}`}
           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
         >
-          {t("viewReceipt")} <ArrowRight className="h-3 w-3" />
+          {t("placeOrder")}
         </Link>
+        <div className="w-px bg-border/40" />
+        <Button
+          onClick={() =>
+            moveToSelection(
+              orders,
+              order.id,
+              products,
+              addItem,
+              onClose,
+              setIsOpen
+            )
+          }
+          variant="link"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+        >
+          Move to Selection
+        </Button>
       </div>
     </div>
   );
 }
 
-export default function OrderHistoryDrawer({ products, open, onClose }) {
+export default function OrderHistoryDrawer({ products, open, onClose, setIsOpen }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -231,6 +314,10 @@ export default function OrderHistoryDrawer({ products, open, onClose }) {
                       key={order.id}
                       order={order}
                       products={products}
+                      orders={orders}
+                      setOrders={setOrders}
+                      onClose={onClose}
+                      setIsOpen={setIsOpen}
                     />
                   ))
                 )}

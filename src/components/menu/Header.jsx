@@ -15,7 +15,7 @@ const LANGUAGES = [
   { code: 'fil', label: 'FIL' },
 ];
 
-export default function Header({ products }) {
+export default function Header({ products, setIsOpen }) {
   const { theme, toggleTheme } = useTheme();
   const { lang, setLang } = useLanguage();
   const { activeBranch } = useBranch();
@@ -79,7 +79,7 @@ export default function Header({ products }) {
               className="relative rounded-full h-9 w-9 text-muted-foreground transition-colors transition-colors hover:text-[hsl(var(--primary)/0.85)] hover:bg-[hsl(var(--primary)/0.5)"
               title="Order history"
             >
-              <History className="h-4 w-4" />
+              <History  className="h-4 w-4" />
               {hasHistory && (
                 <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
               )}
@@ -107,6 +107,7 @@ export default function Header({ products }) {
         products={products}
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
+        setIsOpen={setIsOpen}
       />
     </>
   );
