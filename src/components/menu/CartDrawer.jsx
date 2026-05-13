@@ -313,7 +313,7 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0, onPr
                 >
                   {placing
                     ? t("placing")
-                    : `${t("placeOrder")} · ${itemCount} ${itemCount === 1 ? t("item") : t("items")
+                    : `${t("placeOrder")}
                     }`}
                 </Button>
               </div>
