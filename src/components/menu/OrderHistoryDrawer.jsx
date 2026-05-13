@@ -48,10 +48,10 @@ function OrderCard({ order, products }) {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-500">
+        {/* <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-500">
           <CheckCircle className="h-3 w-3" />
           {t("historyPlaced")}
-        </div>
+        </div> */}
       </div>
 
       {/* Items preview */}

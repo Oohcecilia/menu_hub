@@ -137,12 +137,12 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
                 <FloatImage src={product.image} alt={name} size={size} />
             </FloatWrap>
             <div className="mt-2 w-full text-center">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                     <p className="font-serif font-light text-foreground/80 tracking-wide truncate">
                         {name}
                     </p>
                     <p className=" font-light tracking-widest text-primary">
-                        {product.price?.toFixed(2)}
+                        {product.price}
                     </p>
                     {/* {showAdd && <AddBtn product={product} onOpen={onOpen} />} */}
                 </div>
@@ -250,7 +250,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                         {getLocalizedField(hero, "name") || hero?.name?.def}
                                     </p>
                                     <p className="font-light tracking-widest text-base text-primary">
-                                        {hero.price?.toFixed(2)}
+                                        {hero.price}
                                     </p>
                                     {/* <AddBtn product={hero} onOpen={onOpen} /> */}
                                 </div>

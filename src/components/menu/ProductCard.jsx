@@ -72,7 +72,7 @@ export default function ProductCard({ product, onOpen }) {
         <div className="mt-4 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-sm font-bold text-primary">
-              {product.price?.toFixed(2)}
+              {product.price}
             </span>
           </div>
 

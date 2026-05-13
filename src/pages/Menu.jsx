@@ -281,7 +281,7 @@ export default function Menu() {
 
       <main className="max-w-5xl mx-auto px-4 pb-16">
         {loading ? (
-          <div className="space-y-3">
+          <div className="space-y-3 mt-3">
             <div className="grid grid-cols-3 gap-3 mt-2">
               <Skeleton className="col-span-2 h-64 rounded-2xl" />
               <div className="flex flex-col gap-3">

@@ -92,7 +92,7 @@ export default function OrderConfirmation() {
 
   return (
     <div className="min-h-screen bg-background">
-
+{/* 
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -112,7 +112,7 @@ export default function OrderConfirmation() {
           </Link>
           <h1 className="text-lg font-serif font-bold">{t('guestCheckout')}</h1>
         </div>
-      </motion.div>
+      </motion.div> */}
 
       <div className="max-w-lg mx-auto px-4 py-10">
         {/* Success Animation */}

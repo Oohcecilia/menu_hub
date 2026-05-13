@@ -261,14 +261,14 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
                 </h2>
 
                 <p className="text-xl font-bold text-primary">
-                  {product.price?.toFixed(2)}
+                  {product.price}
                 </p>
 
               </div>
 
           
 
-              <p className="text-gray-500 dark:text-white/60 text-sm mt-1">
+              <p className="py-4 text-gray-500 dark:text-white/60 text-sm mt-1">
                 {getLocalizedField(product, "description")}
               </p>
 
