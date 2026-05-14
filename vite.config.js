@@ -5,6 +5,9 @@ import path from 'path'
 export default defineConfig({
   logLevel: 'error',
   plugins: [react()],
+  build: {
+    sourcemap: true,
+  },
 
   resolve: {
     alias: {
