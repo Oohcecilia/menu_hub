@@ -404,7 +404,7 @@ export default function ProductGrid({
                 const subName =
                   sub.properties?.name?.en ||
                   sub.properties?.name?.def ||
-                  "Unnamed";
+                  "";
 
                 const subProducts = catProducts.filter((p) =>
                   String(p.productgroup?.uid || p.productgroup) ===
@@ -415,9 +415,12 @@ export default function ProductGrid({
 
                 return (
                   <div key={sub.uid} className="mt-6">
-                    <h4 className="w-full text-center text-lg font-serif font-semibold mb-2 text-primary px-2 py-1 rounded">
-                      {subName}
-                    </h4>
+
+                    {cName?.toLowerCase() !== subName?.toLowerCase() && subName !== '' && (
+                      <h4 className="w-full text-center text-lg font-serif font-semibold mb-2 text-primary px-2 py-1 rounded">
+                        {subName}
+                      </h4>
+                    )}
 
                     <CategorySection
                       products={subProducts}
