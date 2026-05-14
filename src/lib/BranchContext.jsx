@@ -23,8 +23,22 @@ function getSubdomain() {
   return null;
 }
 
+function getHostname() {
+  const host = window.location.hostname;
+
+  if (host.includes("localhost")) return "iloilo.giuseppe.ph";
+
+  const parts = host.split(".");
+  if (parts.length >= 3) {
+    return parts[1];
+  }
+
+  return null;
+}
+
 function BranchContextInner({ children }) {
   const branchSlug = getSubdomain(); // ✅ REPLACE useParams
+  const hostname = getHostname();
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -52,7 +66,7 @@ function BranchContextInner({ children }) {
         const buid = activeBranch?.buid || 1154;
         const order = activeBranch?.categories || {};
 
-        const res = await getMenuData(buid, order);
+        const res = await getMenuData(hostname, order);
 
         setCategories(
           (res?.categories || []).map(c => ({

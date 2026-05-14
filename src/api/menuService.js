@@ -1,10 +1,13 @@
 const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 
 
-export async function getMenuData(buid, order) {
+export async function getMenuData(host, order) {
+
+
+
   try {
     const res = await fetch(
-      `${API_BASE}/product-groups?buid=${encodeURIComponent(buid)}`
+      `${API_BASE}/product-groups?host=${encodeURIComponent(host)}`
     );
 
 
@@ -194,7 +197,7 @@ function formatProducts(products = []) {
         name,
         description: details || description,
         price,
-        image: `https://pp.d3.net/image.php?a=product-${item.uid}`,
+        image: item.image,
         category_id: item.groupuid,
         is_available: true,
         variations,

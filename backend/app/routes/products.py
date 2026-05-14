@@ -1,66 +1,53 @@
 from fastapi import APIRouter, Depends
 from app.db import get_conn
 import json
+import logging
+from collections import defaultdict
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter()
 
 
-def format_products(products):
-    formatted = []
-
-    for item in products:
-
-        # HARD GUARD
-        if not item.get("groupuids"):
-            continue
-
-        # parse properties safely
-        try:
-            props = json.loads(item["properties"]) if item.get("properties") else {}
-        except:
-            props = {}
-
-        name = props.get("name", {})
-
-        formatted.append({
-            "id": item["uid"],
-            "name": name.get("def", ""),
-            "website_picture": item.get("website_picture", "")
-        })
-
-    return formatted
-
-
-    
-
 @router.get("/product-groups")
-async def get_product_groups(buid: str, conn=Depends(get_conn)):
+async def get_product_groups(host: str, conn=Depends(get_conn)):
 
-    products = []
-
-    query = f"""
-        SELECT pb.prices, pb.website_picture, p.*, pg.name as pgname, pg.properties as pgproperties
-            FROM product_branches pb
-            JOIN products p on p.uid = pb.puid
-            JOIN product_groups pg on pg.uid = p.groupuid
+    query = """
+        SELECT
+            pb.prices, 
+            pb.website_picture,
+            p.*,
+            mc.uid AS mcuid,
+            mc.title AS mctitle,
+            pg.name AS pgname,
+            pg.properties AS pgproperties
+        FROM menus m
+        JOIN menu_categories mc
+            ON mc.menu_uid = m.uid
+        JOIN menu_category_product_groups mcpg
+            ON mcpg.menu_category_uid = mc.uid
+        JOIN product_groups pg
+            ON pg.uid = mcpg.product_group_uid
+        JOIN products p
+            ON p.groupuid = pg.uid
+        JOIN product_branches pb
+            ON pb.puid = p.uid AND pb.buid = m.buid
         WHERE pb.website = 1
-            AND p.active = 1
-            AND pb.buid = %s
+            AND m.active = 1
+            AND m.menu_url = %s
     """
 
-    await conn.execute(query, (buid))
+    await conn.execute(query, (host,))
     results = await conn.fetchall()
-
-    def safe_float(value):
-        try:
-            return float(value)
-        except (TypeError, ValueError):
-            return 0
-
 
     products = []
     categories = {}
+
+    logging.info(f"QUERY {results}")
+
 
     for row in results:
         # Parse once, safely
@@ -78,13 +65,13 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
         except (TypeError, ValueError):
             continue
 
-        groupuid = row["groupuid"]
+        groupuid = row["mcuid"]
 
         # Build category once
         if groupuid not in categories:
             categories[groupuid] = {
                 "uid": groupuid,
-                "name": row["pgname"],
+                "name": row["mctitle"],
                 "properties": json.loads(row["pgproperties"] or "[]")
             }
 
@@ -97,12 +84,14 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
         products.append({
             "uid": row["uid"],
             "name": row["name"],
+            "image": f"https://pp.d3.net/image.php?a=product-{row['uid']}",
             "properties": properties,
             "price": php_price,
             "groupuid": groupuid,
             "variations": row["variations"],
             "website_picture": row["website_picture"]
         })
+
 
 
     # --------------------------------------------------
@@ -112,3 +101,144 @@ async def get_product_groups(buid: str, conn=Depends(get_conn)):
         "categories": list(categories.values()),
         "products": products
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # for row in results:
+    #     # Parse prices safely
+    #     try:
+    #         prices = json.loads(row["prices"] or "{}")
+    #     except Exception:
+    #         continue
+
+    #     php_price = prices.get("PHP")
+
+    #     # Skip invalid prices
+    #     try:
+    #         if float(php_price or 0) <= 0:
+    #             continue
+    #     except (TypeError, ValueError):
+    #         continue
+
+    #     groupuid = row["groupuid"]
+
+    #     # Build category once
+    #     if groupuid not in categories:
+    #         categories[groupuid] = {
+    #             "uid": groupuid,
+    #             "name": row["pgname"],
+    #             "properties": json.loads(row["pgproperties"] or "[]")
+    #         }
+
+    #     # Parse product properties safely
+    #     try:
+    #         properties = json.loads(row["properties"] or "[]")
+    #     except Exception:
+    #         properties = []
+
+    #     # Extract product name
+    #     product_name = None
+    #     for prop in properties:
+    #         if isinstance(prop, dict):
+    #             name_obj = prop.get("name", {})
+    #             if isinstance(name_obj, dict):
+    #                 product_name = name_obj.get("def")
+    #                 if product_name:
+    #                     break
+
+    #     if not product_name:
+    #         product_name = row["name"]
+
+    #     # INIT GROUP
+    #     if product_name not in grouped_products:
+    #         grouped_products[product_name] = {
+    #             "name": product_name,
+    #             "description": row.get("description", ""),
+    #             "image_uid": None,
+    #             "prices": []
+    #         }
+
+    #     group = grouped_products[product_name]
+
+    #     # ✅ FORCE INT CHECK (IMPORTANT)
+    #     website_flag = int(row.get("website_picture") or 0)
+
+    #     # take first valid image only
+    #     if website_flag == 1 and not group["image_uid"]:
+    #         group["image_uid"] = row["uid"]
+
+    #     # fallback if none selected yet
+    #     if not group["image_uid"]:
+    #         group["image_uid"] = row["uid"]
+
+    #     group["image"] = f"https://pp.d3.net/image.php?a=product-{group['image_uid']}"
+
+    #     # Append price entry
+    #     group["prices"].append({
+    #         "uid": row["uid"],
+    #         "price": php_price,
+    #         "label": f'{row.get("baseconversion", "")}{row.get("uunit", "")}',
+    #         "properties": properties,
+    #         "variations": row.get("variations")
+    #     })
+
+    # # Final list
+    # pproducts = list(grouped_products.values())
+
+    # for i, row in enumerate(pproducts[:5]):
+    #     logger.info(f"[{i}] ROW: {row}")

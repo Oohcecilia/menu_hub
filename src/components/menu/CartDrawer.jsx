@@ -288,12 +288,12 @@ export default function CartDrawer({ open, onClose, products, subtotal = 0, onPr
             {/* FOOTER */}
             {items.length > 0 && (
               <div className="p-5 border-t border-border/50 space-y-3">
-                <div className="flex justify-between font-bold text-lg">
+                {/* <div className="flex justify-between font-bold text-lg">
                   <span>{t("total")}</span>
                   <span className="text-primary">
                     {subtotal.toFixed(2)}
                   </span>
-                </div>
+                </div> */}
 
                 <Button
                   onClick={handlePlaceOrder}

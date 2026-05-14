@@ -129,7 +129,7 @@ function CategoryBanner({ category, icon: Icon }) {
       <span
         className="
             flex items-center gap-4
-            font-serif font-bold uppercase
+            font-serif font-bold capitalize
             tracking-[0.15em]
             text-primary
             text-xl sm:text-2xl lg:text-3xl
