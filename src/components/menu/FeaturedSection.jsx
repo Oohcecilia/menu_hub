@@ -1,5 +1,5 @@
+import { useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
 import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
@@ -8,20 +8,65 @@ import { useBranch } from '@/lib/BranchContext.jsx';
 
 /* ─── Cart hook ─────────────────────────────────────────────────── */
 function useProductCart(product) {
-    const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
-    const qty = getProductQuantity(product.id);
+    const {
+        getProductQuantity,
+        addItem,
+        items,
+        updateQuantity,
+        removeItem,
+    } = useCart();
 
-    const handleMinus = (e) => {
+    // safer + memoized id
+    const productId = product?.id;
+
+    // prevent null crash
+    const qty = useMemo(() => {
+        if (!productId) return 0;
+        return getProductQuantity(productId) || 0;
+    }, [productId, getProductQuantity]);
+
+    const handleMinus = useCallback((e) => {
         e.stopPropagation();
-        const cartItems = items.filter(i => i.product_id === product.id);
-        if (!cartItems.length) return;
-        const last = cartItems[cartItems.length - 1];
-        const lastIndex = items.findIndex(i => i === last);
-        last.quantity > 1 ? updateQuantity(lastIndex, last.quantity - 1) : removeItem(lastIndex);
-    };
 
-    const handlePlus = (e) => { e.stopPropagation(); addItem(product, 1); };
-    return { qty, handleMinus, handlePlus };
+        if (!productId) return;
+
+        const cartItems = items.filter(
+            (i) => i?.product_id === productId
+        );
+
+        if (!cartItems.length) return;
+
+        const last = cartItems[cartItems.length - 1];
+
+        const lastIndex = items.findIndex((i) => i === last);
+
+        if (lastIndex < 0) return;
+
+        if ((last?.quantity || 0) > 1) {
+            updateQuantity(lastIndex, last.quantity - 1);
+        } else {
+            removeItem(lastIndex);
+        }
+    }, [
+        items,
+        productId,
+        updateQuantity,
+        removeItem,
+    ]);
+
+    const handlePlus = useCallback((e) => {
+        e.stopPropagation();
+
+        if (!product) return;
+
+        addItem(product, 1);
+    }, [product, addItem]);
+
+    return {
+        qty,
+        handleMinus,
+        handlePlus,
+    };
 }
 
 /* ─── Minimal add button ────────────────────────────────────────── */
@@ -203,19 +248,23 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
         return { hero, gridItems };
     }, [products]);
 
-    const renderCard = (product, idx) => (
-        <SmallCard
-            key={product.id || idx}
-            product={product}
-            onOpen={onOpen}
-            size={200}
-            delay={0.3 + idx * 0.15}
-        />
-    );
+    const renderCard = (product, idx) => {
+        if (!product) return null;
+
+        return (
+            <SmallCard
+                key={product?.id || idx}
+                product={product}
+                onOpen={onOpen}
+                size={200}
+                delay={0.3 + idx * 0.15}
+            />
+        );
+    };
 
 
     const { hero, gridItems } = layout;
-    const { qty } = useProductCart(hero);
+    const { qty = 0 } = useProductCart(hero || {});
 
     return (
         <div className="relative w-full overflow-hidden sm:overflow-visible">
@@ -275,7 +324,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                             {qty}
                                         </div>
                                     )}
-                                    <div/>
+                                    <div />
                                     <p className="font-bold tracking-widest text-base text-primary">
                                         {hero.price}
                                     </p>
