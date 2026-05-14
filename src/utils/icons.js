@@ -36,6 +36,7 @@ const CATEGORY_ICON_MAP = {
   "wines": Wine,
   "cocktails": Martini,
   "beverages": CupSoda,
+  "pizze": Pizza,
 
   "dips": Cookie,
   "tapas": Utensils, 

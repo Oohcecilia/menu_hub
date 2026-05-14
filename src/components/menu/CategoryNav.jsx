@@ -54,9 +54,9 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
 
     return {
       id: c.id,
-      iconName: getLocalizedField(c, 'name'),
+      iconName: getLocalizedField(c.name, 'en'),
       label: trans
-        ? getLocalizedField(c?.name, "translation")
+        ? getLocalizedField(c?.name, "en")
         : c?.name?.en,
     };
   });

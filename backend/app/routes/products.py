@@ -19,7 +19,7 @@ async def get_product_groups(
     conn=Depends(get_conn)
 ):
 
-    host = request.url.hostname
+    host = request.url.hostname 
 
 
     query = """
@@ -29,6 +29,7 @@ async def get_product_groups(
             p.*,
             mc.uid AS mcuid,
             mc.title AS mctitle,
+            mc.sorder AS mcorder,
             pg.name AS pgname,
             pg.properties AS pgproperties
         FROM menus m
@@ -79,7 +80,7 @@ async def get_product_groups(
             categories[groupuid] = {
                 "uid": groupuid,
                 "name": row["mctitle"],
-                "properties": json.loads(row["pgproperties"] or "[]")
+                "order": row["mcorder"]
             }
 
         # Parse product properties safely once

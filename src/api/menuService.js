@@ -17,7 +17,7 @@ export async function getMenuData(host, order) {
 
     const data = await res.json();
 
-    const categories = formatCategories(data.categories, order);
+    const categories = formatCategories(data.categories);
     const products = formatProducts(data.products);
 
     
@@ -105,78 +105,24 @@ export async function getMenuData(host, order) {
 //     }));
 // }
 
-function formatCategories(apiData, order) {
+
+
+function formatCategories(apiData = []) {
   if (!Array.isArray(apiData)) return [];
 
-  const normalize = (str) => str?.toLowerCase().trim();
-
-  // map inconsistent API names → your desired order names
-  const categoryMap = {
-    "pasta": "Pasta E Risotti",
-    "pasta e risotti": "Pasta E Risotti",
-    "pizzas": "Pizze",
-    "pizza": "Pizze",
-    "soups": "Soup",
-    "soup": "Soup",
-  };
-
-  const normalizeName = (name) => {
-    const key = normalize(name);
-    return categoryMap[key] || name?.trim();
-  };
-
-  const orderNormalized = order.map((o) => normalize(o));
-
-  return apiData
-    .map((item, index) => {
-
-
-      const nameObj = item.properties?.name || {};
-      const rawName = nameObj.en || nameObj.def || item.name || "";
-
-      return {
-        id: item.uid,
-        name: {
-          en: rawName,
-          translation: nameObj,
-        },
-        raw_name: rawName,
-        normalized_name: normalizeName(rawName),
-      };
-    })
-
-    // ✅ only include categories found in order
-    .filter((item) =>
-      orderNormalized.includes(
-        normalize(item.normalized_name)
-      )
-    )
-
-    .sort((a, b) => {
-      // ✅ prioritize backend sort if available
-
-      // ✅ fallback to custom order
-      const aIndex = orderNormalized.indexOf(
-        normalize(a.normalized_name)
-      );
-
-      const bIndex = orderNormalized.indexOf(
-        normalize(b.normalized_name)
-      );
-
-      return aIndex - bIndex;
-    })
-
-    .map((item, index) => ({
-      ...item,
-      sort_order: index + 1,
-    }));
+  return apiData.map((item) => ({
+    id: item.uid,
+    name: {
+      en: item.name,
+      translation: {},
+    },
+    sort_order: item.order,
+  }));
 }
 
 
 
 function formatProducts(products = []) {
-
   
   return products
     .map((item) => {
