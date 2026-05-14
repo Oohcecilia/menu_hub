@@ -3,6 +3,7 @@ import { branchesData } from '@/data/branches.config';
 import { getMenuData } from '@/api/menuService';
 import { hexToHsl } from "@/utils/color";
 import { loadFont } from "@/utils/loadfont";
+import { useAsyncError } from 'react-router-dom';
 
 const BranchContext = createContext();
 
@@ -23,24 +24,13 @@ function getSubdomain() {
   return null;
 }
 
-// function getHostname() {
-//   const host = window.location.hostname;
-
-//   if (host.includes("localhost")) return "iloilo.giuseppe.ph";
-
-//   const parts = host.split(".");
-//   if (parts.length >= 3) {
-//     return parts[1];
-//   }
-
-//   return null;
-// }
 
 function BranchContextInner({ children }) {
   const branchSlug = getSubdomain(); // ✅ REPLACE useParams
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // optional: store branch config
@@ -57,29 +47,103 @@ function BranchContextInner({ children }) {
 
 
   // ✅ fetch menu by branch
+  // useEffect(() => {
+  //   async function load() {
+  //     setLoading(true);
+
+  //     try {
+  //       const buid = activeBranch?.buid || 1154;
+  //       const order = activeBranch?.categories || {};
+
+  //       const res = await getMenuData( order );
+
+  //       setCategories(
+  //         (res?.categories || []).map(c => ({
+  //           ...c,
+  //           id: String(c.id),
+  //         }))
+  //       );
+
+  //       setSubCategories(
+  //         (res?.subCategories || []).map(s => ({
+  //           ...s,
+  //           id: String(s.id),
+  //         }))
+  //       );
+
+  //       setProducts(
+  //         (res?.products || []).map(p => ({
+  //           ...p,
+  //           category_id: String(p.category_id),
+  //         }))
+  //       );
+  //     } catch (e) {
+  //       console.error("Failed to load menu", e);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+
+  //   load();
+  // }, [activeBranch]);
+
   useEffect(() => {
     async function load() {
       setLoading(true);
 
       try {
-        const buid = activeBranch?.buid || 1154;
-        const order = activeBranch?.categories || {};
+        const res = await getMenuData(activeBranch?.host || "");
 
-        const res = await getMenuData( order );
+        // -------------------------
+        // SAFE CATEGORIES
+        // -------------------------
+        const categoriesRaw = res?.categories;
+
+        const categoriesArr = Array.isArray(categoriesRaw)
+          ? categoriesRaw
+          : Object.values(categoriesRaw || {});
 
         setCategories(
-          (res?.categories || []).map(c => ({
+          categoriesArr.map(c => ({
             ...c,
             id: String(c.id),
           }))
         );
 
+        // -------------------------
+        // SAFE SUBCATEGORIES
+        // -------------------------
+        const subRaw = res?.subCategories;
+
+        const subArr = Array.isArray(subRaw)
+          ? subRaw
+          : Object.values(subRaw || {});
+
+        setSubCategories(
+          subArr.map(s => ({
+            uid: String(s.uid),
+            cuid: String(s.cuid),
+            properties: s.properties,
+          }))
+        );
+
+        // -------------------------
+        // SAFE PRODUCTS (OBJECT → ARRAY)
+        // -------------------------
+        const productRaw = res?.products;
+
+        const productArr = Array.isArray(productRaw)
+          ? productRaw
+          : Object.values(productRaw || {}).flat();
+
         setProducts(
-          (res?.products || []).map(p => ({
+          productArr.map(p => ({
             ...p,
             category_id: String(p.category_id),
           }))
         );
+
+
       } catch (e) {
         console.error("Failed to load menu", e);
       } finally {
@@ -89,7 +153,6 @@ function BranchContextInner({ children }) {
 
     load();
   }, [activeBranch]);
-
 
   useEffect(() => {
     const root = document.documentElement;
@@ -130,6 +193,7 @@ function BranchContextInner({ children }) {
         branches,
         branchSlug,
         categories,
+        subCategories,
         products,
         loading,
       }}

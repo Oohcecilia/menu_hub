@@ -41,6 +41,7 @@ const CATEGORY_ICON_MAP = {
   "dips": Cookie,
   "tapas": Utensils, 
   "specials": Sparkles,
+  "starters": Sparkles,
 };
 
 export function getCategoryIcon(name = "") {

@@ -86,9 +86,9 @@ function CartItem({
             {variations.join(", ")}
           </p>
 
-          <p className="text-primary font-bold text-sm">
+          {/* <p className="text-primary font-bold text-sm">
             {total.toFixed(2)}
-          </p>
+          </p> */}
         </div>
 
         {/* ACTIONS */}

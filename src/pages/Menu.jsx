@@ -26,7 +26,7 @@ export default function Menu() {
 
   const sectionRefs = useRef({});
 
-  const { products, categories, loading, activeBranch } = useBranch();
+  const { products, categories, subCategories, loading, activeBranch } = useBranch();
 
 
   const sortedCategories = useMemo(() => {
@@ -300,6 +300,7 @@ export default function Menu() {
           <ProductGrid
             products={groupedProducts}
             categories={sortedCategories}
+            subCat={subCategories}
             onProductOpen={setSelectedProduct}
             sectionRefs={sectionRefs}
           />

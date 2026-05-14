@@ -21,7 +21,6 @@ async def get_product_groups(
 
     host = request.url.hostname 
 
-
     query = """
         SELECT
             pb.prices, 
@@ -30,6 +29,7 @@ async def get_product_groups(
             mc.uid AS mcuid,
             mc.title AS mctitle,
             mc.sorder AS mcorder,
+            mcpg.product_group_uid AS subpgu,
             pg.name AS pgname,
             pg.properties AS pgproperties
         FROM menus m
@@ -46,6 +46,7 @@ async def get_product_groups(
         WHERE pb.website = 1
             AND m.active = 1
             AND m.menu_url = %s
+        ORDER BY mc.sorder, mcpg.sorder ASC
     """
 
     await conn.execute(query, (host,))
@@ -53,9 +54,7 @@ async def get_product_groups(
 
     products = []
     categories = {}
-
-    logging.info(f"QUERY {results}")
-
+    subCategories = {}
 
     for row in results:
         # Parse once, safely
@@ -74,6 +73,7 @@ async def get_product_groups(
             continue
 
         groupuid = row["mcuid"]
+        product_group_uid = row["subpgu"]
 
         # Build category once
         if groupuid not in categories:
@@ -82,6 +82,20 @@ async def get_product_groups(
                 "name": row["mctitle"],
                 "order": row["mcorder"]
             }
+
+
+        if product_group_uid not in subCategories:
+            try:
+                properties = json.loads(row["pgproperties"] or "{}")
+            except Exception:
+                properties = {}
+
+            subCategories[product_group_uid] = {
+                "uid": product_group_uid,
+                "cuid": groupuid,
+                "properties": properties
+            }
+
 
         # Parse product properties safely once
         try:
@@ -96,17 +110,20 @@ async def get_product_groups(
             "properties": properties,
             "price": php_price,
             "groupuid": groupuid,
+            "productgroup": product_group_uid,
             "variations": row["variations"],
             "website_picture": row["website_picture"]
         })
 
 
 
+    # logging.info(f"subCategories {subCategories}")
     # --------------------------------------------------
     # 3. RETURN
     # --------------------------------------------------
     return {
         "categories": list(categories.values()),
+        "subCategories": list(subCategories.values()),
         "products": products
     }
 
