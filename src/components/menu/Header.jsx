@@ -65,13 +65,7 @@ export default function Header({ products, setIsOpen }) {
 
           {/* Controls */}
           <div className="flex items-center gap-2">
-            {/* <Link to="/vip">
-              <Button variant="outline" size="sm" className="rounded-full h-8 px-3 gap-1.5 border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 hover:border-amber-500/60 text-xs font-semibold">
-                <Crown className="h-3.5 w-3.5" />
-                VIP
-              </Button>
-            </Link> */}
-
+           
             <Button
               variant="ghost"
               size="icon"

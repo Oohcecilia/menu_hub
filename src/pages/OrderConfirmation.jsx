@@ -110,7 +110,7 @@ export default function OrderConfirmation() {
         "
         >
           {/* Glow Effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/30 pointer-events-none" />
 
           <div className="relative z-10 flex flex-col items-center">
 
@@ -118,7 +118,7 @@ export default function OrderConfirmation() {
             <div
               className="
               rounded-3xl
-              bg-white dark:bg-zinc-900
+              bg-white
               p-5
               shadow-lg
               border border-border/40
@@ -135,11 +135,6 @@ export default function OrderConfirmation() {
             <h1 className="mt-6 font-serif text-xl font-bold tracking-tight text-center">
               {t("scanQR")}
             </h1>
-
-            {/* Subtitle */}
-            {/* <p className="mt-2 text-sm text-muted-foreground text-center max-w-xs leading-relaxed">
-              {t("showQRCodeToWaiter")}
-            </p> */}
 
             {/* Divider */}
             <div className="w-16 h-1 rounded-full bg-primary/30 mt-6" />

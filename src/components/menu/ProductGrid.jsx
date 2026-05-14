@@ -126,12 +126,24 @@ function CategoryBanner({ category, icon: Icon }) {
   return (
     <div className="flex items-center justify-center gap-5 mt-24 mb-4">
 
-      {/* <span className="text-primary text-2xl" >&#10170;</span> */}
-      <span className="flex items-center gap-4 text-2xl font-serif font-bold uppercase tracking-[0.15em] text-primary">
-        {Icon && <Icon size={24} className="text-current" />}
+      <span
+        className="
+            flex items-center gap-4
+            font-serif font-bold uppercase
+            tracking-[0.15em]
+            text-primary
+            text-xl sm:text-2xl lg:text-3xl
+          "
+      >
+        {Icon && (
+          <Icon
+            size={28}
+            className="text-current shrink-0 lg:w-7 lg:h-7"
+          />
+        )}
+
         {categoryName}
       </span>
-      {/* <span className="inline-block scale-x-[-1] text-2xl text-primary " >&#10170;</span> */}
     </div>
   );
 }
@@ -175,25 +187,54 @@ function TextListItem({ product, onOpen, delay = 0 }) {
     >
       {/* Left: Name + Description */}
       <div className="min-w-0">
+        <div className="flex items-start justify-between gap-3">
 
-        <div className="flex items-center justify-between">
-          <p className="font-serif uppercase font-medium  leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300">
-            {name}
-            {location.pathname.startsWith("/debug") && (
-              <span> - {product.id}</span>
+          {/* Left Content */}
+          <div className="min-w-0 flex items-start gap-2">
+
+            {/* Product Name */}
+            <p className="font-serif uppercase font-medium leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300 break-words">
+              {name}
+
+              {location.pathname.startsWith("/debug") && (
+                <span className="text-muted-foreground">
+                  {" "} - {product.id}
+                </span>
+              )}
+            </p>
+
+
+            {qty > 0 && (
+              <div
+                className=" flex-shrink-0 flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-sm">
+                {qty}
+              </div>
             )}
-          </p>
-          <span className="text-primary font-light tracking-widest text-base whitespace-nowrap">
+          </div>
+
+          {/* Price */}
+          <span
+            className="
+        text-primary font-light tracking-widest
+        text-base whitespace-nowrap flex-shrink-0
+      "
+          >
             {product.price}
           </span>
         </div>
 
+        {/* Description */}
         {desc && (
-          <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed font-light">
+          <p
+            className="
+        text-sm text-muted-foreground
+        mt-1 line-clamp-2
+        leading-relaxed font-light
+      "
+          >
             {desc}
           </p>
         )}
-
       </div>
 
 
@@ -205,7 +246,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
 function TextList({ products, onProductOpen }) {
   const isOdd = products.length % 2 !== 0;
 
-  
+
 
   return (
     <div className="rounded-lg  overflow-hidden ">
@@ -256,14 +297,11 @@ function TextList({ products, onProductOpen }) {
 
 /* ─── Renders one category section ───────────────────────────── */
 function CategorySection({ products, onProductOpen }) {
-  // const withImage = products.filter(p => p.images?.length > 0);
-  // const withoutImage = products.filter(p => !p.images?.length);
 
   const withImage = products.filter(
     p =>
       (p.image?.length ?? 0) > 0 && (p.website_picture)
   );
-  // const withoutImage = products.filter(p => !p.image.length);
   const activeCategory = '';
 
   return (

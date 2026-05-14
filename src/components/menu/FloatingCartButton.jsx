@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Pointer } from 'lucide-react';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 
@@ -22,7 +22,7 @@ export default function FloatingCartButton({ subtotal=0, onClick }) {
         >
           {/* Badge */}
           <div className="relative flex-shrink-0">
-            <ShoppingBag className="h-5 w-5" />
+            <Pointer className="h-5 w-5" />
             <span className="absolute -top-2 -right-2 bg-white text-primary text-[10px] font-black h-4 w-4 rounded-full flex items-center justify-center leading-none">
               {itemCount}
             </span>

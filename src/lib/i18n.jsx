@@ -33,6 +33,7 @@ const translations = {
     viewReceipt: "View Receipt",
     option: "Option",
     pleaseReviewYourSelection: "Please review your selection",
+    moveSelection: "Move to Selection",
   },
   es: {
     menu: "Menú", categories: "Categorías", all: "Todo", popular: "Popular",
@@ -64,6 +65,7 @@ const translations = {
     viewReceipt: "Ver recibo",
     option: "Opción",
     pleaseReviewYourSelection: "Por favor revisa tu selección",
+    moveSelection: "Mover a la selección"
   },
   de: {
     menu: "Speisekarte", categories: "Kategorien", all: "Alle", popular: "Beliebt",
@@ -94,6 +96,7 @@ const translations = {
     viewReceipt: "Beleg anzeigen",
     option: "Option",
     pleaseReviewYourSelection: "Bitte überprüfen Sie Ihre Auswahl",
+    moveSelection: "Zur Auswahl verschieben",
   },
   fr: {
     menu: "Menu", categories: "Catégories", all: "Tout", popular: "Populaire",
@@ -124,6 +127,7 @@ const translations = {
     viewReceipt: "Voir le reçu",
     option: "Option",
     pleaseReviewYourSelection: "Veuillez vérifier votre sélection",
+    moveSelection: "Déplacer vers la sélection",
   },
   it: {
     menu: "Menu", categories: "Categorie", all: "Tutto", popular: "Popolare",
@@ -154,6 +158,7 @@ const translations = {
     viewReceipt: "Visualizza ricevuta",
     option: "Opzione",
     pleaseReviewYourSelection: "Si prega di rivedere la tua selezione",
+    moveSelection: "Sposta nella selezione"
   },
   zh: {
     menu: "菜单", categories: "分类", all: "全部", popular: "热门",
@@ -184,6 +189,7 @@ const translations = {
     viewReceipt: "查看收据",
     option: "选项",
     pleaseReviewYourSelection: "请检查您的选择",
+    moveSelection: "移动到选择"
   },
   ja: {
     menu: "メニュー", categories: "カテゴリー", all: "すべて", popular: "人気",
@@ -214,6 +220,7 @@ const translations = {
     viewReceipt: "領収書を表示",
     option: "オプション",
     pleaseReviewYourSelection: "選択内容をご確認ください",
+    moveSelection: "選択に移動"
   },
   ko: {
     menu: "메뉴", categories: "카테고리", all: "전체", popular: "인기",
@@ -244,6 +251,7 @@ const translations = {
     viewReceipt: "영수증 보기",
     option: "옵션",
     pleaseReviewYourSelection: "선택을 검토해 주세요",
+    moveSelection: "선택으로 이동"
   },
   ru: {
     menu: "Меню", categories: "Категории", all: "Все", popular: "Популярное",
@@ -274,6 +282,7 @@ const translations = {
     viewReceipt: "Просмотреть чек",
     option: "Опция",
     pleaseReviewYourSelection: "Пожалуйста, проверьте ваш выбор",
+    moveSelection: "Переместить в выбор"
   },
   fil: {
     menu: "Menu", categories: "Mga Kategorya", all: "Lahat", popular: "Sikat",
@@ -304,6 +313,7 @@ const translations = {
     viewReceipt: "Tingnan ang resibo",
     option: "Pagpipilian",
     pleaseReviewYourSelection: "Pakisuri ang iyong napili",
+    moveSelection: "lipat sa Pinili"
   }
 };
 
@@ -322,23 +332,6 @@ export function LanguageProvider({ children }) {
     translations.en?.[key] ||
     key;
 
-  // const getLocalizedField = (item, field) => {
-  //   if (!item) return "";
-
-  //   const value = item[field];
-
-  //   if (typeof value === "object" && value !== null) {
-  //     return value[lang] || value.en || "";
-  //   }
-
-  //   if (item[`${field}_${lang}`]) return item[`${field}_${lang}`];
-  //   if (item[`${field}_en`]) return item[`${field}_en`];
-
-  //   if (typeof value === "string") return value;
-
-  //   return "";
-  // };
-
 
   const getLocalizedField = (item, field) => {
     if (!item) return "";
@@ -348,10 +341,10 @@ export function LanguageProvider({ children }) {
     // ✅ case: object with translations
     if (typeof value === "object" && value !== null) {
       return (
-        value[lang] ||      // current language
-        value.en ||         // fallback to English
-        value.def ||        // fallback to default (VERY IMPORTANT)
-        Object.values(value).find(v => v) || // first non-empty
+        value[lang] ||      
+        value.en ||       
+        value.def ||
+        Object.values(value).find(v => v) ||    
         ""
       );
     }

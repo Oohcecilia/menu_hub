@@ -266,18 +266,9 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
 
               </div>
 
-          
-
               <p className="py-4 text-gray-500 dark:text-white/60 text-sm mt-1">
                 {getLocalizedField(product, "description")}
               </p>
-
-              {/* {product?.description?.def &&
-                product?.description?.def !== getLocalizedField(product, "description") && (
-                  <span className="text-xs text-muted-foreground/70 block mt-0.5">
-                    {product.description.def}
-                  </span>
-                )} */}
 
             
             </div>
@@ -304,22 +295,6 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
                 }
               />
             ))}
-
-
-            {/* <textarea
-              placeholder={t('specialInstructions')}
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              rows={2}
-              className="
-              w-full rounded-xl px-3 py-2.5 text-sm resize-none
-              bg-gray-100 dark:bg-white/5
-              border border-gray-200 dark:border-white/10
-              text-gray-900 dark:text-white
-              placeholder:text-gray-400 dark:placeholder:text-white/30
-              focus:outline-none focus:ring-2 focus:ring-amber-400/40
-            "
-            /> */}
           </div>
 
           {/* Bottom */}

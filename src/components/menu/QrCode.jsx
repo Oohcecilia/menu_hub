@@ -39,46 +39,22 @@ export default function QRCodeComponent({ order = {}, size = 200, cuid = "" }) {
     };
   }, [items, buid, cuid]);
 
-  // ⚠️ FIXED: prevents infinite re-render loop
-  // useEffect(() => {
-  //   if (!items.length) return;
-  //   if (hasClearedRef.current) return;
-
-  //   // clearCart();
-  //   hasClearedRef.current = true;
-  // }, [items.length, clearCart]);
-
   return (
     <>
-    {/* <QRCode
-      value={JSON.stringify(payload)}
-      size={size}
-      ecLevel="H"
-      quietZone={10}
-      logoImage={noImage}
-      logoWidth={size * 0.25}
-      logoHeight={size * 0.25}
-      removeQrCodeBehindLogo={true}
-      qrStyle="dots"
-      eyeRadius={8}
-      fgColor="#000000"
-      bgColor="#ffffff"
-    />
-     */}
-    <QRCode
-      value={qrEncode(JSON.stringify(payload))}
-      size={size}
-      ecLevel="H"
-      quietZone={10}
-      logoImage={noImage}
-      logoWidth={size * 0.25}
-      logoHeight={size * 0.25}
-      removeQrCodeBehindLogo={true}
-      qrStyle="dots"
-      eyeRadius={8}
-      fgColor="#000000"
-      bgColor="#ffffff"
-    />
+      <QRCode
+        value={qrEncode(JSON.stringify(payload))}
+        size={size}
+        ecLevel="H"
+        quietZone={10}
+        logoImage={noImage}
+        logoWidth={size * 0.25}
+        logoHeight={size * 0.25}
+        removeQrCodeBehindLogo={true}
+        qrStyle="dots"
+        eyeRadius={8}
+        fgColor="#000000"
+        bgColor="#ffffff"
+      />
     </>
     
   );

@@ -163,7 +163,7 @@ function OrderCard({
           variant="link"
           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50"
         >
-          Move to Selection
+          {t("moveSelection")}
         </Button>
       </div>
     </div>

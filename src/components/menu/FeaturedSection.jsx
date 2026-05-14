@@ -125,6 +125,7 @@ function FloatWrap({ children, delay = 0, amplitude = 6 }) {
 function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
     const { getLocalizedField } = useLanguage();
     const name = getLocalizedField(product, 'name');
+    const { qty } = useProductCart(product);
 
     return (
         <motion.div
@@ -138,10 +139,17 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
             </FloatWrap>
             <div className="mt-2 w-full text-center">
                 <div className="flex items-center justify-between gap-4">
-                    <p className="font-serif uppercase font-light text-foreground/80 tracking-wide truncate">
-                        {name}
-                    </p>
-                    <p className=" font-light tracking-widest text-primary">
+                    <div className="min-w-0 flex items-start gap-2">
+                        <p className="font-serif uppercase font-light text-foreground/80 tracking-wide truncate">
+                            {name}
+                        </p>
+                        {qty > 0 && (
+                            <div className="flex-shrink-0 flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-sm" >
+                                {qty}
+                            </div>
+                        )}
+                    </div>
+                    <p className=" font-bold tracking-widest text-primary">
                         {product.price}
                     </p>
                     {/* {showAdd && <AddBtn product={product} onOpen={onOpen} />} */}
@@ -205,7 +213,9 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
         />
     );
 
+
     const { hero, gridItems } = layout;
+    const { qty } = useProductCart(hero);
 
     return (
         <div className="relative w-full overflow-hidden sm:overflow-visible">
@@ -246,10 +256,27 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                             <div className="text-center mt-2">
 
                                 <div className="flex items-center justify-center gap-3 mt-1.5">
+                                    <div className="min-w-0 flex items-start gap-2"></div>
                                     <p className="font-serif uppercase font-light text-xl text-foreground/95 tracking-wide">
                                         {getLocalizedField(hero, "name") || hero?.name?.def}
                                     </p>
-                                    <p className="font-light tracking-widest text-base text-primary">
+                                    {qty > 0 && (
+                                        <div
+                                            className="
+                                                flex-shrink-0
+                                                flex items-center justify-center
+                                                min-w-5 h-5 px-1
+                                                rounded-full
+                                                bg-primary text-primary-foreground
+                                                text-xs font-semibold
+                                                shadow-sm
+                                            "
+                                        >
+                                            {qty}
+                                        </div>
+                                    )}
+                                    <div/>
+                                    <p className="font-bold tracking-widest text-base text-primary">
                                         {hero.price}
                                     </p>
                                     {/* <AddBtn product={hero} onOpen={onOpen} /> */}
@@ -295,15 +322,6 @@ export default function FeaturedSection({ products, activeCategory, onProductOpe
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="mb-12"
         >
-            {/* Section label */}
-            {/* <div className="flex items-center gap-4 mb-8">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/70">
-                    ✦✦ {t("featured")} ✦✦
-                </span>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
-            </div> */}
-
             <LayoutComponent products={products} onOpen={onProductOpen} isAll={isAll} />
         </motion.section>
     );
