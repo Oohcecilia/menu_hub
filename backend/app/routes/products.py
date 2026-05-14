@@ -20,6 +20,7 @@ async def get_product_groups(
 ):
 
     host = request.url.hostname 
+    # host = "iloilo.giuseppe.ph"
 
     query = """
         SELECT
@@ -39,8 +40,10 @@ async def get_product_groups(
             ON mcpg.menu_category_uid = mc.uid
         JOIN product_groups pg
             ON pg.uid = mcpg.product_group_uid
+        JOIN product_group_products 
+            ON pgp.groupuid = pg.uid
         JOIN products p
-            ON p.groupuid = pg.uid
+            ON p.uid = pgp.puid
         JOIN product_branches pb
             ON pb.puid = p.uid AND pb.buid = m.buid
         WHERE pb.website = 1
