@@ -40,7 +40,7 @@ async def get_product_groups(
             ON mcpg.menu_category_uid = mc.uid
         JOIN product_groups pg
             ON pg.uid = mcpg.product_group_uid
-        JOIN product_group_products 
+        JOIN product_group_products pgp
             ON pgp.groupuid = pg.uid
         JOIN products p
             ON p.uid = pgp.puid
