@@ -49,7 +49,7 @@ async def get_product_groups(
         WHERE pb.website = 1
             AND m.active = 1
             AND m.menu_url = %s
-        ORDER BY mc.sorder, mcpg.sorder ASC
+        ORDER BY mc.sorder ASC
     """
 
     await conn.execute(query, (host,))
