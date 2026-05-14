@@ -7,7 +7,7 @@ export async function getMenuData(host, order) {
 
   try {
     const res = await fetch(
-      `${API_BASE}/product-groups?host=${encodeURIComponent(host)}`
+      `${API_BASE}/product-groups`
     );
 
 

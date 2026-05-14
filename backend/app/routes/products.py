@@ -3,6 +3,7 @@ from app.db import get_conn
 import json
 import logging
 from collections import defaultdict
+from fastapi import APIRouter, Depends, Request
 
 
 logging.basicConfig(level=logging.INFO)
@@ -13,7 +14,13 @@ router = APIRouter()
 
 
 @router.get("/product-groups")
-async def get_product_groups(host: str, conn=Depends(get_conn)):
+async def get_product_groups(
+    request: Request,
+    conn=Depends(get_conn)
+):
+
+    host = request.url.hostname
+
 
     query = """
         SELECT

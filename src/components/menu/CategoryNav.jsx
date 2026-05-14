@@ -65,7 +65,7 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
   return (
     <div className="bg-background/95 backdrop-blur-xl border-border/30">
       <div className="max-w-5xl mx-auto px-4 py-2.5 relative">
-        <nav ref={navRef} className="flex gap-1 overflow-x-auto scrollbar-none pb-0.5 no-scrollbar">
+        <nav ref={navRef} className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-0.5 no-scrollbar">
           {items.map(item => {
             const isActive = activeCategory === item.id;
             const Icon = getCategoryIcon(item.iconName);
