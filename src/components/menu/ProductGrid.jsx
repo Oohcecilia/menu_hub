@@ -328,7 +328,7 @@ export default function ProductGrid({
   onProductOpen,
   sectionRefs,
 }) {
-  const { t } = useLanguage();
+  const { t, getLocalizedField } = useLanguage();
   const { activeBranch } = useBranch();
   const noImage = activeBranch?.no_image;
 
@@ -362,7 +362,7 @@ export default function ProductGrid({
   return (
     <div className="space-y-12">
       {categories.map((cat) => {
-        const cName = cat.name?.en;
+        const cName = cat?.name?.en ? getLocalizedField(cat?.name, "en") : cat?.en;
         const icon = getCategoryIcon(cName);
 
         const catProducts = products[cat.id] || [];
