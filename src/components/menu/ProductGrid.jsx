@@ -121,7 +121,9 @@ function CategoryBanner({ category, icon: Icon }) {
 
   const { getLocalizedField } = useLanguage();
 
-  const categoryName = category?.name?.en ? getLocalizedField(category?.name, "en") : category?.en;
+  const translation = getLocalizedField(category?.name, "translation");
+
+  const categoryName = translation ? translation  : category?.en;
 
   return (
     <div className="flex items-center justify-center gap-5 mt-24 mb-4">
