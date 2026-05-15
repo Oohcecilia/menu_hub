@@ -121,9 +121,9 @@ function CategoryBanner({ category, icon: Icon }) {
 
   const { getLocalizedField } = useLanguage();
 
-  // const translation = getLocalizedField(category?.name, "translation");
+  const translation = getLocalizedField(category?.name, "translation");
 
-  const categoryName = category?.name?.def || translation;
+  const categoryName = translation ? translation  : category?.en;
 
   return (
     <div className="flex items-center justify-center gap-5 mt-24 mb-4">
@@ -362,9 +362,11 @@ export default function ProductGrid({
   return (
     <div className="space-y-12">
       {categories.map((cat) => {
-        const cName = cat?.name?.def || getLocalizedField(cat?.name, "translation");
+        const cName = cat?.name?.en
+          ? getLocalizedField(cat?.name, "en")
+          : cat?.en;
 
-        const icon = getCategoryIcon(cat?.name?.en);
+        const icon = getCategoryIcon(cName);
 
         const catProducts = products[cat.id] || [];
         const subCategories = groupedSubCats[cat.id] || [];
@@ -443,7 +445,6 @@ export default function ProductGrid({
     </div>
   );
 }
-
 
 
 

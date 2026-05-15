@@ -52,10 +52,11 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
   const items = categories.map((c) => {
     const trans = c.name?.translation;
 
+
     return {
       id: c.id,
       iconName: getLocalizedField(c.name, 'en'),
-      label: c?.name || getLocalizedField(c.name, 'translation'),
+      label: trans ? getLocalizedField(c?.name, "translation") : c?.name?.en,
     };
   });
 
