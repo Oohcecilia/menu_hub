@@ -28,7 +28,7 @@ function BranchContextInner({ children }) {
   const branchSlug = getSubdomain(); // ✅ REPLACE useParams
 
   const [loading, setLoading] = useState(true);
-  const [menu, setMenu] =useState([]);
+  const [menu, setMenu] = useState([]);
 
   // optional: store branch config
   const branches = useMemo(() => {
@@ -63,9 +63,29 @@ function BranchContextInner({ children }) {
 
   useEffect(() => {
     const root = document.documentElement;
-
+    const logo = activeBranch?.logo;
     const theme = activeBranch?.theme;
+    const title = activeBranch?.slug;
 
+    if (title) {
+      const formattedTitle =
+        title.charAt(0).toUpperCase() + title.slice(1);
+
+      document.title = `${formattedTitle} Menu`;
+    }
+
+    if (logo) {
+      let link = document.querySelector("link[rel='icon']");
+
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+
+      link.type = "image/png";
+      link.href = logo;
+    }
     if (theme?.colors?.primary) {
       root.style.setProperty("--primary", hexToHsl(theme.colors.primary));
     }
