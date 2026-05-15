@@ -11,9 +11,7 @@ import CartDrawer from '@/components/menu/CartDrawer.jsx';
 import FloatingCartButton from '@/components/menu/FloatingCartButton.jsx';
 import ScrollButtons from '@/components/menu/ScrollButtons.jsx';
 import { Skeleton } from '@/components/ui/skeleton';
-
-
-
+import { getDisplayPrices, getMenuCategoryLabel, getMenuCategoryUid, getProductList, normalizeProduct, selectProductPrice } from '@/utils/menuData';
 
 export default function Menu() {
   const { getLocalizedField } = useLanguage();
@@ -43,12 +41,13 @@ export default function Menu() {
     if (menu) {
       // Iterate over the top-level menu keys (Categories)
       Object.entries(menu).forEach(([catKey, section]) => {
-        // Use the section's UID if available, fallback to the object key
-        const categoryId = String(section.uid || catKey);
+        const categoryId = getMenuCategoryUid(section, catKey);
+        const categoryLabel = getMenuCategoryLabel(section, catKey);
 
         parsedCategories.push({
           id: categoryId,
-          name: section.properties?.name || { en: section.name || catKey },
+          label: categoryLabel,
+          name: section.properties?.name || { en: categoryLabel },
           sort_order: section.sort !== null ? section.sort : 0,
         });
 
@@ -65,17 +64,14 @@ export default function Menu() {
             });
 
             // Iterate over the actual Products
-            if (group.products && Array.isArray(group.products)) {
-              group.products.forEach((product) => {
+            const groupProducts = getProductList(group.products);
+
+            if (groupProducts.length > 0) {
+              groupProducts.forEach((product, productIndex) => {
                 parsedProducts.push({
-                  id: String(product.uid),
+                  ...normalizeProduct(product, `${subcategoryId}-${productIndex}`),
                   category_id: categoryId,       // Used for top-level filtering/scrolling
                   subcategory_id: subcategoryId, // Used if you want to group by subcat in the UI
-                  default_name: product.name,
-                  name: product.properties?.name || { en: product.name },
-                  price: parseFloat(product.price) || 0,
-                  image: product.image,
-                  properties: product.properties,
                 });
               });
             }
@@ -108,13 +104,14 @@ export default function Menu() {
       const filteredGroups = (section.groups || []).map(group => {
         const groupName = (getLocalizedField(group.properties, 'name') || group.name || "").toLowerCase();
         const groupMatch = groupName.includes(search);
+        const groupProducts = getProductList(group.products);
 
         // If the group name matches, we keep ALL its products.
         // Otherwise, we filter the products by name.
         const filteredProducts = groupMatch
-          ? group.products
-          : (group.products || []).filter(p => {
-            const pName = (getLocalizedField(p.properties, 'name') || p.name || "").toLowerCase();
+          ? groupProducts
+          : groupProducts.filter(p => {
+            const pName = (getLocalizedField(p.properties, 'name') || p.name || p.default_name || "").toLowerCase();
             return pName.includes(search);
           });
 
@@ -142,9 +139,10 @@ export default function Menu() {
     if (!menu) return [];
     return Object.entries(menu)
       .map(([key, section]) => ({
-        id: String(section.uid || key),
+        id: getMenuCategoryUid(section, key),
         key: key, // Keep the key to match against filteredMenu later
-        name: section.properties?.name || { en: section.name || key },
+        label: getMenuCategoryLabel(section, key),
+        name: section.properties?.name || { en: getMenuCategoryLabel(section, key) },
         sort_order: section.sort ?? 0
       }))
       .sort((a, b) => a.sort_order - b.sort_order);
@@ -214,9 +212,20 @@ export default function Menu() {
   }, [sortedCategories, filteredMenu, searchQuery]); 
 // Added filteredMenu as a dependency so it re-checks matches as the user types
   // Dependency is now just sortedCategories (which reacts to filteredMenu) and searchQuery
-  const productMap = useMemo(() => {
-    return Object.fromEntries(products.map((p) => [String(p.id), p]));
+  const cartProducts = useMemo(() => {
+    return products.flatMap((product) => {
+      const priceOptions = getDisplayPrices(product);
+
+      return [
+        product,
+        ...priceOptions.map((priceOption) => selectProductPrice(product, priceOption)),
+      ];
+    });
   }, [products]);
+
+  const productMap = useMemo(() => {
+    return Object.fromEntries(cartProducts.map((p) => [String(p.id), p]));
+  }, [cartProducts]);
 
   const subtotal = useMemo(() => {
     return items.reduce((sum, item) => {
@@ -334,7 +343,7 @@ export default function Menu() {
       <CartDrawer
         open={isOpen}
         onClose={() => setIsOpen(false)}
-        products={products}
+        products={cartProducts}
         subtotal={subtotal}
         onProductOpen={setSelectedProduct}
       />

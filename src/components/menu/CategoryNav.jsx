@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useLanguage } from '@/lib/i18n.jsx';
-import { getCategoryIcon } from '@/utils/icons';
 import { motion } from 'framer-motion';
 
 export default function CategoryNav({ categories = [], activeCategory, onSelect }) {
@@ -56,8 +55,7 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
 
     return {
       id: c.id,
-      iconName: getLocalizedField(c, 'name'),
-      label: translation ? translation : c?.name?.en,
+      label: c.label || translation || c?.name?.en || name,
     };
   });
 
@@ -68,7 +66,6 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
         <nav ref={navRef} className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-0.5 no-scrollbar">
           {items.map(item => {
             const isActive = activeCategory === item.id;
-            const Icon = getCategoryIcon(item.iconName);
 
             return (
               <button
@@ -88,10 +85,6 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
                     transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                   />
                 )}
-
-                <span className="relative z-10">
-                  {Icon && <Icon size={16} className="text-current" />}
-                </span>
 
                 <span className="relative z-10">
                   {item.label}

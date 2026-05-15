@@ -3,6 +3,7 @@ import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
+import PriceOptions from './PriceOptions.jsx';
 
 export default function ProductCard({ product, onOpen }) {
   const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
@@ -61,7 +62,7 @@ export default function ProductCard({ product, onOpen }) {
       <div className="flex flex-1 flex-col p-4">
         <div className="flex-1">
           <h3 className="line-clamp-1 text-sm font-bold tracking-tight text-foreground">
-            {getLocalizedField(product?.properties, 'name') || product?.name}
+            {product?.default_name || product?.name || getLocalizedField(product?.properties, 'name')}
           </h3>
           <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground/80">
             {getLocalizedField(product?.properties, 'details')}
@@ -70,9 +71,7 @@ export default function ProductCard({ product, onOpen }) {
 
         <div className="mt-4 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-primary">
-              {product.price}
-            </span>
+            <PriceOptions product={product} />
           </div>
 
           <div className="flex items-center justify-between mt-2">

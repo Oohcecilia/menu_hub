@@ -4,6 +4,7 @@ import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
+import { getDisplayPrices, selectProductPrice } from '@/utils/menuData';
 
 
 /* ─── Cart hook ─────────────────────────────────────────────────── */
@@ -168,11 +169,46 @@ function FloatWrap({ children, delay = 0, amplitude = 6 }) {
     );
 }
 
+function FeaturedPriceChoices({ product, onOpen, name, align = "center" }) {
+    const prices = getDisplayPrices(product);
+
+    return (
+        <div className={`mt-2 flex flex-wrap gap-2 ${align === "center" ? "justify-center" : "justify-start"}`}>
+            {prices.map((priceOption, index) => {
+                const optionName = priceOption.label ? `${name} ${priceOption.label}` : name;
+
+                return (
+                    <button
+                        key={priceOption.uid || `${priceOption.label}-${index}`}
+                        type="button"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onOpen(selectProductPrice(product, priceOption));
+                        }}
+                        className="
+                            inline-flex items-center gap-2 rounded-full border border-primary/25
+                            bg-background/80 px-3 py-1.5 text-left shadow-sm backdrop-blur
+                            hover:border-primary/60 hover:bg-primary/10 transition-colors
+                        "
+                    >
+                        <span className="max-w-[12rem] truncate font-serif text-sm capitalize text-foreground/85">
+                            {optionName}
+                        </span>
+                        <span className="text-sm font-semibold tracking-widest text-primary">
+                            {priceOption.price}
+                        </span>
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
+
 
 /* ─── Small card ─────────────────────────────────────────────────── */
 function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
     const { getLocalizedField } = useLanguage();
-    const name = getLocalizedField(product.properties, 'name') || product.name;
+    const name = product.default_name || product.name || getLocalizedField(product.properties, 'name');
     const { qty } = useProductCart(product);
 
     return (
@@ -197,11 +233,9 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
                             </div>
                         )}
                     </div>
-                    <p className=" font-bold tracking-widest text-primary">
-                        {product.price}
-                    </p>
                     {/* {showAdd && <AddBtn product={product} onOpen={onOpen} />} */}
                 </div>
+                <FeaturedPriceChoices product={product} onOpen={onOpen} name={name} />
             </div>
         </motion.div>
     );
@@ -310,7 +344,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                 <div className="flex items-center justify-center gap-3 mt-1.5">
                                     <div className="min-w-0 flex items-start gap-2"></div>
                                     <p className="font-serif capitalize font-light text-xl text-foreground/95 tracking-wide">
-                                        {getLocalizedField(hero.properties, "name") || hero?.name}
+                                        {hero.default_name || hero.name || getLocalizedField(hero.properties, "name")}
                                     </p>
                                     {qty > 0 && (
                                         <div
@@ -328,11 +362,9 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                         </div>
                                     )}
                                     <div />
-                                    <p className="font-bold tracking-widest text-base text-primary">
-                                        {hero.price}
-                                    </p>
                                     {/* <AddBtn product={hero} onOpen={onOpen} /> */}
                                 </div>
+                                <FeaturedPriceChoices product={hero} onOpen={onOpen} name={hero.default_name || hero.name || getLocalizedField(hero.properties, "name")} />
                             </div>
                         </motion.div>
                     </div>

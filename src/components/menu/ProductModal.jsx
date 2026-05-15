@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext';
+import { getDisplayPrices, selectProductPrice } from '@/utils/menuData';
 
 
 
@@ -107,13 +108,55 @@ function OptionGroup({ group, selections, onChange }) {
   );
 }
 
+function PriceChoiceGroup({ prices, selectedPriceUid, onSelect }) {
+  if (prices.length <= 1) return null;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1 text-xs rounded-xl text-gray-700 dark:text-white/70">
+        <AlertCircle className="h-3.5 w-3.5" />
+        <span>Select a price option</span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2">
+        {prices.map((priceOption, index) => {
+          const id = priceOption.uid || `${priceOption.label}-${index}`;
+          const isSelected = selectedPriceUid === id;
+
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onSelect(id)}
+              className={`
+                flex items-center justify-between gap-3 rounded-xl border px-3 py-2
+                transition-colors
+                ${isSelected
+                  ? "border-primary bg-primary/10"
+                  : "border-black/10 bg-white/50 hover:border-primary/50 dark:border-white/10 dark:bg-white/5"}
+              `}
+            >
+              <span className="font-serif text-sm capitalize text-gray-900 dark:text-white">
+                {priceOption.label || "Regular"}
+              </span>
+              <span className="font-semibold tracking-widest text-primary">
+                {priceOption.price}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 
 export default function ProductModal({ open, product, onClose, cart_id = "" }) {
   const { activeBranch } = useBranch();
   const { addItem } = useCart();
   const { t, getLocalizedField } = useLanguage();
 
-  const name = getLocalizedField(product, 'name') || product.default_name;
+  const name = product?.default_name || product?.name || getLocalizedField(product, 'name');
 
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
@@ -121,8 +164,20 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
 
   // ✅ stable structure: { [groupId]: selectedOptionId }
   const [selections, setSelections] = useState({});
+  const prices = useMemo(() => getDisplayPrices(product), [product]);
+  const hasMultiplePrices = prices.length > 1;
+  const [selectedPriceUid, setSelectedPriceUid] = useState("");
 
   const noImage = activeBranch?.no_image;
+
+  useEffect(() => {
+    if (prices.length === 1) {
+      setSelectedPriceUid(prices[0].uid || `${prices[0].label}-0`);
+      return;
+    }
+
+    setSelectedPriceUid("");
+  }, [prices]);
 
 
 
@@ -162,6 +217,14 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
 
   // 🔥 ADD TO CART FIXED
   const handleAdd = () => {
+    const selectedPrice = hasMultiplePrices
+      ? prices.find((priceOption, index) =>
+        (priceOption.uid || `${priceOption.label}-${index}`) === selectedPriceUid
+      )
+      : prices[0];
+
+    if (!selectedPrice) return;
+
     const selectedVariations = groups.flatMap((g) => {
       const sel = selections[g.name];
 
@@ -176,11 +239,11 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
         .map(item => item.name?.def);
     });
 
-    addItem(product, quantity, note, selectedVariations, cart_id);
+    addItem(selectProductPrice(product, selectedPrice), quantity, note, selectedVariations, cart_id);
     onClose();
   };
 
-  const totalPrice = product.price * quantity;
+  const canAdd = !hasMultiplePrices || Boolean(selectedPriceUid);
 
   return (
     <AnimatePresence>
@@ -257,21 +320,22 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
             <div>
               <div className="flex justify-between items-start gap-3">
                 <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white capitalize">
-                  {getLocalizedField(product?.properties, "name") || product?.name}
+                  {name}
                 </h2>
-
-                <p className="text-xl font-bold text-primary">
-                  {product.price}
-                </p>
-
               </div>
 
               <p className="py-4 text-gray-500 dark:text-white/60 text-sm mt-1">
-                {getLocalizedField(product.properties, "details")}
+                {getLocalizedField(product.properties, "details") || getLocalizedField(product, "details") || product?.details?.description}
               </p>
 
             
             </div>
+
+            <PriceChoiceGroup
+              prices={prices}
+              selectedPriceUid={selectedPriceUid}
+              onSelect={setSelectedPriceUid}
+            />
 
             {groups.length > 0 && (
               <div className="
@@ -325,6 +389,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
 
             <Button
               onClick={handleAdd}
+              disabled={!canAdd}
               className="
                 flex-1 rounded-xl h-11 font-semibold text-sm mx-2
                 relative overflow-hidden
@@ -343,10 +408,6 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
     </AnimatePresence>
   );
 }
-
-
-
-
 
 
 

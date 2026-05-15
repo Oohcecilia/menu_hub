@@ -6,8 +6,9 @@ import { useLanguage } from '@/lib/i18n.jsx';
 import { useCart } from '@/lib/cartStore.jsx';
 import { Plus, Minus, Sparkles } from 'lucide-react';
 import { useBranch } from '@/lib/BranchContext.jsx';
-import { getCategoryIcon } from '@/utils/icons';
 import { useLocation } from 'react-router-dom'
+import { getMenuCategoryLabel, getMenuCategoryUid, getProductList, normalizeProduct } from '@/utils/menuData';
+import PriceOptions from './PriceOptions.jsx';
 
 
 const map = {
@@ -80,7 +81,7 @@ function ListSpace({ spacing = 2 }) {
 
 
 
-function CategoryBanner({ category, icon: Icon }) {
+function CategoryBanner({ category }) {
 
   const { getLocalizedField } = useLanguage();
 
@@ -96,13 +97,6 @@ function CategoryBanner({ category, icon: Icon }) {
             text-3xl sm:text-3xl lg:text-4xl
           "
       >
-        {/* {Icon && (
-          <Icon
-            size={28}
-            className="text-current shrink-0 lg:w-7 lg:h-7"
-          />
-        )} */}
-
         {category?.name || ''}
       </span>
     </div>
@@ -114,8 +108,8 @@ function TextListItem({ product, onOpen, delay = 0 }) {
   const { getLocalizedField } = useLanguage();
   const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
   const qty = getProductQuantity(product.id);
-  const name = getLocalizedField(product?.properties, 'name') || product.name;
-  const desc = getLocalizedField(product?.properties, 'details');
+  const name = product.default_name || product.name || getLocalizedField(product?.properties, 'name');
+  const desc = getLocalizedField(product?.properties, 'details') || getLocalizedField(product, 'details') || product?.details?.description;
   const location = useLocation();
 
   const handleMinus = (e) => {
@@ -173,15 +167,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
             )}
           </div>
 
-          {/* Price */}
-          <span
-            className="
-        text-primary font-light tracking-widest
-        text-base whitespace-nowrap flex-shrink-0
-      "
-          >
-            {product.price}
-          </span>
+          <PriceOptions product={product} className="flex-shrink-0 max-w-[45%]" />
         </div>
 
         {/* Description */}
@@ -284,8 +270,6 @@ function CategorySection({ products, onProductOpen }) {
 
 
 
-
-
 export default function ProductGrid({
   menu,
   onProductOpen,
@@ -321,16 +305,13 @@ export default function ProductGrid({
   return (
     <div className="space-y-12">
       {sortedCategories.map(([key, section]) => {
-        const catId = String(section.uid || key);
+        const catId = getMenuCategoryUid(section, key);
+        const categoryLabel = getMenuCategoryLabel(section, key);
         
-        // Get icon based on category name
-        const cNameEn = section.properties?.name?.en || section.name || key;
-        const icon = getCategoryIcon(cNameEn);
-
         // A category is visible if it has groups with products
         const groups = section.groups || [];
         const hasVisibleProducts = groups.some(
-          (group) => group.products && group.products.length > 0
+          (group) => getProductList(group.products).length > 0
         );
 
         if (!hasVisibleProducts) return null;
@@ -348,27 +329,26 @@ export default function ProductGrid({
             <CategoryBanner 
               category={{ 
                 id: catId, 
-                name: section.name || { en: section.name || key } 
-              }} 
-              icon={icon} 
+                label: categoryLabel,
+                name: categoryLabel,
+              }}
             />
 
             {/* 2. Iterate through Groups (Subcategories) */}
             {groups.map((group) => {
-              const subProducts = (group.products || []).map(p => ({
-                ...p,
-                id: String(p.uid), // Ensure ID is a string for the components
-                price: parseFloat(p.price) || 0
-              }));
+              const subProducts = getProductList(group.products).flatMap((p, productIndex) =>
+                normalizeProduct(p, `${group.uid || catId}-${productIndex}`)
+              );
 
               if (subProducts.length === 0) return null;
 
               const subName = getLocalizedField(group?.properties, "name") || group.name;
+              const categoryName = getLocalizedField(section?.properties, "name") || categoryLabel;
               
               // Hide subcategory title if it's identical to the main category name
               const shouldShowSubTitle = 
                 subName && 
-                subName.trim().toLowerCase() !== cNameEn.trim().toLowerCase();
+                subName.trim().toLowerCase() !== String(categoryName).trim().toLowerCase();
 
 
               return (
