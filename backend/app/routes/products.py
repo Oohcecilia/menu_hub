@@ -48,21 +48,22 @@ async def get_product_groups(
         groupuid = row["mcuid"]
         product_group_uid = row["subpgu"]
 
+        try:
+            properties = json.loads(row["pgproperties"] or "{}")
+        except Exception:
+            properties = {}
+
         # Build category once
         if groupuid not in categories:
             categories[groupuid] = {
                 "uid": groupuid,
                 "name": row["mctitle"],
                 "order": row["mcorder"]
-                "properties": properties
+                "properties":
             }
 
 
         if product_group_uid not in subCategories:
-            try:
-                properties = json.loads(row["pgproperties"] or "{}")
-            except Exception:
-                properties = {}
 
             subCategories[product_group_uid] = {
                 "uid": product_group_uid,
