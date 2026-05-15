@@ -125,7 +125,10 @@ function FloatImage({ src, alt, size, float = true }) {
     const noImage = activeBranch?.no_image;
     const image = src || noImage;
     return (
-        <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+        <div
+            className="relative flex h-[90vw] w-[90vw] items-center justify-center sm:h-[var(--image-size)] sm:w-[var(--image-size)]"
+            style={{ "--image-size": `${size}px` }}
+        >
             {src && (
                 <>
                     {/* ambient glow */}
@@ -146,7 +149,7 @@ function FloatImage({ src, alt, size, float = true }) {
             )}
             <img
                 src={src} alt={alt}
-                className="relative z-10 object-contain drop-shadow-2xl w-full h-full w-[90%]"
+                className="relative z-10 h-full w-full object-contain drop-shadow-2xl"
                 style={{ filter: 'drop-shadow(0 12px 28px --primary)' }}
             />
         </div>
@@ -375,5 +378,4 @@ export default function FeaturedSection({ products, activeCategory, onProductOpe
         </motion.section>
     );
 }
-
 
