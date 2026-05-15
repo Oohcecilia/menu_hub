@@ -169,7 +169,7 @@ function FloatWrap({ children, delay = 0, amplitude = 6 }) {
 /* ─── Small card ─────────────────────────────────────────────────── */
 function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
     const { getLocalizedField } = useLanguage();
-    const name = getLocalizedField(product, 'name');
+    const name = getLocalizedField(product.properties, 'name') || product.name;
     const { qty } = useProductCart(product);
 
     return (
@@ -307,7 +307,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                 <div className="flex items-center justify-center gap-3 mt-1.5">
                                     <div className="min-w-0 flex items-start gap-2"></div>
                                     <p className="font-serif uppercase font-light text-xl text-foreground/95 tracking-wide">
-                                        {getLocalizedField(hero, "name") || hero?.name?.def}
+                                        {getLocalizedField(hero.properties, "name") || hero?.name}
                                     </p>
                                     {qty > 0 && (
                                         <div

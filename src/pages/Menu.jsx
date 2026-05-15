@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 
+
 export default function Menu() {
   const { getLocalizedField } = useLanguage();
   const { isOpen, setIsOpen, items } = useCart();
@@ -22,183 +23,199 @@ export default function Menu() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const userClickedRef = useRef(false);
-  const clickTimeoutRef = useRef(null);
+  const clickTimeoutRef = useRef(null); // Not explicitly used below, but kept from original
 
   const sectionRefs = useRef({});
 
-  const { products, categories, subCategories, loading, activeBranch } = useBranch();
+  const { menu, loading, activeBranch } = useBranch();
+
+  // ── 1. FLATTEN THE NEW DATA STRUCTURE ─────────────────────────
+  // We extract 'groups' as categories and 'products' as a flat array 
+  // so the rest of your existing logic works seamlessly.
 
 
-  const sortedCategories = useMemo(() => {
-    return categories
-      .sort((a, b) => a.sort_order - b.sort_order);
-  }, [categories]);
+  // ── 1. FLATTEN THE 3-TIER MENU STRUCTURE ─────────────────────────
+  const { categories, subcategories, products } = useMemo(() => {
+    const parsedCategories = [];
+    const parsedSubcategories = [];
+    const parsedProducts = [];
 
-  const groupedProducts = useMemo(() => {
-    const groups = {};
+    if (menu) {
+      // Iterate over the top-level menu keys (Categories)
+      Object.entries(menu).forEach(([catKey, section]) => {
+        // Use the section's UID if available, fallback to the object key
+        const categoryId = String(section.uid || catKey);
 
-    sortedCategories.forEach((category) => {
-      groups[category.id] = [];
-    });
+        parsedCategories.push({
+          id: categoryId,
+          name: section.properties?.name || { en: section.name || catKey },
+          sort_order: section.sort !== null ? section.sort : 0,
+        });
 
+        // Iterate over the groups (Subcategories)
+        if (section.groups && Array.isArray(section.groups)) {
+          section.groups.forEach((group) => {
+            const subcategoryId = String(group.uid);
+
+            parsedSubcategories.push({
+              id: subcategoryId,
+              category_id: categoryId, // Link back to the parent Category
+              name: group.properties?.name || { en: group.name },
+              sort_order: group.sort !== null ? group.sort : section.sort,
+            });
+
+            // Iterate over the actual Products
+            if (group.products && Array.isArray(group.products)) {
+              group.products.forEach((product) => {
+                parsedProducts.push({
+                  id: String(product.uid),
+                  category_id: categoryId,       // Used for top-level filtering/scrolling
+                  subcategory_id: subcategoryId, // Used if you want to group by subcat in the UI
+                  default_name: product.name,
+                  name: product.properties?.name || { en: product.name },
+                  price: parseFloat(product.price) || 0,
+                  image: product.image,
+                  properties: product.properties,
+                });
+              });
+            }
+          });
+        }
+      });
+    }
+
+    return {
+      categories: parsedCategories,
+      subcategories: parsedSubcategories,
+      products: parsedProducts
+    };
+  }, [menu]);
+
+  // ── 2. EXISTING LOGIC (Now powered by the flattened data) ─────
+  // ── 1. FILTER THE NESTED MENU OBJECT ───────────────────────────
+  const filteredMenu = useMemo(() => {
+    if (!menu) return {};
     const search = searchQuery.toLowerCase().trim();
+    if (!search) return menu;
 
-    products.forEach((product) => {
-      const name =
-        getLocalizedField(product, "name")?.toLowerCase() ||
-        product.default_name?.toLowerCase() ||
-        "";
+    const filtered = {};
 
-      // Find category of product
-      const category = sortedCategories.find(
-        (c) => String(c.id) === String(product.category_id)
-      );
+    Object.entries(menu).forEach(([catKey, section]) => {
+      const catName = (getLocalizedField(section.properties?.name, 'en') || section.name || catKey).toLowerCase();
+      const catMatch = catName.includes(search);
 
-      const categoryName =
-        getLocalizedField(category?.name, "translation")?.toLowerCase() ||
-        category?.name?.en?.toLowerCase() ||
-        "";
+      // Filter the groups (subcategories)
+      const filteredGroups = (section.groups || []).map(group => {
+        const groupName = (getLocalizedField(group.properties?.name, 'en') || group.name || "").toLowerCase();
+        const groupMatch = groupName.includes(search);
 
-      const matchSearch =
-        !search ||
-        name.includes(search) ||
-        categoryName.includes(search);
+        // If the group name matches, we keep ALL its products.
+        // Otherwise, we filter the products by name.
+        const filteredProducts = groupMatch
+          ? group.products
+          : (group.products || []).filter(p => {
+            const pName = (getLocalizedField(p.properties?.name, 'en') || p.name || "").toLowerCase();
+            return pName.includes(search);
+          });
 
-      if (!matchSearch) return;
+        return { ...group, products: filteredProducts };
+      }).filter(group => group.products && group.products.length > 0);
 
-      if (groups[product.category_id]) {
-        groups[product.category_id].push(product);
+      // Keep the category if the title matches OR if it has matching products/groups
+      if (catMatch || filteredGroups.length > 0) {
+        filtered[catKey] = {
+          ...section,
+          // If the category title matched, show all its original groups.
+          // Otherwise, only show the groups that had matches.
+          groups: catMatch ? section.groups : filteredGroups
+        };
       }
     });
 
-    return groups;
-  }, [
-    products,
-    sortedCategories,
-    activeBranch,
-    searchQuery,
-    getLocalizedField,
-  ]);
+    return filtered;
+  }, [menu, searchQuery, getLocalizedField]);
 
+  // ── 2. DERIVE SORTED CATEGORIES FROM FILTERED MENU ─────────────
+  // This keeps your CategoryNav and Scroll logic in sync with search results
+  // Always derive this from the full 'menu' so the Nav Bar stays complete
+  const sortedCategories = useMemo(() => {
+    if (!menu) return [];
+    return Object.entries(menu)
+      .map(([key, section]) => ({
+        id: String(section.uid || key),
+        key: key, // Keep the key to match against filteredMenu later
+        name: section.properties?.name || { en: section.name || key },
+        sort_order: section.sort ?? 0
+      }))
+      .sort((a, b) => a.sort_order - b.sort_order);
+  }, [menu]); // Dependent on 'menu', not 'filteredMenu'
 
   useEffect(() => {
+    const search = searchQuery.trim();
 
     // SEARCH MODE
-    if (searchQuery) {
-      const firstMatchedCategory = sortedCategories.find(
-        (category) =>
-          groupedProducts[category.id] &&
-          groupedProducts[category.id].length > 0
-      );
+    if (search) {
+      // Find the first category in our full list that actually has search results
+      const firstMatch = sortedCategories.find((cat) => filteredMenu[cat.key]);
 
-      if (firstMatchedCategory) {
-        setActiveCategory((prev) =>
-          prev === firstMatchedCategory.id
-            ? prev
-            : firstMatchedCategory.id
-        );
+      if (firstMatch) {
+        setActiveCategory((prev) => (prev === firstMatch.id ? prev : firstMatch.id));
+        
+        // Optional: Auto-scroll to the first match during search
+        const section = sectionRefs.current[firstMatch.id];
+        if (section) {
+          const offset = 225;
+          const top = section.getBoundingClientRect().top + window.pageYOffset - offset;
+          window.scrollTo({ top, behavior: "smooth" });
+        }
       }
-
       return;
     }
 
-    // NORMAL SCROLL MODE
+    // NORMAL SCROLL MODE (Logic remains the same)
     const handleScroll = () => {
       if (userClickedRef.current) return;
 
-      // Detect bottom of page
-      const scrollBottom =
-        window.innerHeight + window.scrollY;
+      const scrollBottom = window.innerHeight + window.scrollY;
+      const pageHeight = document.documentElement.scrollHeight;
 
-      const pageHeight =
-        document.documentElement.scrollHeight;
-
-      // If near bottom → activate last category
       if (scrollBottom >= pageHeight - 20) {
-        const lastCategory =
-          sortedCategories[
-          sortedCategories.length - 1
-          ];
-
-        if (lastCategory) {
-          setActiveCategory((prev) =>
-            prev === lastCategory.id
-              ? prev
-              : lastCategory.id
-          );
-        }
-
+        const lastCategory = sortedCategories[sortedCategories.length - 1];
+        if (lastCategory) setActiveCategory(lastCategory.id);
         return;
       }
 
       const offset = 225;
-
       let currentCategory = null;
 
       for (const category of sortedCategories) {
-        const section =
-          sectionRefs.current[category.id];
-
+        const section = sectionRefs.current[category.id];
         if (!section) continue;
+        const rect = section.getBoundingClientRect();
 
-        const rect =
-          section.getBoundingClientRect();
-
-        // Section crossed sticky header
         if (rect.top <= offset) {
           currentCategory = category.id;
-        }
-
-        // First visible section fallback
-        else if (
-          !currentCategory &&
-          rect.top > offset
-        ) {
+        } else if (!currentCategory && rect.top > offset) {
           currentCategory = category.id;
           break;
         }
       }
 
-      // Final fallback
-      if (
-        !currentCategory &&
-        sortedCategories.length
-      ) {
-        currentCategory =
-          sortedCategories[0].id;
+      if (!currentCategory && sortedCategories.length) {
+        currentCategory = sortedCategories[0].id;
       }
 
-      setActiveCategory((prev) =>
-        prev === currentCategory
-          ? prev
-          : currentCategory
-      );
+      if (currentCategory) setActiveCategory(currentCategory);
     };
 
-    window.addEventListener(
-      "scroll",
-      handleScroll,
-      { passive: true }
-    );
-
+    window.addEventListener("scroll", handleScroll, { passive: true });
     requestAnimationFrame(handleScroll);
-
-    return () => {
-      window.removeEventListener(
-        "scroll",
-        handleScroll
-      );
-    };
-  }, [
-    sortedCategories,
-    groupedProducts,
-    searchQuery,
-  ]);
-
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [sortedCategories, filteredMenu, searchQuery]); 
+// Added filteredMenu as a dependency so it re-checks matches as the user types
+  // Dependency is now just sortedCategories (which reacts to filteredMenu) and searchQuery
   const productMap = useMemo(() => {
-    return Object.fromEntries(
-      products.map(p => [String(p.id), p])
-    );
+    return Object.fromEntries(products.map((p) => [String(p.id), p]));
   }, [products]);
 
   const subtotal = useMemo(() => {
@@ -210,74 +227,74 @@ export default function Menu() {
     }, 0);
   }, [items, productMap]);
 
-
-
   // ── Click handler: scroll to section ─────────────────────────
-  const handleCategorySelect = useCallback((catId) => {
-    const hasSearch = searchQuery?.trim()?.length > 0;
+  const handleCategorySelect = useCallback(
+    (catId) => {
+      const hasSearch = searchQuery?.trim()?.length > 0;
 
-    if (hasSearch) {
-      setSearchQuery("");
-    }
-
-    setActiveCategory(catId);
-    userClickedRef.current = true;
-
-    let tries = 0;
-
-    const tryScroll = () => {
-      const section = sectionRefs.current[catId];
-
-      if (!section && tries < 10) {
-        tries++;
-        requestAnimationFrame(tryScroll);
-        return;
+      if (hasSearch) {
+        setSearchQuery("");
       }
 
-      if (!section) return;
+      setActiveCategory(catId);
+      userClickedRef.current = true;
 
-      const offset = 225;
+      let tries = 0;
 
-      const top =
-        section.getBoundingClientRect().top +
-        window.pageYOffset -
-        offset;
+      const tryScroll = () => {
+        const section = sectionRefs.current[catId];
 
-      window.scrollTo({
-        top,
-        behavior: "smooth",
-      });
+        if (!section && tries < 10) {
+          tries++;
+          requestAnimationFrame(tryScroll);
+          return;
+        }
 
-      let timeout;
+        if (!section) return;
 
-      const onScroll = () => {
-        clearTimeout(timeout);
+        const offset = 225;
+        const top =
+          section.getBoundingClientRect().top + window.pageYOffset - offset;
 
-        timeout = setTimeout(() => {
-          userClickedRef.current = false;
-          window.removeEventListener("scroll", onScroll);
-        }, 100);
+        window.scrollTo({
+          top,
+          behavior: "smooth",
+        });
+
+        let timeout;
+
+        const onScroll = () => {
+          clearTimeout(timeout);
+
+          timeout = setTimeout(() => {
+            userClickedRef.current = false;
+            window.removeEventListener("scroll", onScroll);
+          }, 100);
+        };
+
+        window.addEventListener("scroll", onScroll, {
+          passive: true,
+        });
       };
 
-      window.addEventListener("scroll", onScroll, {
-        passive: true,
+      // wait for React to flush search reset + re-render
+      requestAnimationFrame(() => {
+        requestAnimationFrame(tryScroll);
       });
-    };
-
-    // wait for React to flush search reset + re-render
-    requestAnimationFrame(() => {
-      requestAnimationFrame(tryScroll);
-    });
-  }, [searchQuery]);
-
+    },
+    [searchQuery]
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <Header products={products} setIsOpen={setIsOpen} />
-      {/* <CoverHero /> */}
 
       <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-border/30">
-        <CategoryNav categories={sortedCategories} activeCategory={activeCategory} onSelect={handleCategorySelect} />
+        <CategoryNav
+          categories={sortedCategories}
+          activeCategory={activeCategory}
+          onSelect={handleCategorySelect}
+        />
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
 
@@ -299,9 +316,7 @@ export default function Menu() {
           </div>
         ) : (
           <ProductGrid
-            products={groupedProducts}
-            categories={sortedCategories}
-            subCat={subCategories}
+            menu={filteredMenu}
             onProductOpen={setSelectedProduct}
             sectionRefs={sectionRefs}
           />
@@ -310,7 +325,7 @@ export default function Menu() {
 
       {selectedProduct && (
         <ProductModal
-          open={isOpen}
+          open={isOpen} // Check if this should be `!!selectedProduct` rather than `isOpen` (cart state) based on your needs
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
         />
@@ -323,10 +338,7 @@ export default function Menu() {
         subtotal={subtotal}
         onProductOpen={setSelectedProduct}
       />
-      <FloatingCartButton
-        subtotal={subtotal}
-        onClick={() => setIsOpen(true)}
-      />
+      <FloatingCartButton subtotal={subtotal} onClick={() => setIsOpen(true)} />
       <ScrollButtons />
     </div>
   );

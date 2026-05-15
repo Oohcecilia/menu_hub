@@ -1,119 +1,20 @@
-const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
+const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}`;
 
-
-
-
-export async function getMenuData(host, order) {
+export async function getMenuData() {
   try {
-    const res = await fetch(`${API_BASE}/product-groups`);
+    
+    const res = await fetch(`${API_BASE}`);
 
     if (!res.ok) {
       throw new Error(`HTTP error: ${res.status}`);
     }
 
-    const data = await res.json();
+    return await res.json();
 
-    const categories = formatCategories(data.categories);
-    const subCategories = formatSubCategories(data.subCategories || []);
-    const products = formatProducts(data.products);
-
-    return {
-      categories,
-      subCategories,
-      products,
-    };
   } catch (error) {
     console.error("getMenuData error:", error);
-    return {
-      categories: [],
-      subCategories: [],
-      products: {},
-    };
   }
 }
-
-
-
-function formatCategories(apiData = []) {
-  if (!Array.isArray(apiData)) return [];
-
-  return apiData.map((item) => {
-    const propName = item?.properties?.name || {};
-
-    return {
-      id: String(item?.id ?? item?.uid ?? ""),
-      name: {
-        def: item?.name,
-        en: item?.name?.en || item?.name || "",
-        translation: propName,
-      },
-      sort_order: item?.sort_order ?? item?.order ?? 0,
-    };
-  });
-}
-
-
-
-function formatSubCategories(apiData = []) {
-  if (!Array.isArray(apiData)) return [];
-
-  return apiData.map((item) => ({
-    uid: item.uid,
-    cuid: String(item.cuid), // link to category
-    name: {
-      en: item.properties?.name?.en || item.properties?.name?.def || "Unnamed",
-      translation: item.properties?.name || {},
-    },
-    properties: item.properties || {},
-  }));
-}
-
-
-
-
-function formatProducts(products = []) {
-  
-  return products
-    .map((item) => {
-
-
-      const name = item.properties.name || null;
-      const description = item.properties.description || null;
-      const details = item.properties.details || null;
-      const variations = item.variations || [];
-
-
-      const price = Number(item.price); 
-
-
-      return {
-        id: item.uid,
-        default_name: item.name,
-        name,
-        description: details || description,
-        price,
-        image: item.image,
-        category_id: item.groupuid,
-        is_available: true,
-        variations,
-        sort_order: item.sort_order || 0,
-        options: [],
-        website_picture: item.website_picture,
-        productgroup: item.productgroup
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.price - b.price); // ✅ ascending price
-}
-
-
-
-
-
-
-
-
-
 
 
 

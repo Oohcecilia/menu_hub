@@ -257,7 +257,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
             <div>
               <div className="flex justify-between items-start gap-3">
                 <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white uppercase">
-                  {name}
+                  {getLocalizedField(product?.properties, "name") || product?.name}
                 </h2>
 
                 <p className="text-xl font-bold text-primary">
@@ -267,7 +267,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
               </div>
 
               <p className="py-4 text-gray-500 dark:text-white/60 text-sm mt-1">
-                {getLocalizedField(product, "description")}
+                {getLocalizedField(product.properties, "details")}
               </p>
 
             

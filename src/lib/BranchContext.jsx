@@ -3,7 +3,6 @@ import { branchesData } from '@/data/branches.config';
 import { getMenuData } from '@/api/menuService';
 import { hexToHsl } from "@/utils/color";
 import { loadFont } from "@/utils/loadfont";
-import { useAsyncError } from 'react-router-dom';
 
 const BranchContext = createContext();
 
@@ -28,10 +27,8 @@ function getSubdomain() {
 function BranchContextInner({ children }) {
   const branchSlug = getSubdomain(); // ✅ REPLACE useParams
 
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [menu, setMenu] =useState([]);
 
   // optional: store branch config
   const branches = useMemo(() => {
@@ -52,58 +49,8 @@ function BranchContextInner({ children }) {
       setLoading(true);
 
       try {
-        const res = await getMenuData(activeBranch?.host || "");
-
-        // -------------------------
-        // SAFE CATEGORIES
-        // -------------------------
-        const categoriesRaw = res?.categories;
-
-        const categoriesArr = Array.isArray(categoriesRaw)
-          ? categoriesRaw
-          : Object.values(categoriesRaw || {});
-
-        setCategories(
-          categoriesArr.map(c => ({
-            ...c,
-            id: String(c.id),
-          }))
-        );
-
-        // -------------------------
-        // SAFE SUBCATEGORIES
-        // -------------------------
-        const subRaw = res?.subCategories;
-
-        const subArr = Array.isArray(subRaw)
-          ? subRaw
-          : Object.values(subRaw || {});
-
-        setSubCategories(
-          subArr.map(s => ({
-            uid: String(s.uid),
-            cuid: String(s.cuid),
-            properties: s.properties,
-          }))
-        );
-
-        // -------------------------
-        // SAFE PRODUCTS (OBJECT → ARRAY)
-        // -------------------------
-        const productRaw = res?.products;
-
-        const productArr = Array.isArray(productRaw)
-          ? productRaw
-          : Object.values(productRaw || {}).flat();
-
-        setProducts(
-          productArr.map(p => ({
-            ...p,
-            category_id: String(p.category_id),
-          }))
-        );
-
-
+        const res = await getMenuData();
+        setMenu(res);
       } catch (e) {
         console.error("Failed to load menu", e);
       } finally {
@@ -152,9 +99,7 @@ function BranchContextInner({ children }) {
         activeBranch,
         branches,
         branchSlug,
-        categories,
-        subCategories,
-        products,
+        menu,
         loading,
       }}
     >

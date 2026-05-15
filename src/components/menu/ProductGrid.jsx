@@ -121,10 +121,6 @@ function CategoryBanner({ category, icon: Icon }) {
 
   const { getLocalizedField } = useLanguage();
 
-  const translation = getLocalizedField(category?.name, "translation");
-
-  const categoryName = translation ? translation  : category?.en;
-
   return (
     <div className="flex items-center justify-center gap-5 mt-24 mb-4">
 
@@ -144,7 +140,7 @@ function CategoryBanner({ category, icon: Icon }) {
           />
         )}
 
-        {categoryName}
+        {category?.name || ''}
       </span>
     </div>
   );
@@ -155,8 +151,8 @@ function TextListItem({ product, onOpen, delay = 0 }) {
   const { getLocalizedField } = useLanguage();
   const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
   const qty = getProductQuantity(product.id);
-  const name = getLocalizedField(product, 'name') || product.default_name;
-  const desc = getLocalizedField(product, 'description');
+  const name = getLocalizedField(product?.properties, 'name') || product.name;
+  const desc = getLocalizedField(product?.properties, 'details');
   const location = useLocation();
 
   const handleMinus = (e) => {
@@ -228,7 +224,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
         {/* Description */}
         {desc && (
           <p
-            className="
+            className=" font-sans
         text-sm text-muted-foreground
         mt-1 line-clamp-2
         leading-relaxed font-light
@@ -321,10 +317,14 @@ function CategorySection({ products, onProductOpen }) {
 }
 
 
+
+
+
+
+
+
 export default function ProductGrid({
-  products,
-  categories = [],
-  subCat = [],
+  menu,
   onProductOpen,
   sectionRefs,
 }) {
@@ -332,19 +332,10 @@ export default function ProductGrid({
   const { activeBranch } = useBranch();
   const noImage = activeBranch?.no_image;
 
-  const hasProducts = Object.values(products || {}).some(
-    (arr) => Array.isArray(arr) && arr.length > 0
-  );
+  // Check if menu has any data
+  const hasContent = menu && Object.keys(menu).length > 0;
 
-  // group subcategories by category id
-  const groupedSubCats = (subCat || []).reduce((acc, sc) => {
-    const key = String(sc.cuid);
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(sc);
-    return acc;
-  }, {});
-
-  if (!hasProducts) {
+  if (!hasContent) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-muted-foreground text-center">
         <img
@@ -359,187 +350,83 @@ export default function ProductGrid({
     );
   }
 
+  // Sort the top-level categories by their 'sort' property
+  const sortedCategories = Object.entries(menu).sort(
+    ([, a], [, b]) => (a.sort || 0) - (b.sort || 0)
+  );
+
   return (
     <div className="space-y-12">
-      {categories.map((cat) => {
-        const cName = cat?.name?.en
-          ? getLocalizedField(cat?.name, "en")
-          : cat?.en;
+      {sortedCategories.map(([key, section]) => {
+        const catId = String(section.uid || key);
+        
+        // Get icon based on category name
+        const cNameEn = section.properties?.name?.en || section.name || key;
+        const icon = getCategoryIcon(cNameEn);
 
-        const icon = getCategoryIcon(cName);
-
-        const catProducts = products[cat.id] || [];
-        const subCategories = groupedSubCats[cat.id] || [];
-
-        // only keep subcategories that actually have products
-        const visibleSubCategories = subCategories.filter((sub) =>
-          catProducts.some(
-            (p) =>
-              String(p.productgroup?.uid || p.productgroup) ===
-              String(sub.uid)
-          )
+        // A category is visible if it has groups with products
+        const groups = section.groups || [];
+        const hasVisibleProducts = groups.some(
+          (group) => group.products && group.products.length > 0
         );
 
-        const hasSubCategories = visibleSubCategories.length > 0;
-
-        const hasContent =
-          catProducts.length > 0 || hasSubCategories;
-
-        if (!hasContent) return null;
+        if (!hasVisibleProducts) return null;
 
         return (
           <section
-            key={cat.id}
+            key={catId}
             ref={(el) => {
-              if (el) sectionRefs.current[cat.id] = el;
+              if (el) sectionRefs.current[catId] = el;
             }}
-            data-category={cat.id}
-            id={`cat-section-${cat.id}`}
+            data-category={catId}
+            id={`cat-section-${catId}`}
           >
-            <CategoryBanner category={cat} icon={icon} />
+            {/* 1. The Main Category Header */}
+            <CategoryBanner 
+              category={{ 
+                id: catId, 
+                name: section.name || { en: section.name || key } 
+              }} 
+              icon={icon} 
+            />
 
-            {/* NO SUBCATEGORIES */}
-            {!hasSubCategories && catProducts.length > 0 && (
-              <CategorySection
-                products={catProducts}
-                onProductOpen={onProductOpen}
-              />
-            )}
+            {/* 2. Iterate through Groups (Subcategories) */}
+            {groups.map((group) => {
+              const subProducts = (group.products || []).map(p => ({
+                ...p,
+                id: String(p.uid), // Ensure ID is a string for the components
+                price: parseFloat(p.price) || 0
+              }));
 
-            {/* HAS SUBCATEGORIES */}
-            {hasSubCategories &&
-              visibleSubCategories.map((sub) => {
-                const subName =
-                  sub.properties?.name?.en ||
-                  sub.properties?.name?.def ||
-                  "";
+              if (subProducts.length === 0) return null;
 
-                const subProducts = catProducts.filter(
-                  (p) =>
-                    String(
-                      p.productgroup?.uid || p.productgroup
-                    ) === String(sub.uid)
-                );
+              const subName = getLocalizedField(group?.properties, "name") || group.name;
+              
+              // Hide subcategory title if it's identical to the main category name
+              const shouldShowSubTitle = 
+                subName && 
+                subName.trim().toLowerCase() !== cNameEn.trim().toLowerCase();
 
 
-                return (
-                  <div key={sub.uid} className="mt-6">
-                    {cName?.trim().toLowerCase() !==
-                      subName?.trim().toLowerCase() &&
-                      subName !== "" && (
-                        <h4 className="w-full text-center text-lg font-serif font-semibold mb-2 text-primary px-2 py-1 rounded">
-                          {subName}
-                        </h4>
-                      )}
+              return (
+                <div key={group.uid} className="mt-6">
+                  {shouldShowSubTitle && (
+                    <h4 className="w-full text-center text-2xl font-serif font-semibold mb-2 text-primary px-2 py-1 rounded">
+                      {subName}
+                    </h4>
+                  )}
 
-                    <CategorySection
-                      products={subProducts}
-                      onProductOpen={onProductOpen}
-                    />
-                  </div>
-                );
-              })}
+                  {/* 3. Render the products for this subcategory */}
+                  <CategorySection
+                    products={subProducts}
+                    onProductOpen={onProductOpen}
+                  />
+                </div>
+              );
+            })}
           </section>
         );
       })}
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// export default function ProductGrid({
-//   products,
-//   categories = [],
-//   subCat = [],
-//   onProductOpen,
-//   sectionRefs,
-// }) {
-
-//   const hasProducts = Object.values(products).some(
-//     arr => arr.length > 0
-//   );
-
-
-//   console.log(`cat ${JSON.stringify(categories)} sub ${JSON.stringify(subCat)} PRODUCTS ${JSON.stringify(products)}`);
-//   const { t, getLocalizedField } = useLanguage();
-//   const { activeBranch } = useBranch();
-
-//   const noImage = activeBranch?.no_image;
-
-//   if (!hasProducts) {
-//     return (
-//       <div className="flex flex-col items-center justify-center py-24 text-muted-foreground text-center">
-//         <img
-//           src={noImage}
-//           alt="no-image"
-//           className="h-10 w-10 opacity-60 dark:opacity-20"
-//         />
-
-//         <p className="text-base font-medium tracking-wide mt-3">
-//           {t('noResults')}
-//         </p>
-//       </div>
-//     );
-//   }
-
-//   if (categories.length > 0) {
-//     return (
-//       <div className="space-y-12">
-//         {categories.map((cat, ci) => {
-//           const cName = cat.name?.en;
-
-//           const icon = getCategoryIcon(cName);
-
-
-//           const catProducts =
-//             products[cat.id] || [];
-
-//           if (!catProducts.length) return null;
-
-//           return (
-//             <section
-//               key={cat.id}
-//               ref={(el) => {
-//                 if (el) {
-//                   sectionRefs.current[cat.id] = el;
-//                 }
-//               }}
-//               data-category={cat.id}
-//               id={`cat-section-${cat.id}`}
-//             >
-//               <CategoryBanner category={cat} icon={icon}></CategoryBanner>
-
-//               <CategorySection
-//                 products={catProducts}
-//                 onProductOpen={onProductOpen}
-//               ></CategorySection>
-//             </section>
-//           );
-//         })}
-//       </div>
-//     );
-//   }
-//   return (
-//     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-//       <SpaceY y={4} />
-//       <CategorySection products={products} onProductOpen={onProductOpen} />
-//       {/* <EndBanner />  */}
-//     </motion.div>
-//   );
-// }

@@ -1,9 +1,0 @@
-services:
-  api:
-    container_name: menu_hub
-    build: .
-    restart: always
-    env_file:
-      - ../.env
-    ports:
-      - "7777:7777"
