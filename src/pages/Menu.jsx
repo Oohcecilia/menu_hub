@@ -83,7 +83,6 @@ export default function Menu() {
 
   useEffect(() => {
 
-    console.log(JSON.stringify(products))
     // SEARCH MODE
     if (searchQuery) {
       const firstMatchedCategory = sortedCategories.find(

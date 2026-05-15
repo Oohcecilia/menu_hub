@@ -425,8 +425,8 @@ export default function ProductGrid({
 
                 return (
                   <div key={sub.uid} className="mt-6">
-                    {cName?.toLowerCase() !==
-                      subName?.toLowerCase() &&
+                    {cName?.trim().toLowerCase() !==
+                      subName?.trim().toLowerCase() &&
                       subName !== "" && (
                         <h4 className="w-full text-center text-lg font-serif font-semibold mb-2 text-primary px-2 py-1 rounded">
                           {subName}
