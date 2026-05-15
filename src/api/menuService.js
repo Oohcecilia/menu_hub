@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}`;
+const API_BASE = import.meta.env.VITE_API_URL || "/api/menu.php";
 
 export async function getMenuData() {
   try {
@@ -15,7 +15,6 @@ export async function getMenuData() {
     console.error("getMenuData error:", error);
   }
 }
-
 
 
 
