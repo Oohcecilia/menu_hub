@@ -137,7 +137,7 @@ function FloatImage({ src, alt, size, float = true }) {
                         style={{
                             width: size * 0.85, height: size * 0.85,
                             backgroundImage: `url(${src})`, backgroundSize: 'cover',
-                            top: '10%', left: '7.5%',
+                            top: '10%',
                         }}
                     />
                     {/* soft shadow beneath */}
@@ -186,21 +186,32 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
                 <FloatImage src={product.image} alt={name} size={size} />
             </FloatWrap>
             <div className="mt-2 w-full text-center">
-                <div className="flex items-center justify-between gap-4">
-                    <div className="min-w-0 flex items-start gap-2">
-                        <p className="font-serif capitalize font-light text-foreground/80 tracking-wide truncate">
+                <div className="flex items-center justify-center gap-4">
+                    <div className="min-w-0 flex items-center gap-2">
+                        <p className="font-serif capitalize font-light text-xl text-foreground/80 tracking-wide truncate">
                             {name}
                         </p>
+
                         {qty > 0 && (
-                            <div className="flex-shrink-0 flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-sm" >
+                            <div
+                                className="
+                        flex-shrink-0
+                        flex items-center justify-center
+                        min-w-5 h-5 px-1
+                        rounded-full
+                        bg-primary text-primary-foreground
+                        text-xs font-semibold
+                        shadow-sm
+                    "
+                            >
                                 {qty}
                             </div>
                         )}
                     </div>
-                    <p className=" font-bold tracking-widest text-primary">
+
+                    <p className="font-bold tracking-widest text-primary">
                         {product.price}
                     </p>
-                    {/* {showAdd && <AddBtn product={product} onOpen={onOpen} />} */}
                 </div>
             </div>
         </motion.div>
