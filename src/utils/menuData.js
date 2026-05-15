@@ -1,3 +1,39 @@
+export function getLocalizedObject(entity, field = "name") {
+  const translations = entity?.translations;
+
+  if (translations?.[field] && typeof translations[field] === "object") {
+    return translations[field];
+  }
+
+  if (field === "name" && translations && typeof translations === "object") {
+    return translations;
+  }
+
+  const propertyValue = entity?.properties?.[field];
+  if (propertyValue && typeof propertyValue === "object") {
+    return propertyValue;
+  }
+
+  const directValue = entity?.[field];
+  if (directValue && typeof directValue === "object") {
+    return directValue;
+  }
+
+  return null;
+}
+
+export function getDefaultLocalizedText(value, fallback = "") {
+  if (!value) return fallback;
+  if (typeof value === "string") return value || fallback;
+
+  return (
+    value.en ||
+    value.def ||
+    Object.values(value).find(Boolean) ||
+    fallback
+  );
+}
+
 export function getMenuCategoryUid(section, fallback) {
   return String(
     section?.uid ||
@@ -8,7 +44,15 @@ export function getMenuCategoryUid(section, fallback) {
 }
 
 export function getMenuCategoryLabel(section, fallback) {
-  return section?.label || section?.title || section?.name || fallback;
+  return (
+    section?.label ||
+    section?.title ||
+    getDefaultLocalizedText(getLocalizedObject(section, "name"), section?.name || fallback)
+  );
+}
+
+export function getMenuCategoryName(section, fallback) {
+  return getLocalizedObject(section, "name") || { en: getMenuCategoryLabel(section, fallback) };
 }
 
 export function getProductList(products) {
@@ -29,7 +73,7 @@ function parseMaybeJson(value) {
 }
 
 function getBaseProductName(product, fallback) {
-  const translatedName = product?.properties?.name;
+  const translatedName = getLocalizedObject(product, "name");
 
   if (typeof translatedName === "string") return translatedName;
   if (translatedName?.en) return translatedName.en;

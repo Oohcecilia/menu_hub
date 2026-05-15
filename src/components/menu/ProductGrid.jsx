@@ -7,7 +7,7 @@ import { useCart } from '@/lib/cartStore.jsx';
 import { Plus, Minus, Sparkles } from 'lucide-react';
 import { useBranch } from '@/lib/BranchContext.jsx';
 import { useLocation } from 'react-router-dom'
-import { getMenuCategoryLabel, getMenuCategoryUid, getProductList, normalizeProduct } from '@/utils/menuData';
+import { getDefaultLocalizedText, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryUid, getProductList, normalizeProduct } from '@/utils/menuData';
 import PriceOptions from './PriceOptions.jsx';
 
 
@@ -108,7 +108,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
   const { getLocalizedField } = useLanguage();
   const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
   const qty = getProductQuantity(product.id);
-  const name = product.default_name || product.name || getLocalizedField(product?.properties, 'name');
+  const name = product.default_name || product.name || getLocalizedField(product, 'translations') || getLocalizedField(product?.properties, 'name');
   const desc = getLocalizedField(product?.properties, 'details') || getLocalizedField(product, 'details') || product?.details?.description;
   const location = useLocation();
 
@@ -342,8 +342,14 @@ export default function ProductGrid({
 
               if (subProducts.length === 0) return null;
 
-              const subName = getLocalizedField(group?.properties, "name") || group.name;
-              const categoryName = getLocalizedField(section?.properties, "name") || categoryLabel;
+              const subName =
+                getLocalizedField(group, "translations") ||
+                getLocalizedField(group, "name") ||
+                getDefaultLocalizedText(getLocalizedObject(group, "name"), group.name);
+              const categoryName =
+                getLocalizedField(section, "translations") ||
+                getLocalizedField(section, "name") ||
+                categoryLabel;
               
               // Hide subcategory title if it's identical to the main category name
               const shouldShowSubTitle = 

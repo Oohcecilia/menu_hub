@@ -11,7 +11,7 @@ import CartDrawer from '@/components/menu/CartDrawer.jsx';
 import FloatingCartButton from '@/components/menu/FloatingCartButton.jsx';
 import ScrollButtons from '@/components/menu/ScrollButtons.jsx';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getDisplayPrices, getMenuCategoryLabel, getMenuCategoryUid, getProductList, normalizeProduct, selectProductPrice } from '@/utils/menuData';
+import { getDefaultLocalizedText, getDisplayPrices, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryName, getMenuCategoryUid, getProductList, normalizeProduct, selectProductPrice } from '@/utils/menuData';
 
 export default function Menu() {
   const { getLocalizedField } = useLanguage();
@@ -47,7 +47,7 @@ export default function Menu() {
         parsedCategories.push({
           id: categoryId,
           label: categoryLabel,
-          name: section.properties?.name || { en: categoryLabel },
+          name: getMenuCategoryName(section, catKey),
           sort_order: section.sort !== null ? section.sort : 0,
         });
 
@@ -59,7 +59,7 @@ export default function Menu() {
             parsedSubcategories.push({
               id: subcategoryId,
               category_id: categoryId, // Link back to the parent Category
-              name: group.properties?.name || { en: group.name },
+              name: getLocalizedObject(group, "name") || { en: group.name },
               sort_order: group.sort !== null ? group.sort : section.sort,
             });
 
@@ -97,12 +97,20 @@ export default function Menu() {
     const filtered = {};
 
     Object.entries(menu).forEach(([catKey, section]) => {
-      const catName = (getLocalizedField(section.properties, 'name') || section.name || catKey).toLowerCase();
+      const catName = (
+        getLocalizedField(section, 'translations') ||
+        getLocalizedField(section, 'name') ||
+        getDefaultLocalizedText(getLocalizedObject(section, "name"), section.name || catKey)
+      ).toLowerCase();
       const catMatch = catName.includes(search);
 
       // Filter the groups (subcategories)
       const filteredGroups = (section.groups || []).map(group => {
-        const groupName = (getLocalizedField(group.properties, 'name') || group.name || "").toLowerCase();
+        const groupName = (
+          getLocalizedField(group, 'translations') ||
+          getLocalizedField(group, 'name') ||
+          getDefaultLocalizedText(getLocalizedObject(group, "name"), group.name || "")
+        ).toLowerCase();
         const groupMatch = groupName.includes(search);
         const groupProducts = getProductList(group.products);
 
@@ -111,7 +119,11 @@ export default function Menu() {
         const filteredProducts = groupMatch
           ? groupProducts
           : groupProducts.filter(p => {
-            const pName = (getLocalizedField(p.properties, 'name') || p.name || p.default_name || "").toLowerCase();
+            const pName = (
+              getLocalizedField(p, 'translations') ||
+              getLocalizedField(p, 'name') ||
+              getDefaultLocalizedText(getLocalizedObject(p, "name"), p.name || p.default_name || "")
+            ).toLowerCase();
             return pName.includes(search);
           });
 
@@ -142,7 +154,7 @@ export default function Menu() {
         id: getMenuCategoryUid(section, key),
         key: key, // Keep the key to match against filteredMenu later
         label: getMenuCategoryLabel(section, key),
-        name: section.properties?.name || { en: getMenuCategoryLabel(section, key) },
+        name: getMenuCategoryName(section, key),
         sort_order: section.sort ?? 0
       }))
       .sort((a, b) => a.sort_order - b.sort_order);
