@@ -50,37 +50,11 @@ function SpaceY({ y = 4 }) {
   return <div className={map[y] || "py-4"} />;
 }
 
-function ListBanner({ spacing = 2, start = false }) {
-
+function ListBanner() {
   return (
-    <div className={`flex items-center ${map[spacing]} gap-3`}>
-      <span className="text-lg text-primary">
-        &#10171;
-      </span>
-
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
-
-      <div className="flex items-center justify-center shrink-0">
-        <span className="flex items-center gap-1 text-primary text-xl">
-          <span className='inline-block scale-x-[-1]'>&#10171;</span>
-
-          {start ? (
-            <span className='text-2xl'>&#9737;</span>
-          ) : (
-            <span className='text-md'>&#9737;</span>
-          )}
-
-          <span>
-            &#10171;
-          </span>
-        </span>
-      </div>
-
-      <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
-
-      <span className="text-lg inline-block scale-x-[-1] text-primary">
-        &#10171;
-      </span>
+    <div className="flex items-center">
+      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-primary/50" />
+      <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-primary/50" />
     </div>
   );
 }
@@ -104,17 +78,6 @@ function ListSpace({ spacing = 2 }) {
   );
 }
 
-function EndBanner() {
-  return (
-    <div className="flex items-center pt-8 gap-3">
-      <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
-      <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary">
-        ✦ ✦ ✦
-      </span>
-      <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
-    </div>
-  );
-}
 
 
 function CategoryBanner({ category, icon: Icon }) {
@@ -130,15 +93,15 @@ function CategoryBanner({ category, icon: Icon }) {
             font-serif font-bold capitalize
             tracking-[0.15em]
             text-primary
-            text-xl sm:text-2xl lg:text-3xl
+            text-2xl sm:text-3xl lg:text-4xl
           "
       >
-        {Icon && (
+        {/* {Icon && (
           <Icon
             size={28}
             className="text-current shrink-0 lg:w-7 lg:h-7"
           />
-        )}
+        )} */}
 
         {category?.name || ''}
       </span>
@@ -247,7 +210,7 @@ function TextList({ products, onProductOpen }) {
   return (
     <div className="rounded-lg  overflow-hidden ">
       {/* Mobile: single column, all items stacked */}
-      <ListBanner spacing={6} start={true} />
+      <ListBanner />
       <div className="sm:hidden  divide-y divide-border/25 ">
         {products.map((p, i) => (
           <TextListItem key={p.id} product={p} onOpen={onProductOpen} delay={i * 0.04} />
@@ -286,7 +249,7 @@ function TextList({ products, onProductOpen }) {
           );
         })}
       </div>
-      <ListBanner spacing={6} />
+      <ListBanner />
     </div>
   );
 }
@@ -411,7 +374,7 @@ export default function ProductGrid({
               return (
                 <div key={group.uid} className="mt-6">
                   {shouldShowSubTitle && (
-                    <h4 className="w-full text-center text-2xl font-serif font-semibold mb-2 text-primary px-2 py-1 rounded">
+                    <h4 className="w-full text-center font-serif font-semibold my-2 text-primary px-2 py-1 rounded capitalize text-1xl sm:text-1xl lg:text-2xl">
                       {subName}
                     </h4>
                   )}
