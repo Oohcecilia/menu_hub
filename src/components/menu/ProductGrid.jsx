@@ -109,24 +109,15 @@ function CategoryBanner({ category, icon: Icon }) {
   );
 }
 
-/* ─── Text list item (no-image products) ──*/
+
+/* ─── Text list item (no-image products with multi-price support) ──*/
 function TextListItem({ product, onOpen, delay = 0 }) {
   const { getLocalizedField } = useLanguage();
   const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
   const qty = getProductQuantity(product.id);
-  const name = getLocalizedField(product?.properties, 'name') || product.name;
-  const desc = getLocalizedField(product?.properties, 'details');
+  const name = getLocalizedField(product, 'translations') || product.name;
+  const desc = getLocalizedField(product, 'details');
   const location = useLocation();
-
-  const handleMinus = (e) => {
-    e.stopPropagation();
-    const cartItems = items.filter(i => i.product_id === product.id);
-    if (!cartItems.length) return;
-    const last = cartItems[cartItems.length - 1];
-    const lastIndex = items.findIndex(i => i === last);
-    last.quantity > 1 ? updateQuantity(lastIndex, last.quantity - 1) : removeItem(lastIndex);
-  };
-  const handlePlus = (e) => { e.stopPropagation(); addItem(product, 1); };
 
   return (
     <motion.div
@@ -147,58 +138,67 @@ function TextListItem({ product, onOpen, delay = 0 }) {
       transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Left: Name + Description */}
-      <div className="min-w-0">
-        <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-4">
 
           {/* Left Content */}
           <div className="min-w-0 flex items-start gap-2">
 
             {/* Product Name */}
-            <p className="font-serif capitalize font-medium leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300 break-words">
+            <p className="font-serif uppercase font-medium leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300 break-words">
               {name}
 
               {location.pathname.startsWith("/debug") && (
-                <span className="text-muted-foreground">
-                  {" "} - {product.id}
+                <span className="text-muted-foreground text-xs normal-case block mt-0.5">
+                  ID: {product.id}
                 </span>
               )}
             </p>
 
-
             {qty > 0 && (
               <div
-                className=" flex-shrink-0 flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-sm">
+                className="flex-shrink-0 flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-sm mt-0.5">
                 {qty}
               </div>
             )}
           </div>
 
-          {/* Price */}
-          <span
-            className="
-        text-primary font-light tracking-widest
-        text-base whitespace-nowrap flex-shrink-0
-      "
-          >
-            {product.price}
-          </span>
+          {/* Dynamic Price Display Stack */}
+          <div className="flex flex-col items-end gap-1.5 flex-shrink-0 text-right">
+            {product.prices && product.prices.length > 0 ? (
+              product.prices.map((p) => (
+                <div key={p.uid} className="flex items-center gap-2 justify-end">
+                  {p.label && (
+                    <span className="text-[10px] font-sans font-medium tracking-wider uppercase bg-muted text-muted-foreground border border-border/50 px-1.5 py-0.5 rounded-sm">
+                      {p.label}
+                    </span>
+                  )}
+                  <span className="text-primary font-light tracking-widest text-base whitespace-nowrap">
+                    {p.price}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <span className="text-primary font-light tracking-widest text-base whitespace-nowrap">
+                {product.price || 0}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Description */}
         {desc && (
           <p
-            className=" font-sans
+            className="font-sans
         text-sm text-muted-foreground
         mt-1 line-clamp-2
         leading-relaxed font-light
       "
           >
-            {desc}
+            {typeof desc === 'object' ? (desc.def || desc.en) : desc}
           </p>
         )}
       </div>
-
-
     </motion.div>
   );
 }
@@ -213,7 +213,7 @@ function TextList({ products, onProductOpen }) {
       <ListBanner />
       <div className="sm:hidden  divide-y divide-border/25 ">
         {products.map((p, i) => (
-          <TextListItem key={p.id} product={p} onOpen={onProductOpen} delay={i * 0.04} />
+          <TextListItem key={p.name} product={p} onOpen={onProductOpen} delay={i * 0.04} />
         ))}
       </div>
 
@@ -259,7 +259,7 @@ function CategorySection({ products, onProductOpen }) {
 
   const withImage = products.filter(
     p =>
-      (p.image?.length ?? 0) > 0 && (p.website_picture)
+      (p.image?.length ?? 0) > 0 && (p.picture)
   );
   const activeCategory = '';
 
@@ -363,7 +363,7 @@ export default function ProductGrid({
 
               if (subProducts.length === 0) return null;
 
-              const subName = getLocalizedField(group?.properties, "name") || group.name;
+              const subName = getLocalizedField(group, "translations") || group.name;
               
               // Hide subcategory title if it's identical to the main category name
               const shouldShowSubTitle = 

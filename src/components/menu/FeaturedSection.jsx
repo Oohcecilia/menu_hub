@@ -69,55 +69,6 @@ function useProductCart(product) {
     };
 }
 
-/* ─── Minimal add button ────────────────────────────────────────── */
-function AddBtn({ product, onOpen }) {
-    const { qty, handleMinus, handlePlus } = useProductCart(product);
-
-    const hasVariations =
-        Array.isArray(product?.variations)
-            ? product.variations.length > 0
-            : !!product?.variations;
-
-    return qty === 0 ? (
-        <motion.button
-            whileTap={{ scale: 0.85 }}
-            disabled={hasVariations}
-            onClick={handlePlus}
-            className={`
-    h-6 w-6 rounded-full border border-primary/35
-    flex items-center justify-center
-    transition-all duration-200
-    ${hasVariations
-                    ? "cursor-not-allowed opacity-60 text-primary/60"
-                    : "text-primary hover:bg-primary hover:text-primary-foreground"
-                }
-  `}
-        >
-            <Plus className="h-3 w-3" />
-        </motion.button>
-
-    ) : (
-        <div className="flex items-center gap-1.5 rounded-full px-2 py-0.5 bg-foreground/8 border border-primary backdrop-blur-sm">
-            <button
-                onClick={handleMinus}
-                className="h-5 w-5 flex items-center justify-center text-foreground/60 hover:text-foreground"
-            >
-                <Minus className="h-2.5 w-2.5" />
-            </button>
-
-            <span className="text-foreground text-xs font-bold w-3 text-center">
-                {qty}
-            </span>
-
-            <button
-                onClick={handlePlus}
-                className="h-5 w-5 flex items-center justify-center text-foreground/60 hover:text-foreground"
-            >
-                <Plus className="h-2.5 w-2.5 text-primary" />
-            </button>
-        </div>
-    );
-}
 
 /* ─── Floating product image with ambient glow ──────────────────── */
 function FloatImage({ src, alt, size, float = true }) {
@@ -167,12 +118,10 @@ function FloatWrap({ children, delay = 0, amplitude = 6 }) {
         </motion.div>
     );
 }
-
-
 /* ─── Small card ─────────────────────────────────────────────────── */
 function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
     const { getLocalizedField } = useLanguage();
-    const name = getLocalizedField(product.properties, 'name') || product.name;
+    const name = getLocalizedField(product, 'transitions') || product.name;
     const { qty } = useProductCart(product);
 
     return (
@@ -188,30 +137,48 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
             <div className="mt-2 w-full text-center">
                 <div className="flex items-center justify-center gap-4">
                     <div className="min-w-0 flex items-center gap-2">
-                        <p className="font-serif capitalize font-light text-xl text-foreground/80 tracking-wide truncate">
+                        <p className="font-serif capitalize font-light text-xl text-foreground/80 tracking-wide truncate max-w-[140px]">
                             {name}
                         </p>
 
                         {qty > 0 && (
                             <div
                                 className="
-                        flex-shrink-0
-                        flex items-center justify-center
-                        min-w-5 h-5 px-1
-                        rounded-full
-                        bg-primary text-primary-foreground
-                        text-xs font-semibold
-                        shadow-sm
-                    "
+                                flex-shrink-0
+                                flex items-center justify-center
+                                min-w-5 h-5 px-1
+                                rounded-full
+                                bg-primary text-primary-foreground
+                                text-xs font-semibold
+                                shadow-sm
+                            "
                             >
                                 {qty}
                             </div>
                         )}
                     </div>
 
-                    <p className="font-bold tracking-widest text-primary">
-                        {product.price}
-                    </p>
+                    {/* Multi-Price Stack for Small Cards */}
+                    <div className="flex flex-col items-start gap-1 flex-shrink-0">
+                        {product.prices && product.prices.length > 0 ? (
+                            product.prices.map((p) => (
+                                <div key={p.uid} className="flex items-center gap-1.5 text-xs">
+                                    {p.label && (
+                                        <span className="text-[9px] font-sans font-medium tracking-wider uppercase bg-muted text-muted-foreground border border-border/40 px-1 py-0.25 rounded-sm">
+                                            {p.label}
+                                        </span>
+                                    )}
+                                    <span className="font-bold tracking-widest text-primary">
+                                        {p.price}
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="font-bold tracking-widest text-primary">
+                                {product.price || 0}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
         </motion.div>
@@ -276,7 +243,6 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
         );
     };
 
-
     const { hero, gridItems } = layout;
     const { qty = 0 } = useProductCart(hero || {});
 
@@ -317,32 +283,49 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                             </FloatWrap>
 
                             <div className="text-center mt-2">
+                                <div className="flex items-center justify-center gap-4 mt-1.5">
+                                    <div className="min-w-0 flex items-center gap-2">
+                                        <p className="font-serif capitalize font-light text-xl text-foreground/95 tracking-wide">
+                                            {getLocalizedField(hero, "translations") || hero?.name}
+                                        </p>
+                                        {qty > 0 && (
+                                            <div
+                                                className="
+                                                    flex-shrink-0
+                                                    flex items-center justify-center
+                                                    min-w-5 h-5 px-1
+                                                    rounded-full
+                                                    bg-primary text-primary-foreground
+                                                    text-xs font-semibold
+                                                    shadow-sm
+                                                "
+                                            >
+                                                {qty}
+                                            </div>
+                                        )}
+                                    </div>
 
-                                <div className="flex items-center justify-center gap-3 mt-1.5">
-                                    <div className="min-w-0 flex items-start gap-2"></div>
-                                    <p className="font-serif capitalize font-light text-xl text-foreground/95 tracking-wide">
-                                        {getLocalizedField(hero.properties, "name") || hero?.name}
-                                    </p>
-                                    {qty > 0 && (
-                                        <div
-                                            className="
-                                                flex-shrink-0
-                                                flex items-center justify-center
-                                                min-w-5 h-5 px-1
-                                                rounded-full
-                                                bg-primary text-primary-foreground
-                                                text-xs font-semibold
-                                                shadow-sm
-                                            "
-                                        >
-                                            {qty}
-                                        </div>
-                                    )}
-                                    <div />
-                                    <p className="font-bold tracking-widest text-base text-primary">
-                                        {hero.price}
-                                    </p>
-                                    {/* <AddBtn product={hero} onOpen={onOpen} /> */}
+                                    {/* Multi-Price Stack for Featured Hero Card */}
+                                    <div className="flex flex-col items-start gap-1 flex-shrink-0">
+                                        {hero.prices && hero.prices.length > 0 ? (
+                                            hero.prices.map((p) => (
+                                                <div key={p.uid} className="flex items-center gap-1.5 text-sm">
+                                                    {p.label && (
+                                                        <span className="text-[10px] font-sans font-medium tracking-wider uppercase bg-muted text-muted-foreground border border-border/40 px-1.5 py-0.5 rounded-sm">
+                                                            {p.label}
+                                                        </span>
+                                                    )}
+                                                    <span className="font-bold tracking-widest text-base text-primary">
+                                                        {p.price}
+                                                    </span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="font-bold tracking-widest text-base text-primary">
+                                                {hero.price || 0}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
