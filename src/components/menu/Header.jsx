@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
-import { Sun, Moon, Crown, History } from 'lucide-react';
+import { Check, ChevronDown, Sun, Moon, Crown, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/lib/themeToggle.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
@@ -21,6 +27,7 @@ export default function Header({ products, setIsOpen }) {
   const { activeBranch } = useBranch();
   const [historyOpen, setHistoryOpen] = useState(false);
   const isMobile = useIsMobile()
+  const currentLanguage = LANGUAGES.find(language => language.code === lang) || LANGUAGES[0];
   
   const noImage = activeBranch?.no_image;
   const brandName = activeBranch?.brand_name || 'The Menu';
@@ -82,18 +89,34 @@ export default function Header({ products, setIsOpen }) {
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
 
-            <select
-              value={lang}
-              onChange={e => setLang(e.target.value)}
-              aria-label="Language"
-              className="h-9 min-w-14 rounded-full border-0 bg-secondary px-2.5 py-1.5 text-center text-sm font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              {LANGUAGES.map(l => (
-                <option key={l.code} value={l.code} className="text-base">
-                  {l.label}
-                </option>
-              ))}
-            </select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Language"
+                  className="inline-flex h-9 min-w-16 items-center justify-center gap-1 rounded-full bg-secondary px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  <span>{currentLanguage.label}</span>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-24 rounded-xl p-1">
+                {LANGUAGES.map(language => {
+                  const selected = language.code === lang;
+
+                  return (
+                    <DropdownMenuItem
+                      key={language.code}
+                      onClick={() => setLang(language.code)}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-base font-semibold"
+                    >
+                      <span>{language.label}</span>
+                      {selected && <Check className="h-4 w-4 text-primary" />}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
 
           </div>
