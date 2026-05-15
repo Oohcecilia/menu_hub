@@ -362,13 +362,25 @@ export default function ProductGrid({
   return (
     <div className="space-y-12">
       {categories.map((cat) => {
-        const cName = cat?.name?.en ? getLocalizedField(cat?.name, "en") : cat?.en;
+        const cName = cat?.name?.en
+          ? getLocalizedField(cat?.name, "en")
+          : cat?.en;
+
         const icon = getCategoryIcon(cName);
 
         const catProducts = products[cat.id] || [];
         const subCategories = groupedSubCats[cat.id] || [];
 
-        const hasSubCategories = subCategories.length > 0;
+        // only keep subcategories that actually have products
+        const visibleSubCategories = subCategories.filter((sub) =>
+          catProducts.some(
+            (p) =>
+              String(p.productgroup?.uid || p.productgroup) ===
+              String(sub.uid)
+          )
+        );
+
+        const hasSubCategories = visibleSubCategories.length > 0;
 
         const hasContent =
           catProducts.length > 0 || hasSubCategories;
@@ -386,41 +398,38 @@ export default function ProductGrid({
           >
             <CategoryBanner category={cat} icon={icon} />
 
-            {/* =========================
-                CASE 1: NO SUBCATEGORIES
-                ========================= */}
-            {/* {!hasSubCategories && catProducts.length > 0 && (
+            {/* NO SUBCATEGORIES */}
+            {!hasSubCategories && catProducts.length > 0 && (
               <CategorySection
                 products={catProducts}
                 onProductOpen={onProductOpen}
               />
-            )} */}
+            )}
 
-            {/* =========================
-                CASE 2: HAS SUBCATEGORIES
-                ========================= */}
+            {/* HAS SUBCATEGORIES */}
             {hasSubCategories &&
-              subCategories.map((sub) => {
+              visibleSubCategories.map((sub) => {
                 const subName =
                   sub.properties?.name?.en ||
                   sub.properties?.name?.def ||
                   "";
 
-                const subProducts = catProducts.filter((p) =>
-                  String(p.productgroup?.uid || p.productgroup) ===
-                  String(sub.uid)
+                const subProducts = catProducts.filter(
+                  (p) =>
+                    String(
+                      p.productgroup?.uid || p.productgroup
+                    ) === String(sub.uid)
                 );
-
-                if (!subProducts.length) return null;
 
                 return (
                   <div key={sub.uid} className="mt-6">
-
-                    {cName?.toLowerCase() !== subName?.toLowerCase() && subName !== '' && (
-                      <h4 className="w-full text-center text-lg font-serif font-semibold mb-2 text-primary px-2 py-1 rounded">
-                        {subName}
-                      </h4>
-                    )}
+                    {cName?.toLowerCase() !==
+                      subName?.toLowerCase() &&
+                      subName !== "" && (
+                        <h4 className="w-full text-center text-lg font-serif font-semibold mb-2 text-primary px-2 py-1 rounded">
+                          {subName}
+                        </h4>
+                      )}
 
                     <CategorySection
                       products={subProducts}
