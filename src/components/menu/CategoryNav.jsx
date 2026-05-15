@@ -52,13 +52,13 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
   const items = categories.map((c) => {
     const trans = c.name?.translation;
 
-    // console.log("trans: ", trans);
+    console.log("trans: ", trans);
 
     return {
       id: c.id,
       iconName: getLocalizedField(c.name, 'en'),
       label: trans
-        ? getLocalizedField(c?.name, "en")
+        ? getLocalizedField(c?.name, "translation")
         : c?.name?.en,
     };
   });
