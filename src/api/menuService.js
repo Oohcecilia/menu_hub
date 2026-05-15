@@ -37,14 +37,18 @@ export async function getMenuData(host, order) {
 function formatCategories(apiData = []) {
   if (!Array.isArray(apiData)) return [];
 
-  return apiData.map((item) => ({
-    id: String(item.id ?? item.uid),
-    name: {
-      en: item.name?.en || item.name,
-      translation: item.name?.translation || {},
-    },
-    sort_order: item.sort_order ?? item.order ?? 0,
-  }));
+  return apiData.map((item) => {
+    const propName = item?.properties?.name || {};
+
+    return {
+      id: String(item?.id ?? item?.uid ?? ""),
+      name: {
+        en: item?.name?.en || item?.name || "",
+        translation: propName,
+      },
+      sort_order: item?.sort_order ?? item?.order ?? 0,
+    };
+  });
 }
 
 
