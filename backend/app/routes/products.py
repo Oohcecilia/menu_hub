@@ -22,6 +22,36 @@ async def get_product_groups(
     host = request.url.hostname 
     # host = "iloilo.giuseppe.ph"
 
+    query = """
+        SELECT
+            pb.prices, 
+            pb.website_picture,
+            p.*,
+            mc.uid AS mcuid,
+            mc.title AS mctitle,
+            mc.sorder AS mcorder,
+            mcpg.product_group_uid AS subpgu,
+            pg.name AS pgname,
+            pg.properties AS pgproperties
+        FROM menus m
+        JOIN menu_categories mc
+            ON mc.menu_uid = m.uid
+        JOIN menu_category_product_groups mcpg
+            ON mcpg.menu_category_uid = mc.uid
+        JOIN product_groups pg
+            ON pg.uid = mcpg.product_group_uid
+        JOIN product_group_products pgp
+            ON pgp.groupuid = pg.uid
+        JOIN products p
+            ON p.uid = pgp.puid
+        JOIN product_branches pb
+            ON pb.puid = p.uid AND pb.buid = m.buid
+        WHERE pb.website = 1
+            AND m.active = 1
+            AND m.menu_url = %s
+        ORDER BY mc.sorder ASC
+    """
+
     await conn.execute(query, (host,))
     results = await conn.fetchall()
 
@@ -48,22 +78,27 @@ async def get_product_groups(
         groupuid = row["mcuid"]
         product_group_uid = row["subpgu"]
 
-        try:
-            properties = json.loads(row["pgproperties"] or "{}")
-        except Exception:
-            properties = {}
+
 
         # Build category once
         if groupuid not in categories:
+            try:
+                properties = json.loads(row["pgproperties"] or "{}")
+            except Exception:
+                properties = {}
             categories[groupuid] = {
                 "uid": groupuid,
                 "name": row["mctitle"],
-                "order": row["mcorder"]
-                "properties":
+                "order": row["mcorder"],
+                "properties": properties
             }
 
 
         if product_group_uid not in subCategories:
+            try:
+                properties = json.loads(row["pgproperties"] or "{}")
+            except Exception:
+                properties = {}
 
             subCategories[product_group_uid] = {
                 "uid": product_group_uid,
@@ -156,35 +191,6 @@ async def get_product_groups(
 
 
 
-    # query = """
-    #     SELECT
-    #         pb.prices, 
-    #         pb.website_picture,
-    #         p.*,
-    #         mc.uid AS mcuid,
-    #         mc.title AS mctitle,
-    #         mc.sorder AS mcorder,
-    #         mcpg.product_group_uid AS subpgu,
-    #         pg.name AS pgname,
-    #         pg.properties AS pgproperties
-    #     FROM menus m
-    #     JOIN menu_categories mc
-    #         ON mc.menu_uid = m.uid
-    #     JOIN menu_category_product_groups mcpg
-    #         ON mcpg.menu_category_uid = mc.uid
-    #     JOIN product_groups pg
-    #         ON pg.uid = mcpg.product_group_uid
-    #     JOIN product_group_products pgp
-    #         ON pgp.groupuid = pg.uid
-    #     JOIN products p
-    #         ON p.uid = pgp.puid
-    #     JOIN product_branches pb
-    #         ON pb.puid = p.uid AND pb.buid = m.buid
-    #     WHERE pb.website = 1
-    #         AND m.active = 1
-    #         AND m.menu_url = %s
-    #     ORDER BY mc.sorder ASC
-    # """
 
 
 
