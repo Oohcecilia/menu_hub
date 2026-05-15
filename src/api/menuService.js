@@ -44,7 +44,7 @@ function formatCategories(apiData = []) {
       id: String(item?.id ?? item?.uid ?? ""),
       name: {
         en: item?.name?.en || item?.name || "",
-        translation: {},
+        translation: propName,
       },
       sort_order: item?.sort_order ?? item?.order ?? 0,
     };
