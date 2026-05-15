@@ -85,7 +85,8 @@ export default function Header({ products, setIsOpen }) {
             <select
               value={lang}
               onChange={e => setLang(e.target.value)}
-              className="text-xs bg-secondary border-0 rounded-full px-2.5 py-1.5 text-foreground cursor-pointer focus:outline-none"
+              aria-label="Language"
+              className="h-9 min-w-14 rounded-full border-0 bg-secondary px-2.5 py-1.5 text-center text-xs font-semibold text-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               {LANGUAGES.map(l => (
                 <option key={l.code} value={l.code}>{l.label}</option>
