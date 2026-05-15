@@ -49,14 +49,12 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
     };
   }, [checkOverflow, categories]);
 
-  console.log(categories)
 
   const items = categories.map((c) => {
 
     const name = c.name
     const translation = getLocalizedField(c, "translations")
 
-    console.log("tr", translation)
 
     return {
       id: c.id,
