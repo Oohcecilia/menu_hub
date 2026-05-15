@@ -389,12 +389,12 @@ export default function ProductGrid({
             {/* =========================
                 CASE 1: NO SUBCATEGORIES
                 ========================= */}
-            {!hasSubCategories && catProducts.length > 0 && (
+            {/* {!hasSubCategories && catProducts.length > 0 && (
               <CategorySection
                 products={catProducts}
                 onProductOpen={onProductOpen}
               />
-            )}
+            )} */}
 
             {/* =========================
                 CASE 2: HAS SUBCATEGORIES

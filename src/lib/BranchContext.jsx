@@ -46,46 +46,6 @@ function BranchContextInner({ children }) {
   }, [branchSlug, branches]);
 
 
-  // ✅ fetch menu by branch
-  // useEffect(() => {
-  //   async function load() {
-  //     setLoading(true);
-
-  //     try {
-  //       const buid = activeBranch?.buid || 1154;
-  //       const order = activeBranch?.categories || {};
-
-  //       const res = await getMenuData( order );
-
-  //       setCategories(
-  //         (res?.categories || []).map(c => ({
-  //           ...c,
-  //           id: String(c.id),
-  //         }))
-  //       );
-
-  //       setSubCategories(
-  //         (res?.subCategories || []).map(s => ({
-  //           ...s,
-  //           id: String(s.id),
-  //         }))
-  //       );
-
-  //       setProducts(
-  //         (res?.products || []).map(p => ({
-  //           ...p,
-  //           category_id: String(p.category_id),
-  //         }))
-  //       );
-  //     } catch (e) {
-  //       console.error("Failed to load menu", e);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-
-  //   load();
-  // }, [activeBranch]);
 
   useEffect(() => {
     async function load() {

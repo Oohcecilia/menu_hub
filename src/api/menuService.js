@@ -64,6 +64,8 @@ function formatSubCategories(apiData = []) {
 }
 
 
+
+
 function formatProducts(products = []) {
   
   return products
@@ -113,89 +115,6 @@ function formatProducts(products = []) {
 
 
 
-
-
-
-
-// export async function getMenuData(host, order) {
-
-
-
-//   try {
-//     const res = await fetch(
-//       `${API_BASE}/product-groups`
-//     );
-
-
-//     if (!res.ok) {
-//       throw new Error(`HTTP error: ${res.status}`);
-//     }
-
-//     const data = await res.json();
-
-//     const categories = formatCategories(data.categories);
-//     const subCategories = data?.subCategories || [];
-//     const products = formatProducts(data.products);
-    
-//     return {categories: categories, subCategories: subCategories, products: products}
-
-//   } catch (error) {
-//     console.error("getCategories error:", error);
-//     return [];
-//   }
-// }
-
-
-
-// function formatCategories(apiData = []) {
-//   if (!Array.isArray(apiData)) return [];
-
-//   return apiData.map((item) => ({
-//     id: item.uid,
-//     name: {
-//       en: item.name,
-//       translation: {},
-//     },
-//     sort_order: item.order,
-//   }));
-// }
-
-
-
-
-// function formatProducts(products = []) {
-  
-//   return products
-//     .map((item) => {
-
-
-//       const name = item.properties.name || null;
-//       const description = item.properties.description || null;
-//       const details = item.properties.details || null;
-//       const variations = item.variations || [];
-
-
-//       const price = Number(item.price); 
-
-
-//       return {
-//         id: item.uid,
-//         default_name: item.name,
-//         name,
-//         description: details || description,
-//         price,
-//         image: item.image,
-//         category_id: item.groupuid,
-//         is_available: true,
-//         variations,
-//         sort_order: item.sort_order || 0,
-//         options: [],
-//         website_picture: item.website_picture,
-//       };
-//     })
-//     .filter(Boolean)
-//     .sort((a, b) => a.price - b.price); // ✅ ascending price
-// }
 
 
 
