@@ -188,7 +188,7 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
             <div className="mt-2 w-full text-center">
                 <div className="flex items-center justify-between gap-4">
                     <div className="min-w-0 flex items-start gap-2">
-                        <p className="font-serif uppercase font-light text-foreground/80 tracking-wide truncate">
+                        <p className="font-serif capitalize font-light text-foreground/80 tracking-wide truncate">
                             {name}
                         </p>
                         {qty > 0 && (
@@ -309,7 +309,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
 
                                 <div className="flex items-center justify-center gap-3 mt-1.5">
                                     <div className="min-w-0 flex items-start gap-2"></div>
-                                    <p className="font-serif uppercase font-light text-xl text-foreground/95 tracking-wide">
+                                    <p className="font-serif capitalize font-light text-xl text-foreground/95 tracking-wide">
                                         {getLocalizedField(hero.properties, "name") || hero?.name}
                                     </p>
                                     {qty > 0 && (
@@ -378,4 +378,3 @@ export default function FeaturedSection({ products, activeCategory, onProductOpe
         </motion.section>
     );
 }
-

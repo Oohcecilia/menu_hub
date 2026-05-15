@@ -154,7 +154,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
           <div className="min-w-0 flex items-start gap-2">
 
             {/* Product Name */}
-            <p className="font-serif uppercase font-medium leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300 break-words">
+            <p className="font-serif capitalize font-medium leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300 break-words">
               {name}
 
               {location.pathname.startsWith("/debug") && (

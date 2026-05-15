@@ -256,7 +256,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
           <div className="flex-1 overflow-y-auto p-5 space-y-5">
             <div>
               <div className="flex justify-between items-start gap-3">
-                <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white uppercase">
+                <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white capitalize">
                   {getLocalizedField(product?.properties, "name") || product?.name}
                 </h2>
 
@@ -343,7 +343,6 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
     </AnimatePresence>
   );
 }
-
 
 
 
