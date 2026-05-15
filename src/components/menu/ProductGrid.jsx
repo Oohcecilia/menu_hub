@@ -84,6 +84,7 @@ function ListSpace({ spacing = 2 }) {
 function CategoryBanner({ category }) {
 
   const { getLocalizedField } = useLanguage();
+  const label = getLocalizedField(category, "name") || category?.label || category?.name || "";
 
   return (
     <div className="flex items-center justify-center gap-5 mt-24 mb-4">
@@ -97,7 +98,7 @@ function CategoryBanner({ category }) {
             text-3xl sm:text-3xl lg:text-4xl
           "
       >
-        {category?.name || ''}
+        {label}
       </span>
     </div>
   );
@@ -108,7 +109,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
   const { getLocalizedField } = useLanguage();
   const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
   const qty = getProductQuantity(product.id);
-  const name = product.default_name || product.name || getLocalizedField(product, 'translations') || getLocalizedField(product?.properties, 'name');
+  const name = getLocalizedField(product, 'translations') || getLocalizedField(product, 'name') || product.default_name || product.name;
   const desc = getLocalizedField(product?.properties, 'details') || getLocalizedField(product, 'details') || product?.details?.description;
   const location = useLocation();
 
@@ -330,7 +331,7 @@ export default function ProductGrid({
               category={{ 
                 id: catId, 
                 label: categoryLabel,
-                name: categoryLabel,
+                name: getLocalizedObject(section, "name") || { en: categoryLabel },
               }}
             />
 

@@ -62,7 +62,7 @@ export default function ProductCard({ product, onOpen }) {
       <div className="flex flex-1 flex-col p-4">
         <div className="flex-1">
           <h3 className="line-clamp-1 text-sm font-bold tracking-tight text-foreground">
-            {product?.default_name || product?.name || getLocalizedField(product, 'translations') || getLocalizedField(product?.properties, 'name')}
+            {getLocalizedField(product, 'translations') || getLocalizedField(product, 'name') || product?.default_name || product?.name}
           </h3>
           <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground/80">
             {getLocalizedField(product, 'details') || getLocalizedField(product?.properties, 'details')}

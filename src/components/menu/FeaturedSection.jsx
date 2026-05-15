@@ -208,7 +208,7 @@ function FeaturedPriceChoices({ product, onOpen, name, align = "center" }) {
 /* ─── Small card ─────────────────────────────────────────────────── */
 function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
     const { getLocalizedField } = useLanguage();
-    const name = product.default_name || product.name || getLocalizedField(product, 'translations') || getLocalizedField(product.properties, 'name');
+    const name = getLocalizedField(product, 'translations') || getLocalizedField(product, 'name') || product.default_name || product.name;
     const { qty } = useProductCart(product);
 
     return (
@@ -302,6 +302,9 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
 
     const { hero, gridItems } = layout;
     const { qty = 0 } = useProductCart(hero || {});
+    const heroName = hero
+        ? getLocalizedField(hero, "translations") || getLocalizedField(hero, "name") || hero.default_name || hero.name
+        : "";
 
     return (
         <div className="relative w-full overflow-hidden sm:overflow-visible">
@@ -344,7 +347,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                 <div className="flex items-center justify-center gap-3 mt-1.5">
                                     <div className="min-w-0 flex items-start gap-2"></div>
                                     <p className="font-serif capitalize font-light text-xl text-foreground/95 tracking-wide">
-                                        {hero.default_name || hero.name || getLocalizedField(hero, "translations") || getLocalizedField(hero.properties, "name")}
+                                        {heroName}
                                     </p>
                                     {qty > 0 && (
                                         <div
@@ -364,7 +367,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                                     <div />
                                     {/* <AddBtn product={hero} onOpen={onOpen} /> */}
                                 </div>
-                                <FeaturedPriceChoices product={hero} onOpen={onOpen} name={hero.default_name || hero.name || getLocalizedField(hero, "translations") || getLocalizedField(hero.properties, "name")} />
+                                <FeaturedPriceChoices product={hero} onOpen={onOpen} name={heroName} />
                             </div>
                         </motion.div>
                     </div>

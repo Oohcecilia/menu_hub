@@ -156,7 +156,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
   const { addItem } = useCart();
   const { t, getLocalizedField } = useLanguage();
 
-  const name = product?.default_name || product?.name || getLocalizedField(product, 'translations') || getLocalizedField(product, 'name');
+  const name = getLocalizedField(product, 'translations') || getLocalizedField(product, 'name') || product?.default_name || product?.name;
 
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
@@ -408,6 +408,5 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
     </AnimatePresence>
   );
 }
-
 
 

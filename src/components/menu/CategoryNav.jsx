@@ -55,7 +55,7 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
 
     return {
       id: c.id,
-      label: c.label || translation || c?.name?.en || name,
+      label: translation || c.label || c?.name?.en || name,
     };
   });
 
