@@ -235,7 +235,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
               <img
                 src={product.image}
                 alt={getLocalizedField(product, "name")}
-                className="w-full h-full object-contain drop-shadow-xl relative"
+                className="w-full h-full object-contain drop-shadow-xl relative w-[90%]"
                 style={{ maxHeight: 240 }}
                 onError={() => setImgError(true)}
               />

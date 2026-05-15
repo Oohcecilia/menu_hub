@@ -101,12 +101,12 @@ export default function Menu() {
     const filtered = {};
 
     Object.entries(menu).forEach(([catKey, section]) => {
-      const catName = (getLocalizedField(section.properties?.name, 'en') || section.name || catKey).toLowerCase();
+      const catName = (getLocalizedField(section.properties, 'name') || section.name || catKey).toLowerCase();
       const catMatch = catName.includes(search);
 
       // Filter the groups (subcategories)
       const filteredGroups = (section.groups || []).map(group => {
-        const groupName = (getLocalizedField(group.properties?.name, 'en') || group.name || "").toLowerCase();
+        const groupName = (getLocalizedField(group.properties, 'name') || group.name || "").toLowerCase();
         const groupMatch = groupName.includes(search);
 
         // If the group name matches, we keep ALL its products.
@@ -114,7 +114,7 @@ export default function Menu() {
         const filteredProducts = groupMatch
           ? group.products
           : (group.products || []).filter(p => {
-            const pName = (getLocalizedField(p.properties?.name, 'en') || p.name || "").toLowerCase();
+            const pName = (getLocalizedField(p.properties, 'name') || p.name || "").toLowerCase();
             return pName.includes(search);
           });
 

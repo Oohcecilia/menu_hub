@@ -146,7 +146,7 @@ function FloatImage({ src, alt, size, float = true }) {
             )}
             <img
                 src={src} alt={alt}
-                className="relative z-10 object-contain drop-shadow-2xl w-full h-full"
+                className="relative z-10 object-contain drop-shadow-2xl w-full h-full w-[90%]"
                 style={{ filter: 'drop-shadow(0 12px 28px --primary)' }}
             />
         </div>

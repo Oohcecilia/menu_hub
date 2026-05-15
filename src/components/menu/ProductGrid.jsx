@@ -93,7 +93,7 @@ function CategoryBanner({ category, icon: Icon }) {
             font-serif font-bold capitalize
             tracking-[0.15em]
             text-primary
-            text-2xl sm:text-3xl lg:text-4xl
+            text-3xl sm:text-3xl lg:text-4xl
           "
       >
         {/* {Icon && (
