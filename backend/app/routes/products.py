@@ -20,7 +20,6 @@ async def get_product_groups(
 ):
 
     host = request.url.hostname 
-    # host = "iloilo.giuseppe.ph"
 
     query = """
         SELECT

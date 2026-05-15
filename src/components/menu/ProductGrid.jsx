@@ -248,8 +248,6 @@ function TextListItem({ product, onOpen, delay = 0 }) {
 function TextList({ products, onProductOpen }) {
   const isOdd = products.length % 2 !== 0;
 
-
-
   return (
     <div className="rounded-lg  overflow-hidden ">
       {/* Mobile: single column, all items stacked */}
@@ -447,6 +445,23 @@ export default function ProductGrid({
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // export default function ProductGrid({
