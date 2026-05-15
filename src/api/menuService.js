@@ -43,6 +43,7 @@ function formatCategories(apiData = []) {
     return {
       id: String(item?.id ?? item?.uid ?? ""),
       name: {
+        def: item?.name,
         en: item?.name?.en || item?.name || "",
         translation: propName,
       },
