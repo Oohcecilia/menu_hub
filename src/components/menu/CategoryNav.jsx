@@ -52,6 +52,8 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
   const items = categories.map((c) => {
     const trans = c.name?.translation;
 
+    console.log("trans: ", trans);
+
     return {
       id: c.id,
       iconName: getLocalizedField(c.name, 'en'),

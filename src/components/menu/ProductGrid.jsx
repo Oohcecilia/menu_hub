@@ -421,7 +421,6 @@ export default function ProductGrid({
                     ) === String(sub.uid)
                 );
 
-                console.log(`CNAME ${cName} ===== SBG ${subName}`);
 
                 return (
                   <div key={sub.uid} className="mt-6">
