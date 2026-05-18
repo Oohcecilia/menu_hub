@@ -10,6 +10,7 @@ import {
 import { useTheme } from '@/lib/themeToggle.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
+import { branchesData } from '@/data/branches.config';
 import OrderHistoryDrawer from '@/components/menu/OrderHistoryDrawer.jsx';
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -28,12 +29,13 @@ export default function Header({ products, setIsOpen }) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const isMobile = useIsMobile()
   const currentLanguage = LANGUAGES.find(language => language.code === lang) || LANGUAGES[0];
+  const branch = activeBranch || branchesData.giuseppe;
   
-  const noImage = activeBranch?.no_image;
-  const brandName = activeBranch?.brand_name || 'The Menu';
-  const brandTagline = activeBranch?.brand_tagline || 'Crafted with care';
-  const brandLogo = activeBranch?.logo || noImage;
-  const nav_logo = activeBranch?.nav_logo || brandLogo;
+  const noImage = branch?.no_image;
+  const brandName = branch?.brand_name || 'The Menu';
+  const brandTagline = branch?.brand_tagline || 'Crafted with care';
+  const brandLogo = branch?.logo || noImage;
+  const nav_logo = branch?.nav_logo || brandLogo;
 
   // Check if user has any order history
   const hasHistory = (() => {

@@ -13,7 +13,9 @@ export function useBranch() {
 function getSubdomain() {
   const host = window.location.hostname;
 
-  if (host.includes("localhost")) return "giuseppe";
+  if (host.includes("localhost") || host === "127.0.0.1" || host === "::1") {
+    return "giuseppe";
+  }
 
   const parts = host.split(".");
   if (parts.length >= 3) {
