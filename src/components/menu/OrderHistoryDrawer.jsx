@@ -17,43 +17,50 @@ const STATUS_CONFIG = {
   cancelled: { label: 'Cancelled', icon: XCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
 };
 
-export const moveToSelection = ( orders, orderId, products , addItem, onClose, setIsOpen,
-) => {
-  const order = orders.find(
-    (o) => String(o.id) === String(orderId)
-  );
 
+
+// ── 1. FIXED RE-ORDER UTILITY FUNCTION ────────────────────────────
+export const moveToSelection = (orders, orderId, products, addItem, onClose, setIsOpen) => {
+  const order = orders.find((o) => String(o.id) === String(orderId));
 
   if (!order?.items?.length) {
-    console.warn("Order not found:", orderId);
+    console.warn("Order not found or empty:", orderId);
     return;
   }
 
-  // 🔥 faster lookup map
-  const productMap = Object.fromEntries(
-    products.map((p) => [String(p.id), p])
-  );
+  // Generate advanced product index map parsing base items AND unique tier option UIDs
+  const productMap = {};
+  (products || []).forEach((p) => {
+    productMap[String(p.id)] = p;
+    if (p.prices && Array.isArray(p.prices)) {
+      p.prices.forEach((tier) => {
+        if (tier.uid) {
+          productMap[String(tier.uid)] = {
+            ...p,
+            id: String(tier.uid),
+            price: parseFloat(tier.price) || 0,
+            chosenLabel: tier.label || null,
+          };
+        }
+      });
+    }
+  });
 
   order.items.forEach((item, index) => {
-    const product =
-      productMap[String(item.product_id)];
+    const targetProductVariant = productMap[String(item.product_id)];
 
-    if (!product) {
-      console.warn(
-        "Product not found:",
-        item.product_id
-      );
+    if (!targetProductVariant) {
+      console.warn("Product layout signature lost for ID:", item.product_id);
       return;
     }
 
+    // Pass down the resolved product variant object clone intact
     addItem(
-      product,
+      targetProductVariant,
       Number(item.quantity) || 1,
       item.note || "",
       item.variations || [],
-      `${Date.now()}-${index}-${Math.random()
-        .toString(16)
-        .slice(2)}`
+      `${Date.now()}-${index}-${Math.random().toString(16).slice(2)}`
     );
   });
 
@@ -61,107 +68,126 @@ export const moveToSelection = ( orders, orderId, products , addItem, onClose, s
   setIsOpen?.(true);
 };
 
-export const removeOrderById = (
-  orderId,
-  setOrders
-)=> {
+export const removeOrderById = (orderId, setOrders) => {
   setOrders((prev) => {
-    const updated = prev.filter(
-      (o) => String(o.id) !== String(orderId)
-    );
-
-    localStorage.setItem(
-      "orders",
-      JSON.stringify(updated)
-    );
-
+    const updated = prev.filter((o) => String(o.id) !== String(orderId));
+    localStorage.setItem("orders", JSON.stringify(updated));
     return updated;
   });
 };
 
-function OrderCard({
-  order,
-  products,
-  orders,
-  setOrders,
-  onClose,
-  setIsOpen
-}) {
-
-  const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+// ── 2. FIXED ORDER CARD RE-RENDER SUBCOMPONENT ─────────────────────
+function OrderCard({ order, products, orders, setOrders, onClose, setIsOpen }) {
   const { t, getLocalizedField } = useLanguage();
   const { addItem } = useCart();
 
-  const itemCount = order.items?.reduce((s, i) => s + i.quantity, 0) || 0;
-
-
-  // 🔥 FAST LOOKUP MAP
+  // Generate multi-tier advanced product registry lookups
   const productMap = useMemo(() => {
-    return Object.fromEntries(
-      (products || []).map(p => [String(p.id), p])
-    );
+    const map = {};
+    (products || []).forEach((p) => {
+      map[String(p.id)] = p;
+      if (p.prices && Array.isArray(p.prices)) {
+        p.prices.forEach((tier) => {
+          if (tier.uid) {
+            map[String(tier.uid)] = {
+              ...p,
+              id: String(tier.uid),
+              price: parseFloat(tier.price) || 0,
+              chosenLabel: tier.label || null,
+            };
+          }
+        });
+      }
+    });
+    return map;
   }, [products]);
 
+  // Derive dynamic inline content fields safely
+  const { previewText, calculatedSubtotal, totalItemCount } = useMemo(() => {
+    let subtotalCalc = order.subtotal || 0;
+    let itemCountCalc = 0;
 
-  const { prodInfo, subtotal } = useMemo(() => {
-    return buildOrderSummary(order?.items, productMap);
-  }, [order?.items, productMap]);
+    const itemsList = order.items || [];
+    const textPreview = itemsList
+      .map((item) => {
+        itemCountCalc += Number(item.quantity) || 0;
+        const mappedProduct = productMap[String(item.product_id)];
 
+        // Fallback subtotal calculation wrapper if transaction data predates order object schema updates
+        if (!order.subtotal) {
+          const itemUnitPrice = mappedProduct?.price || item.price || 0;
+          subtotalCalc += itemUnitPrice * (Number(item.quantity) || 0);
+        }
+
+        const baseProductName = mappedProduct
+          ? getLocalizedField(mappedProduct, "translations") || mappedProduct.default_name
+          : item.name || t("product");
+          
+        const tierLabelContext = mappedProduct?.chosenLabel 
+          ? ` (${mappedProduct.chosenLabel})` 
+          : "";
+
+        return `${item.quantity}×${baseProductName}${tierLabelContext}`;
+      })
+      .join(", ");
+
+    return {
+      previewText: textPreview,
+      calculatedSubtotal: subtotalCalc,
+      totalItemCount: itemCountCalc,
+    };
+  }, [order, productMap, getLocalizedField, t]);
+
+  const orderDate = useMemo(() => {
+    const d = order.created_at || order.created_date;
+    return d ? format(new Date(d), "MMM d, h:mm a") : "";
+  }, [order.created_at, order.created_date]);
 
   return (
     <div className="bg-background rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-colors">
       {/* Top row */}
       <div className="flex items-center justify-between pt-3 pb-2">
-        <span className="font-serif text-sm text-muted-foreground ml-2">{format(new Date(order.created_at), 'MMM d, h:mm a')}</span>
-        <div className="flex items-center text-xs font-medium p-1 rounded-full bg-red-50 dark:bg-red-900/20 text-red-500 mx-2">
-          <Trash2 onClick={() =>
-            removeOrderById(order.id, setOrders)
-          } className="h-3.5 w-3.5" />
-        </div>
+        <span className="font-serif text-xs text-muted-foreground ml-3">
+          {orderDate}
+        </span>
+        <button
+          type="button"
+          onClick={() => removeOrderById(order.id, setOrders)}
+          className="flex items-center text-xs font-medium p-1.5 rounded-full bg-destructive/10 hover:bg-destructive/20 text-destructive mx-3 transition-colors"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
       </div>
 
       {/* Items preview */}
-      <div className="px-4 pb-2">
-        <p className="text-xs text-muted-foreground truncate">
-          {(prodInfo || [])
-            .map((i) => {
-              const product = productMap[String(i.product_id)];
-
-              return `${i.quantity}×${product
-                ? getLocalizedField(product, "name")
-                : i.name
-                }`;
-            })
-            .join(", ")}
+      <div className="px-4 pb-3">
+        <p className="text-xs text-muted-foreground truncate leading-relaxed">
+          {previewText || t("noItems")}
         </p>
 
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {itemCount} {itemCount !== 1 ? t("items") : t("item")} · <span className="font-semibold text-foreground">{subtotal.toFixed(2)}</span>
+        <p className="text-xs text-muted-foreground mt-1">
+          {totalItemCount} {totalItemCount !== 1 ? t("items") : t("item")} ·{" "}
+          <span className="font-semibold text-foreground font-mono">
+            {calculatedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
         </p>
       </div>
 
       {/* Action links */}
-      <div className="flex border-t border-border/40">
+      <div className="flex border-t border-border/40 bg-secondary/10">
         <Link
           to={`/order-confirmation/${order.id}`}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-colors"
         >
-          {t("placeOrder")}
+          {t("viewOrder")}
         </Link>
         <div className="w-px bg-border/40" />
         <Button
           onClick={() =>
-            moveToSelection(
-              orders,
-              order.id,
-              products,
-              addItem,
-              onClose,
-              setIsOpen
-            )
+            moveToSelection(orders, order.id, products, addItem, onClose, setIsOpen)
           }
           variant="link"
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 h-auto text-xs font-medium text-muted-foreground hover:text-foreground hover:no-underline hover:bg-secondary/40 rounded-none transition-colors"
         >
           {t("moveSelection")}
         </Button>
@@ -170,6 +196,7 @@ function OrderCard({
   );
 }
 
+// ── 3. MAIN ORDER HISTORY DRAWER EXPORT ────────────────────────────
 export default function OrderHistoryDrawer({ products, open, onClose, setIsOpen }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -177,19 +204,16 @@ export default function OrderHistoryDrawer({ products, open, onClose, setIsOpen 
   const { t } = useLanguage();
   const { activeBranch } = useBranch();
 
-  // ✅ LOAD ORDERS ONLY
   useEffect(() => {
     if (!open) return;
 
     setLoading(true);
-
     try {
-      const stored = JSON.parse(localStorage.getItem('orders') || '[]');
+      const stored = JSON.parse(localStorage.getItem("orders") || "[]");
 
-      const normalized = stored.map(order => {
+      const normalized = stored.map((order) => {
         const rawDate = order.created_at || order.created_date;
         const parsed = rawDate ? new Date(rawDate) : null;
-
         return {
           ...order,
           _parsedDate: parsed && !isNaN(parsed) ? parsed : null,
@@ -204,39 +228,29 @@ export default function OrderHistoryDrawer({ products, open, onClose, setIsOpen 
       });
 
       setOrders(sorted);
-
     } catch (e) {
-      console.error('Failed to load orders', e);
+      console.error("Failed to load orders", e);
       setOrders([]);
     } finally {
       setLoading(false);
     }
+  }, [open]);
 
-
+  useEffect(() => {
     if (open) {
       document.documentElement.classList.add("overflow-hidden");
     } else {
       document.documentElement.classList.remove("overflow-hidden");
     }
-
-    return () => {
-      document.documentElement.classList.remove("overflow-hidden");
-    };
+    return () => document.documentElement.classList.remove("overflow-hidden");
   }, [open]);
 
-
-  // ✅ FILTER BY BRANCH (CORRECT PLACE)
   const visibleOrders = useMemo(() => {
-    return orders.filter(order => {
-      return (
-        !activeBranch?.buid ||
-        order?.buid === activeBranch?.buid
-      );
+    return orders.filter((order) => {
+      return !activeBranch?.buid || order?.buid === activeBranch?.buid;
     });
   }, [orders, activeBranch?.buid]);
 
-  // ✅ EMPTY STATE LOGIC
-  const hasAnyOrders = orders.length > 0;
   const hasVisibleOrders = visibleOrders.length > 0;
 
   return (
@@ -254,26 +268,25 @@ export default function OrderHistoryDrawer({ products, open, onClose, setIsOpen 
 
           {/* Drawer */}
           <motion.div
-            initial={{ x: '100%' }}
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-sm bg-card shadow-2xl flex flex-col"
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 320, damping: 32 }}
+            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-sm bg-card shadow-2xl flex flex-col border-l border-border/40"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
               <div>
-                <h2 className="text-lg font-serif font-bold">
+                <h2 className="text-lg font-serif font-bold text-foreground">
                   {t("orderHistory")}
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {t("recentOrder")}
                 </p>
               </div>
-
               <button
                 onClick={onClose}
-                className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80"
+                className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -281,44 +294,31 @@ export default function OrderHistoryDrawer({ products, open, onClose, setIsOpen 
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-
-              {/* LOADING */}
               {loading ? (
                 <div className="space-y-3">
-                  {[1, 2, 3].map(i => (
-                    <div
-                      key={i}
-                      className="h-24 rounded-xl bg-secondary animate-pulse"
-                    />
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-24 rounded-xl bg-secondary animate-pulse" />
                   ))}
                 </div>
-
-              ) : /* NO ORDERS AT ALL */
-                !hasAnyOrders || !hasVisibleOrders ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                    <ShoppingBag className="h-12 w-12 text-muted-foreground/25 mb-4" />
-                    <p className="font-medium text-sm">
-                      {t("no_past_orders")}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {t("orders_placeholder")}
-                    </p>
-                  </div>
-
-                ) : (
-                  /* ORDERS LIST */
-                  visibleOrders.map(order => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      products={products}
-                      orders={orders}
-                      setOrders={setOrders}
-                      onClose={onClose}
-                      setIsOpen={setIsOpen}
-                    />
-                  ))
-                )}
+              ) : !hasVisibleOrders ? (
+                <div className="flex flex-col items-center justify-center h-full text-center py-16">
+                  <ShoppingBag className="h-12 w-12 text-muted-foreground/25 mb-4" />
+                  <p className="font-medium text-sm text-foreground">{t("no_past_orders")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("orders_placeholder")}</p>
+                </div>
+              ) : (
+                visibleOrders.map((order) => (
+                  <OrderCard
+                    key={order.id}
+                    order={order}
+                    products={products}
+                    orders={orders}
+                    setOrders={setOrders}
+                    onClose={onClose}
+                    setIsOpen={setIsOpen}
+                  />
+                ))
+              )}
             </div>
           </motion.div>
         </>
@@ -326,3 +326,313 @@ export default function OrderHistoryDrawer({ products, open, onClose, setIsOpen 
     </AnimatePresence>
   );
 }
+
+// export const moveToSelection = ( orders, orderId, products , addItem, onClose, setIsOpen,
+// ) => {
+//   const order = orders.find(
+//     (o) => String(o.id) === String(orderId)
+//   );
+
+
+//   if (!order?.items?.length) {
+//     console.warn("Order not found:", orderId);
+//     return;
+//   }
+
+//   // 🔥 faster lookup map
+//   const productMap = Object.fromEntries(
+//     products.map((p) => [String(p.id), p])
+//   );
+
+//   order.items.forEach((item, index) => {
+//     const product =
+//       productMap[String(item.product_id)];
+
+//     if (!product) {
+//       console.warn(
+//         "Product not found:",
+//         item.product_id
+//       );
+//       return;
+//     }
+
+//     addItem(
+//       product,
+//       Number(item.quantity) || 1,
+//       item.note || "",
+//       item.variations || [],
+//       `${Date.now()}-${index}-${Math.random()
+//         .toString(16)
+//         .slice(2)}`
+//     );
+//   });
+
+//   onClose?.();
+//   setIsOpen?.(true);
+// };
+
+// export const removeOrderById = (
+//   orderId,
+//   setOrders
+// )=> {
+//   setOrders((prev) => {
+//     const updated = prev.filter(
+//       (o) => String(o.id) !== String(orderId)
+//     );
+
+//     localStorage.setItem(
+//       "orders",
+//       JSON.stringify(updated)
+//     );
+
+//     return updated;
+//   });
+// };
+
+// function OrderCard({
+//   order,
+//   products,
+//   orders,
+//   setOrders,
+//   onClose,
+//   setIsOpen
+// }) {
+
+//   const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+//   const { t, getLocalizedField } = useLanguage();
+//   const { addItem } = useCart();
+
+//   const itemCount = order.items?.reduce((s, i) => s + i.quantity, 0) || 0;
+
+
+//   // 🔥 FAST LOOKUP MAP
+//   const productMap = useMemo(() => {
+//     return Object.fromEntries(
+//       (products || []).map(p => [String(p.id), p])
+//     );
+//   }, [products]);
+
+
+//   const { prodInfo, subtotal } = useMemo(() => {
+//     return buildOrderSummary(order?.items, productMap);
+//   }, [order?.items, productMap]);
+
+
+//   return (
+//     <div className="bg-background rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-colors">
+//       {/* Top row */}
+//       <div className="flex items-center justify-between pt-3 pb-2">
+//         <span className="font-serif text-sm text-muted-foreground ml-2">{format(new Date(order.created_at), 'MMM d, h:mm a')}</span>
+//         <div className="flex items-center text-xs font-medium p-1 rounded-full bg-red-50 dark:bg-red-900/20 text-red-500 mx-2">
+//           <Trash2 onClick={() =>
+//             removeOrderById(order.id, setOrders)
+//           } className="h-3.5 w-3.5" />
+//         </div>
+//       </div>
+
+//       {/* Items preview */}
+//       <div className="px-4 pb-2">
+//         <p className="text-xs text-muted-foreground truncate">
+//           {(prodInfo || [])
+//             .map((i) => {
+//               const product = productMap[String(i.product_id)];
+
+//               return `${i.quantity}×${product
+//                 ? getLocalizedField(product, "name")
+//                 : i.name
+//                 }`;
+//             })
+//             .join(", ")}
+//         </p>
+
+//         <p className="text-xs text-muted-foreground mt-0.5">
+//           {itemCount} {itemCount !== 1 ? t("items") : t("item")} · <span className="font-semibold text-foreground">{subtotal.toFixed(2)}</span>
+//         </p>
+//       </div>
+
+//       {/* Action links */}
+//       <div className="flex border-t border-border/40">
+//         <Link
+//           to={`/order-confirmation/${order.id}`}
+//           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+//         >
+//           {t("placeOrder")}
+//         </Link>
+//         <div className="w-px bg-border/40" />
+//         <Button
+//           onClick={() =>
+//             moveToSelection(
+//               orders,
+//               order.id,
+//               products,
+//               addItem,
+//               onClose,
+//               setIsOpen
+//             )
+//           }
+//           variant="link"
+//           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+//         >
+//           {t("moveSelection")}
+//         </Button>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default function OrderHistoryDrawer({ products, open, onClose, setIsOpen }) {
+//   const [orders, setOrders] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const { t } = useLanguage();
+//   const { activeBranch } = useBranch();
+
+//   // ✅ LOAD ORDERS ONLY
+//   useEffect(() => {
+//     if (!open) return;
+
+//     setLoading(true);
+
+//     try {
+//       const stored = JSON.parse(localStorage.getItem('orders') || '[]');
+
+//       const normalized = stored.map(order => {
+//         const rawDate = order.created_at || order.created_date;
+//         const parsed = rawDate ? new Date(rawDate) : null;
+
+//         return {
+//           ...order,
+//           _parsedDate: parsed && !isNaN(parsed) ? parsed : null,
+//         };
+//       });
+
+//       const sorted = normalized.sort((a, b) => {
+//         if (!a._parsedDate && !b._parsedDate) return 0;
+//         if (!a._parsedDate) return 1;
+//         if (!b._parsedDate) return -1;
+//         return b._parsedDate - a._parsedDate;
+//       });
+
+//       setOrders(sorted);
+
+//     } catch (e) {
+//       console.error('Failed to load orders', e);
+//       setOrders([]);
+//     } finally {
+//       setLoading(false);
+//     }
+
+
+//     if (open) {
+//       document.documentElement.classList.add("overflow-hidden");
+//     } else {
+//       document.documentElement.classList.remove("overflow-hidden");
+//     }
+
+//     return () => {
+//       document.documentElement.classList.remove("overflow-hidden");
+//     };
+//   }, [open]);
+
+
+//   // ✅ FILTER BY BRANCH (CORRECT PLACE)
+//   const visibleOrders = useMemo(() => {
+//     return orders.filter(order => {
+//       return (
+//         !activeBranch?.buid ||
+//         order?.buid === activeBranch?.buid
+//       );
+//     });
+//   }, [orders, activeBranch?.buid]);
+
+//   // ✅ EMPTY STATE LOGIC
+//   const hasAnyOrders = orders.length > 0;
+//   const hasVisibleOrders = visibleOrders.length > 0;
+
+//   return (
+//     <AnimatePresence>
+//       {open && (
+//         <>
+//           {/* Overlay */}
+//           <motion.div
+//             initial={{ opacity: 0 }}
+//             animate={{ opacity: 1 }}
+//             exit={{ opacity: 0 }}
+//             className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+//             onClick={onClose}
+//           />
+
+//           {/* Drawer */}
+//           <motion.div
+//             initial={{ x: '100%' }}
+//             animate={{ x: 0 }}
+//             exit={{ x: '100%' }}
+//             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+//             className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-sm bg-card shadow-2xl flex flex-col"
+//           >
+//             {/* Header */}
+//             <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
+//               <div>
+//                 <h2 className="text-lg font-serif font-bold">
+//                   {t("orderHistory")}
+//                 </h2>
+//                 <p className="text-xs text-muted-foreground mt-0.5">
+//                   {t("recentOrder")}
+//                 </p>
+//               </div>
+
+//               <button
+//                 onClick={onClose}
+//                 className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80"
+//               >
+//                 <X className="h-4 w-4" />
+//               </button>
+//             </div>
+
+//             {/* Body */}
+//             <div className="flex-1 overflow-y-auto p-4 space-y-3">
+
+//               {/* LOADING */}
+//               {loading ? (
+//                 <div className="space-y-3">
+//                   {[1, 2, 3].map(i => (
+//                     <div
+//                       key={i}
+//                       className="h-24 rounded-xl bg-secondary animate-pulse"
+//                     />
+//                   ))}
+//                 </div>
+
+//               ) : /* NO ORDERS AT ALL */
+//                 !hasAnyOrders || !hasVisibleOrders ? (
+//                   <div className="flex flex-col items-center justify-center h-full text-center py-16">
+//                     <ShoppingBag className="h-12 w-12 text-muted-foreground/25 mb-4" />
+//                     <p className="font-medium text-sm">
+//                       {t("no_past_orders")}
+//                     </p>
+//                     <p className="text-xs text-muted-foreground mt-1">
+//                       {t("orders_placeholder")}
+//                     </p>
+//                   </div>
+
+//                 ) : (
+//                   /* ORDERS LIST */
+//                   visibleOrders.map(order => (
+//                     <OrderCard
+//                       key={order.id}
+//                       order={order}
+//                       products={products}
+//                       orders={orders}
+//                       setOrders={setOrders}
+//                       onClose={onClose}
+//                       setIsOpen={setIsOpen}
+//                     />
+//                   ))
+//                 )}
+//             </div>
+//           </motion.div>
+//         </>
+//       )}
+//     </AnimatePresence>
+//   );
+// }
