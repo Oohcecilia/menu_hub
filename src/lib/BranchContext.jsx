@@ -17,6 +17,14 @@ function getSubdomain() {
     return "giuseppe";
   }
 
+  if (host.endsWith("giuseppe.ph")) {
+    return "giuseppe";
+  }
+
+  if (host.endsWith("jardin.ph")) {
+    return "jardin";
+  }
+
   const parts = host.split(".");
   if (parts.length >= 3) {
     return parts[1];
