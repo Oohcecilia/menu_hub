@@ -160,6 +160,34 @@ export default function Menu() {
       .sort((a, b) => a.sort_order - b.sort_order);
   }, [menu]); // Dependent on 'menu', not 'filteredMenu'
 
+  const activeCategoryId = activeCategory || sortedCategories[0]?.id || "";
+
+  const activeSubcategories = useMemo(() => {
+    if (!activeCategoryId) return [];
+
+    const active = sortedCategories.find((category) => category.id === activeCategoryId);
+    const section = active ? filteredMenu[active.key] || menu?.[active.key] : null;
+
+    return (section?.groups || [])
+      .map((group, index) => {
+        const id = String(group.uid ?? `${activeCategoryId}-${index}`);
+        const label =
+          getLocalizedField(group, "translations") ||
+          getLocalizedField(group, "name") ||
+          getDefaultLocalizedText(getLocalizedObject(group, "name"), group.name || "");
+
+        return {
+          id,
+          label,
+          sort_order: group.sort ?? index,
+          category_id: activeCategoryId,
+          product_count: getProductList(group.products).length,
+        };
+      })
+      .filter((group) => group.product_count > 0 && group.label)
+      .sort((a, b) => a.sort_order - b.sort_order);
+  }, [activeCategoryId, filteredMenu, getLocalizedField, menu, sortedCategories]);
+
   useEffect(() => {
     const search = searchQuery.trim();
 
@@ -306,6 +334,54 @@ export default function Menu() {
     [searchQuery]
   );
 
+  const handleSubcategorySelect = useCallback(
+    (subcategory) => {
+      const hasSearch = searchQuery?.trim()?.length > 0;
+
+      if (hasSearch) {
+        setSearchQuery("");
+      }
+
+      if (subcategory.category_id) {
+        setActiveCategory(subcategory.category_id);
+      }
+
+      userClickedRef.current = true;
+
+      let tries = 0;
+
+      const tryScroll = () => {
+        const section = document.getElementById(`subcat-section-${subcategory.id}`);
+
+        if (!section && tries < 10) {
+          tries++;
+          requestAnimationFrame(tryScroll);
+          return;
+        }
+
+        if (!section) return;
+
+        const offset = 255;
+        const top =
+          section.getBoundingClientRect().top + window.pageYOffset - offset;
+
+        window.scrollTo({
+          top,
+          behavior: "smooth",
+        });
+
+        window.setTimeout(() => {
+          userClickedRef.current = false;
+        }, 450);
+      };
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(tryScroll);
+      });
+    },
+    [searchQuery]
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header products={products} setIsOpen={setIsOpen} />
@@ -313,8 +389,10 @@ export default function Menu() {
       <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-xl border-border/30">
         <CategoryNav
           categories={sortedCategories}
-          activeCategory={activeCategory}
+          activeCategory={activeCategoryId}
           onSelect={handleCategorySelect}
+          subcategories={activeSubcategories}
+          onSubcategorySelect={handleSubcategorySelect}
         />
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>

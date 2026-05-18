@@ -2,7 +2,13 @@ import React from 'react';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { motion } from 'framer-motion';
 
-export default function CategoryNav({ categories = [], activeCategory, onSelect }) {
+export default function CategoryNav({
+  categories = [],
+  activeCategory,
+  onSelect,
+  subcategories = [],
+  onSubcategorySelect,
+}) {
   const { getLocalizedField } = useLanguage();
 
   const items = categories.map((c) => {
@@ -49,6 +55,20 @@ export default function CategoryNav({ categories = [], activeCategory, onSelect 
             );
           })}
         </nav>
+
+        {subcategories.length > 0 && (
+          <nav className="mt-2 flex flex-wrap items-center justify-center gap-1.5 border-t border-border/30 pt-2">
+            {subcategories.map(item => (
+              <button
+                key={item.id}
+                onClick={() => onSubcategorySelect?.(item)}
+                className="rounded-full bg-secondary/70 px-3 py-1.5 text-xs font-medium capitalize text-foreground transition-colors hover:bg-primary hover:text-primary-foreground touch-manipulation"
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        )}
       </div>
     </div>
   );

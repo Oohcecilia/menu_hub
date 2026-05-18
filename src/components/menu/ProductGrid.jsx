@@ -336,9 +336,10 @@ export default function ProductGrid({
             />
 
             {/* 2. Iterate through Groups (Subcategories) */}
-            {groups.map((group) => {
+            {groups.map((group, groupIndex) => {
+              const subcategoryId = String(group.uid ?? `${catId}-${groupIndex}`);
               const subProducts = getProductList(group.products).flatMap((p, productIndex) =>
-                normalizeProduct(p, `${group.uid || catId}-${productIndex}`)
+                normalizeProduct(p, `${subcategoryId}-${productIndex}`)
               );
 
               if (subProducts.length === 0) return null;
@@ -359,7 +360,12 @@ export default function ProductGrid({
 
 
               return (
-                <div key={group.uid} className="mt-6">
+                <div
+                  key={subcategoryId}
+                  id={`subcat-section-${subcategoryId}`}
+                  data-subcategory={subcategoryId}
+                  className="mt-6 scroll-mt-56"
+                >
                   {shouldShowSubTitle && (
                     <h4 className="w-full text-center font-serif font-semibold my-2 text-primary px-2 py-1 rounded capitalize text-1xl sm:text-1xl lg:text-2xl">
                       {subName}
