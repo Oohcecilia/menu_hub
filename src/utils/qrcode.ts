@@ -5,6 +5,7 @@ interface QRItem {
   qty?: number | string;
   variation?: number | string;
   addon?: number | string | Array<number | string>;
+  removable?: number | string | Array<number | string>;
 }
 
 interface QRPayload {
@@ -85,6 +86,21 @@ export function qrEncode(json: string): string {
         out +=
           "X" +
           Number(addon)
+            .toString(16)
+            .toUpperCase();
+      }
+    }
+
+    // R = removable HEX
+    if (item.removable) {
+      const removables = Array.isArray(item.removable)
+        ? item.removable
+        : [item.removable];
+
+      for (const removable of removables) {
+        out +=
+          "R" +
+          Number(removable)
             .toString(16)
             .toUpperCase();
       }

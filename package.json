@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "couch:menu:normalize": "node scripts/normalize-couchdb-menu-assets.mjs",
+    "couch:site:push": "node scripts/push-site-to-couchdb.mjs",
+    "couch:site:serve": "node scripts/serve-site-from-couchdb.mjs",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",

@@ -1,17 +1,20 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, ArrowLeft, Clock } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import QRCode from '@/components/menu/QrCode';
 import { useLanguage } from '@/lib/i18n';
 import { useBranch } from '@/lib/BranchContext.jsx';
+import { useCart } from '@/lib/cartStore.jsx';
 import { buildOrderSummary } from '@/utils/orderUtils';
 
 export default function OrderConfirmation() {
   const { orderId } = useParams();
+  const navigate = useNavigate();
   const { t, getLocalizedField } = useLanguage();
+  const { addItem } = useCart();
   const { products } = useBranch();
 
   const [order, setOrder] = useState(null);
@@ -89,7 +92,60 @@ export default function OrderConfirmation() {
   }
 
   const trackingUrl = `${window.location.origin}/order/${orderId}`;
+  const waiterSuggestions = Array.isArray(order.waiter_suggestions) ? order.waiter_suggestions : [];
 
+  const getSuggestionProductForCart = (product) => {
+    const firstPrice = Array.isArray(product?.prices) ? product.prices[0] : null;
+    const productUid = String(product?.product_uid || product?.id || product?.name || '');
+    const priceUid = firstPrice?.uid ? String(firstPrice.uid) : String(product?.id || productUid);
+    const priceLabel = firstPrice?.label || '';
+    const baseName = product?.name || productUid;
+
+    return {
+      ...product,
+      id: priceUid,
+      uid: productUid,
+      product_uid: productUid,
+      price_uid: priceUid,
+      price_label: priceLabel,
+      price: firstPrice?.price || 0,
+      name: priceLabel ? `${baseName} ${priceLabel}` : baseName,
+      default_name: priceLabel ? `${baseName} ${priceLabel}` : baseName,
+      base_name: baseName,
+    };
+  };
+
+  const handleSuggestionClick = (product) => {
+    const productName = product?.name || '';
+    if (!productName) return;
+
+    addItem(getSuggestionProductForCart(product), 1);
+    sessionStorage.setItem('openSelection', '1');
+    sessionStorage.setItem(
+      'menuSuggestionFocus',
+      JSON.stringify({
+        product_uid: product.product_uid || product.id,
+        name: productName,
+      })
+    );
+
+    navigate(`/?suggestion=${encodeURIComponent(productName)}&selection=1`);
+  };
+
+  const handleCategoryClick = (category) => {
+    if (!category) return;
+
+    sessionStorage.setItem('menuCategoryFocus', category);
+    navigate(`/?category=${encodeURIComponent(category)}`);
+  };
+
+  const getSuggestionCategories = (suggestion) => {
+    const categories = (suggestion.products || [])
+      .map((product) => product.category)
+      .filter(Boolean);
+
+    return [...new Set(categories)];
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-6">
@@ -135,6 +191,58 @@ export default function OrderConfirmation() {
             <h1 className="mt-6 font-serif text-xl font-bold tracking-tight text-center">
               {t("scanQR")}
             </h1>
+
+            {waiterSuggestions.length > 0 && (
+              <div className="mt-6 w-full space-y-3 rounded-2xl border border-border/60 bg-background/70 p-4 text-left">
+                <p className="text-sm font-bold text-foreground">
+                  {t("chefSuggestions")}
+                </p>
+
+                {waiterSuggestions.map((suggestion, index) => (
+                  <div key={`${suggestion.type || 'suggestion'}-${index}`} className="space-y-1">
+                    <p className="text-sm font-semibold text-primary">
+                      {suggestion.title}
+                    </p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {suggestion.message}
+                    </p>
+
+                    {(Array.isArray(suggestion.products) && suggestion.products.length > 0) && (
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        {suggestion.products.map((product) => {
+                          const category = product.category;
+
+                          return (
+                            <span
+                              key={`${suggestion.type || 'suggestion'}-${product.product_uid || product.id || product.name}`}
+                              className="inline-flex max-w-full flex-wrap items-center gap-1.5"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleSuggestionClick(product)}
+                                className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold capitalize text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                              >
+                                {product.name}
+                              </button>
+
+                              {category && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleCategoryClick(category)}
+                                  className="rounded-full border border-border/60 px-2.5 py-1.5 text-xs font-semibold capitalize text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                                >
+                                  {t("viewCategory")} {category}
+                                </button>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Divider */}
             <div className="w-16 h-1 rounded-full bg-primary/30 mt-6" />

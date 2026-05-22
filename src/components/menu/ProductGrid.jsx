@@ -1,13 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import FeaturedSection from './FeaturedSection.jsx';
-import ProductCard from './ProductCard.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useCart } from '@/lib/cartStore.jsx';
-import { Plus, Minus, Sparkles } from 'lucide-react';
 import { useBranch } from '@/lib/BranchContext.jsx';
 import { useLocation } from 'react-router-dom'
-import { getDefaultLocalizedText, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryUid, getProductList, normalizeProduct } from '@/utils/menuData';
+import { getDefaultLocalizedText, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryUid, getProductList, isSpecialProduct, normalizeProduct } from '@/utils/menuData';
 import PriceOptions from './PriceOptions.jsx';
 
 
@@ -47,6 +45,30 @@ function hasCategory(product, categoryId) {
   return getCategoryIds(product.category_id).includes(String(categoryId));
 }
 
+function hasProductImage(product) {
+  const hasWebsitePictureFlag =
+    product?.website_picture === 1 ||
+    product?.website_picture === true ||
+    product?.website_picture === "1" ||
+    product?.picture === 1 ||
+    product?.picture === true ||
+    product?.picture === "1";
+
+  return (
+    typeof product?.image === "string" &&
+    product.image.trim().length > 0 &&
+    hasWebsitePictureFlag
+  );
+}
+
+function SpecialBadge() {
+  return (
+    <span className="ml-2 inline-flex translate-y-[-1px] items-center rounded-full bg-red-600 px-2 py-0.5 align-middle text-[10px] font-bold uppercase leading-none tracking-wide text-white shadow-sm">
+      special
+    </span>
+  );
+}
+
 function SpaceY({ y = 4 }) {
   return <div className={map[y] || "py-4"} />;
 }
@@ -79,6 +101,34 @@ function ListSpace({ spacing = 2 }) {
   );
 }
 
+function getSortPrice(product) {
+  const prices = Array.isArray(product?.price_options) && product.price_options.length > 0
+    ? product.price_options
+    : Array.isArray(product?.prices)
+      ? product.prices
+      : [];
+
+  const numericPrices = prices
+    .map((price) => Number(price?.price))
+    .filter((price) => Number.isFinite(price));
+
+  if (numericPrices.length > 0) {
+    return Math.min(...numericPrices);
+  }
+
+  const fallback = Number(product?.price);
+  return Number.isFinite(fallback) ? fallback : Number.MAX_SAFE_INTEGER;
+}
+
+function sortProductsByPrice(products) {
+  return [...products].sort((a, b) => {
+    const priceDiff = getSortPrice(a) - getSortPrice(b);
+    if (priceDiff !== 0) return priceDiff;
+
+    return String(a?.name || '').localeCompare(String(b?.name || ''));
+  });
+}
+
 
 
 function CategoryBanner({ category }) {
@@ -95,6 +145,7 @@ function CategoryBanner({ category }) {
             font-serif font-bold capitalize
             tracking-[0.15em]
             text-primary
+            bg-transparent
             text-3xl sm:text-3xl lg:text-4xl
           "
       >
@@ -107,15 +158,15 @@ function CategoryBanner({ category }) {
 /* ─── Text list item (no-image products) ──*/
 function TextListItem({ product, onOpen, delay = 0 }) {
   const { getLocalizedField } = useLanguage();
-  const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
-  const qty = getProductQuantity(product.id);
+  const { getProductQuantity, addItem, items, updateQuantity, removeItem, itemMatchesProduct } = useCart();
+  const qty = getProductQuantity(product);
   const name = getLocalizedField(product, 'translations') || getLocalizedField(product, 'name') || product.default_name || product.name;
   const desc = getLocalizedField(product?.properties, 'details') || getLocalizedField(product, 'details') || product?.details?.description;
   const location = useLocation();
 
   const handleMinus = (e) => {
     e.stopPropagation();
-    const cartItems = items.filter(i => i.product_id === product.id);
+    const cartItems = items.filter(i => itemMatchesProduct(i, product));
     if (!cartItems.length) return;
     const last = cartItems[cartItems.length - 1];
     const lastIndex = items.findIndex(i => i === last);
@@ -151,6 +202,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
             {/* Product Name */}
             <p className="font-serif capitalize font-medium leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300 break-words">
               {name}
+              {isSpecialProduct(product) && <SpecialBadge />}
 
               {location.pathname.startsWith("/debug") && (
                 <span className="text-muted-foreground">
@@ -158,13 +210,10 @@ function TextListItem({ product, onOpen, delay = 0 }) {
                 </span>
               )}
             </p>
-
-
             {qty > 0 && (
-              <div
-                className=" flex-shrink-0 flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-sm">
+              <span className="mt-0.5 inline-flex min-w-5 h-5 flex-shrink-0 items-center justify-center rounded-full bg-green-500 px-1.5 text-xs font-semibold leading-none text-white shadow-sm">
                 {qty}
-              </div>
+              </span>
             )}
           </div>
 
@@ -176,7 +225,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
           <p
             className=" font-sans
         text-sm text-muted-foreground
-        mt-1 line-clamp-2
+        mt-1
         leading-relaxed font-light
       "
           >
@@ -190,51 +239,36 @@ function TextListItem({ product, onOpen, delay = 0 }) {
   );
 }
 
-/* ─── 2-col on sm+, 1-col on mobile, last lone item centered ─── */
+/* ─── 2-col on sm+, 1-col on mobile ─── */
 function TextList({ products, onProductOpen }) {
-  const isOdd = products.length % 2 !== 0;
+  const sortedProducts = sortProductsByPrice(products);
+  const leftCount = Math.ceil(sortedProducts.length / 2);
+  const leftProducts = sortedProducts.slice(0, leftCount);
+  const rightProducts = sortedProducts.slice(leftCount);
 
   return (
     <div className="rounded-lg  overflow-hidden ">
       {/* Mobile: single column, all items stacked */}
       <ListBanner />
       <div className="sm:hidden  divide-y divide-border/25 ">
-        {products.map((p, i) => (
+        {sortedProducts.map((p, i) => (
           <TextListItem key={p.id} product={p} onOpen={onProductOpen} delay={i * 0.04} />
         ))}
       </div>
 
-      {/* sm+: 2-col rows with vertical divider, last lone item centered */}
-      <div className="hidden sm:block">
-        {Array.from({ length: Math.ceil(products.length / 2) }, (_, rowIdx) => {
-          const a = products[rowIdx * 2];
-          const b = products[rowIdx * 2 + 1];
-          const isSingle = !b;
-
-          return (
-            <div
-              key={rowIdx}
-              className="flex"
-            >
-              {isSingle ? (
-                <div className="w-1/2 mx-auto">
-                  {products.length > 1 && <ListSpace spacing={2} />}
-                  <TextListItem product={a} onOpen={onProductOpen} delay={rowIdx * 2 * 0.04} />
-                </div>
-              ) : (
-                <>
-                  <div className="flex-1 min-w-0 flex justify-center">
-                    <TextListItem product={a} onOpen={onProductOpen} delay={rowIdx * 2 * 0.04} />
-                  </div>
-                  <div className="w-px bg-primary/20 flex-shrink-0 my-3" />
-                  <div className="flex-1 min-w-0 flex justify-center">
-                    <TextListItem product={b} onOpen={onProductOpen} delay={(rowIdx * 2 + 1) * 0.04} />
-                  </div>
-                </>
-              )}
-            </div>
-          );
-        })}
+      {/* sm+: sorted by price, then continued into the right column */}
+      <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)]">
+        <div className="min-w-0">
+          {leftProducts.map((p, i) => (
+            <TextListItem key={p.id} product={p} onOpen={onProductOpen} delay={i * 0.04} />
+          ))}
+        </div>
+        <div className="my-3 bg-primary/20" />
+        <div className="min-w-0">
+          {rightProducts.map((p, i) => (
+            <TextListItem key={p.id} product={p} onOpen={onProductOpen} delay={(leftCount + i) * 0.04} />
+          ))}
+        </div>
       </div>
       <ListBanner />
     </div>
@@ -244,10 +278,7 @@ function TextList({ products, onProductOpen }) {
 /* ─── Renders one category section ───────────────────────────── */
 function CategorySection({ products, onProductOpen }) {
 
-  const withImage = products.filter(
-    p =>
-      (p.image?.length ?? 0) > 0 && (p.website_picture)
-  );
+  const withImage = products.filter(hasProductImage);
   const activeCategory = '';
 
   return (
@@ -321,7 +352,11 @@ export default function ProductGrid({
           <section
             key={catId}
             ref={(el) => {
-              if (el) sectionRefs.current[catId] = el;
+              if (el) {
+                sectionRefs.current[catId] = el;
+              } else {
+                delete sectionRefs.current[catId];
+              }
             }}
             data-category={catId}
             id={`cat-section-${catId}`}
@@ -364,10 +399,10 @@ export default function ProductGrid({
                   key={subcategoryId}
                   id={`subcat-section-${subcategoryId}`}
                   data-subcategory={subcategoryId}
-                  className="mt-6 scroll-mt-56"
+                  className="mt-6 scroll-mt-56 bg-transparent"
                 >
                   {shouldShowSubTitle && (
-                    <h4 className="w-full text-center font-serif font-semibold my-2 text-primary px-2 py-1 rounded capitalize text-1xl sm:text-1xl lg:text-2xl">
+                    <h4 className="w-full bg-transparent text-center font-serif font-semibold my-2 text-primary capitalize text-1xl sm:text-1xl lg:text-2xl">
                       {subName}
                     </h4>
                   )}

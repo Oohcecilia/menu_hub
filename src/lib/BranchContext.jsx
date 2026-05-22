@@ -3,6 +3,7 @@ import { branchesData } from '@/data/branches.config';
 import { getMenuData } from '@/api/menuService';
 import { hexToHsl } from "@/utils/color";
 import { loadFont } from "@/utils/loadfont";
+import { prewarmWaiterMenu } from '@/utils/waiterSuggestions';
 
 const BranchContext = createContext();
 
@@ -13,7 +14,7 @@ export function useBranch() {
 function getSubdomain() {
   const host = window.location.hostname;
 
-  if (host.includes("localhost") || host === "127.0.0.1" || host === "::1") {
+  if (host.includes("localhost") || host === "127.0.0.1" || host === "::1" || host === "menu.test") {
     return "giuseppe";
   }
 
@@ -61,6 +62,7 @@ function BranchContextInner({ children }) {
       try {
         const res = await getMenuData();
         setMenu(res);
+        prewarmWaiterMenu(res, localStorage.getItem("menu_lang") || "en");
       } catch (e) {
         console.error("Failed to load menu", e);
       } finally {

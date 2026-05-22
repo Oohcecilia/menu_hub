@@ -34,6 +34,8 @@ const translations = {
     option: "Option",
     pleaseReviewYourSelection: "Please review your selection",
     moveSelection: "Move to Selection",
+    chefSuggestions: "Chef's suggestions",
+    viewCategory: "View",
   },
   es: {
     menu: "Menú", categories: "Categorías", all: "Todo", popular: "Popular",
@@ -65,7 +67,9 @@ const translations = {
     viewReceipt: "Ver recibo",
     option: "Opción",
     pleaseReviewYourSelection: "Por favor revisa tu selección",
-    moveSelection: "Mover a la selección"
+    moveSelection: "Mover a la selección",
+    chefSuggestions: "Sugerencias del chef",
+    viewCategory: "Ver"
   },
   de: {
     menu: "Speisekarte", categories: "Kategorien", all: "Alle", popular: "Beliebt",
@@ -97,6 +101,8 @@ const translations = {
     option: "Option",
     pleaseReviewYourSelection: "Bitte überprüfen Sie Ihre Auswahl",
     moveSelection: "Zur Auswahl verschieben",
+    chefSuggestions: "Empfehlungen des Küchenchefs",
+    viewCategory: "Anzeigen",
   },
   fr: {
     menu: "Menu", categories: "Catégories", all: "Tout", popular: "Populaire",
@@ -128,6 +134,8 @@ const translations = {
     option: "Option",
     pleaseReviewYourSelection: "Veuillez vérifier votre sélection",
     moveSelection: "Déplacer vers la sélection",
+    chefSuggestions: "Suggestions du chef",
+    viewCategory: "Voir",
   },
   it: {
     menu: "Menu", categories: "Categorie", all: "Tutto", popular: "Popolare",
@@ -158,7 +166,9 @@ const translations = {
     viewReceipt: "Visualizza ricevuta",
     option: "Opzione",
     pleaseReviewYourSelection: "Si prega di rivedere la tua selezione",
-    moveSelection: "Sposta nella selezione"
+    moveSelection: "Sposta nella selezione",
+    chefSuggestions: "Suggerimenti dello chef",
+    viewCategory: "Vedi"
   },
   zh: {
     menu: "菜单", categories: "分类", all: "全部", popular: "热门",
@@ -189,7 +199,9 @@ const translations = {
     viewReceipt: "查看收据",
     option: "选项",
     pleaseReviewYourSelection: "请检查您的选择",
-    moveSelection: "移动到选择"
+    moveSelection: "移动到选择",
+    chefSuggestions: "主厨建议",
+    viewCategory: "查看"
   },
   ja: {
     menu: "メニュー", categories: "カテゴリー", all: "すべて", popular: "人気",
@@ -220,7 +232,9 @@ const translations = {
     viewReceipt: "領収書を表示",
     option: "オプション",
     pleaseReviewYourSelection: "選択内容をご確認ください",
-    moveSelection: "選択に移動"
+    moveSelection: "選択に移動",
+    chefSuggestions: "シェフのおすすめ",
+    viewCategory: "表示"
   },
   ko: {
     menu: "메뉴", categories: "카테고리", all: "전체", popular: "인기",
@@ -251,7 +265,9 @@ const translations = {
     viewReceipt: "영수증 보기",
     option: "옵션",
     pleaseReviewYourSelection: "선택을 검토해 주세요",
-    moveSelection: "선택으로 이동"
+    moveSelection: "선택으로 이동",
+    chefSuggestions: "셰프 추천",
+    viewCategory: "보기"
   },
   ru: {
     menu: "Меню", categories: "Категории", all: "Все", popular: "Популярное",
@@ -282,7 +298,9 @@ const translations = {
     viewReceipt: "Просмотреть чек",
     option: "Опция",
     pleaseReviewYourSelection: "Пожалуйста, проверьте ваш выбор",
-    moveSelection: "Переместить в выбор"
+    moveSelection: "Переместить в выбор",
+    chefSuggestions: "Рекомендации шефа",
+    viewCategory: "Смотреть"
   },
   fil: {
     menu: "Menu", categories: "Mga Kategorya", all: "Lahat", popular: "Sikat",
@@ -313,7 +331,9 @@ const translations = {
     viewReceipt: "Tingnan ang resibo",
     option: "Pagpipilian",
     pleaseReviewYourSelection: "Pakisuri ang iyong napili",
-    moveSelection: "lipat sa Pinili"
+    moveSelection: "lipat sa Pinili",
+    chefSuggestions: "Mga mungkahi ng chef",
+    viewCategory: "Tingnan"
   }
 };
 

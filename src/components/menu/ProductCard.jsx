@@ -6,16 +6,16 @@ import { useBranch } from '@/lib/BranchContext.jsx';
 import PriceOptions from './PriceOptions.jsx';
 
 export default function ProductCard({ product, onOpen }) {
-  const { getProductQuantity, addItem, items, updateQuantity, removeItem } = useCart();
+  const { getProductQuantity, addItem, items, updateQuantity, removeItem, itemMatchesProduct } = useCart();
   const { t, getLocalizedField } = useLanguage();
-  const qty = getProductQuantity(product.id);
+  const qty = getProductQuantity(product);
   const { activeBranch } = useBranch();
 
   const noImage = activeBranch?.no_image;
 
   const handleMinus = (e) => {
     e.stopPropagation();
-    const cartItems = items.filter(i => i.product_id === product.id);
+    const cartItems = items.filter(i => itemMatchesProduct(i, product));
     if (cartItems.length === 0) return;
     const last = cartItems[cartItems.length - 1];
     const lastIndex = items.findIndex(i => i === last);

@@ -1,10 +1,10 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
-import { getDisplayPrices, selectProductPrice } from '@/utils/menuData';
+import { getDisplayPrices, isSpecialProduct } from '@/utils/menuData';
 
 
 /* ─── Cart hook ─────────────────────────────────────────────────── */
@@ -15,6 +15,7 @@ function useProductCart(product) {
         items,
         updateQuantity,
         removeItem,
+        itemMatchesProduct,
     } = useCart();
 
     // safer + memoized id
@@ -23,8 +24,8 @@ function useProductCart(product) {
     // prevent null crash
     const qty = useMemo(() => {
         if (!productId) return 0;
-        return getProductQuantity(productId) || 0;
-    }, [productId, getProductQuantity]);
+        return getProductQuantity(product) || 0;
+    }, [product, productId, getProductQuantity]);
 
     const handleMinus = useCallback((e) => {
         e.stopPropagation();
@@ -32,7 +33,7 @@ function useProductCart(product) {
         if (!productId) return;
 
         const cartItems = items.filter(
-            (i) => i?.product_id === productId
+            (i) => itemMatchesProduct(i, product)
         );
 
         if (!cartItems.length) return;
@@ -51,6 +52,8 @@ function useProductCart(product) {
     }, [
         items,
         productId,
+        product,
+        itemMatchesProduct,
         updateQuantity,
         removeItem,
     ]);
@@ -121,85 +124,119 @@ function AddBtn({ product, onOpen }) {
 }
 
 /* ─── Floating product image with ambient glow ──────────────────── */
-function FloatImage({ src, alt, size, float = true }) {
+function FloatImage({ src, alt, size, float = true, caption, isSpecial = false }) {
     const { activeBranch } = useBranch();
     const noImage = activeBranch?.no_image;
     const image = src || noImage;
+    const [isPortrait, setIsPortrait] = useState(false);
+
+    const imageClassName = isPortrait
+        ? "relative z-10 h-[90vw] w-auto max-w-full object-contain drop-shadow-2xl sm:h-[var(--image-size)]"
+        : "relative z-10 h-auto max-h-[90vw] w-auto max-w-full object-contain drop-shadow-2xl sm:max-h-[var(--image-size)]";
+
     return (
         <div
-            className="relative flex h-[90vw] w-[90vw] items-center justify-center sm:h-[var(--image-size)] sm:w-[var(--image-size)]"
+            className="flex w-[90vw] flex-col items-center sm:w-[var(--image-size)]"
             style={{ "--image-size": `${size}px` }}
         >
-            {src && (
-                <>
-                    {/* ambient glow */}
-                    <div
-                        className="absolute rounded-full opacity-25 blur-2xl"
-                        style={{
-                            width: size * 0.85, height: size * 0.85,
-                            backgroundImage: `url(${src})`, backgroundSize: 'cover',
-                            top: '10%', left: '7.5%',
+            <motion.div
+                className="relative z-30 flex w-full items-center justify-center pt-4"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
+                {src && (
+                    <>
+                        {/* ambient glow */}
+                        <div
+                            className="absolute rounded-full opacity-25 blur-2xl"
+                            style={{
+                                width: size * 0.85, height: size * 0.85,
+                                backgroundImage: `url(${src})`, backgroundSize: 'cover',
+                                top: '10%', left: '7.5%',
+                            }}
+                        />
+                        {/* soft shadow beneath */}
+                        <div
+                            className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full opacity-20 blur-xl"
+                            style={{ width: size * 0.6, height: size * 0.15, background: '--primary' }}
+                        />
+                    </>
+                )}
+                <div className="relative z-10 inline-flex max-w-full">
+                    <img
+                        src={image}
+                        alt={alt}
+                        className={imageClassName}
+                        onLoad={(event) => {
+                            const img = event.currentTarget;
+                            setIsPortrait(img.naturalHeight > img.naturalWidth);
                         }}
+                        style={{ filter: 'drop-shadow(0 12px 28px --primary)' }}
                     />
-                    {/* soft shadow beneath */}
-                    <div
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full opacity-20 blur-xl"
-                        style={{ width: size * 0.6, height: size * 0.15, background: '--primary' }}
-                    />
-                </>
+                    {isSpecial && (
+                        <span className="absolute right-0 top-0 z-20 -translate-y-1/2 rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-bold uppercase leading-none tracking-wide text-white shadow-md">
+                            special
+                        </span>
+                    )}
+                </div>
+            </motion.div>
+            {caption && (
+                <div className="relative z-10 mt-[10px] w-full text-center">
+                    {caption}
+                </div>
             )}
-            <img
-                src={src} alt={alt}
-                className="relative z-10 h-full w-full object-contain drop-shadow-2xl"
-                style={{ filter: 'drop-shadow(0 12px 28px --primary)' }}
-            />
         </div>
     );
 }
 
-/* ─── Floating animation wrapper ────────────────────────────────── */
-function FloatWrap({ children, delay = 0, amplitude = 6 }) {
-    return (
-        <motion.div
-            animate={{ y: [0, -amplitude, 0] }}
-            transition={{ repeat: Infinity, duration: 4 + delay * 0.5, ease: 'easeInOut', delay }}
-        >
-            {children}
-        </motion.div>
-    );
-}
-
-function FeaturedPriceChoices({ product, onOpen, name, align = "center" }) {
+function FeaturedPriceChoices({ product, className = "", priceClassName = "text-sm" }) {
     const prices = getDisplayPrices(product);
 
     return (
-        <div className={`mt-2 flex flex-wrap gap-2 ${align === "center" ? "justify-center" : "justify-start"}`}>
+        <span className={`${className} inline-flex flex-wrap items-baseline gap-x-2 gap-y-1`}>
             {prices.map((priceOption, index) => {
-                const optionName = priceOption.label ? `${name} ${priceOption.label}` : name;
+                const optionLabel = priceOption.label || "";
 
                 return (
-                    <button
+                    <span
                         key={priceOption.uid || `${priceOption.label}-${index}`}
-                        type="button"
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            onOpen(selectProductPrice(product, priceOption));
-                        }}
-                        className="
-                            inline-flex items-center gap-2 rounded-full border border-primary/25
-                            bg-background/80 px-3 py-1.5 text-left shadow-sm backdrop-blur
-                            hover:border-primary/60 hover:bg-primary/10 transition-colors
-                        "
+                        className={`inline-flex items-baseline gap-1 font-bold tracking-widest text-primary ${priceClassName}`}
                     >
-                        <span className="max-w-[12rem] truncate font-serif text-sm capitalize text-foreground/85">
-                            {optionName}
-                        </span>
-                        <span className="text-sm font-semibold tracking-widest text-primary">
+                        {optionLabel && (
+                            <span className="max-w-[8rem] truncate font-serif text-xs capitalize tracking-normal text-foreground/70">
+                                {optionLabel}
+                            </span>
+                        )}
+                        <span>
                             {priceOption.price}
                         </span>
-                    </button>
+                    </span>
                 );
             })}
+        </span>
+    );
+}
+
+function SpecialBadge() {
+    return (
+        <span className="ml-2 inline-flex translate-y-[-1px] items-center rounded-full bg-red-600 px-2 py-0.5 align-middle text-[10px] font-bold uppercase leading-none tracking-wide text-white shadow-sm">
+            special
+        </span>
+    );
+}
+
+function ImageCaption({ name, product, qty }) {
+    return (
+        <div className="flex min-w-0 items-start justify-center gap-2">
+            <p className="min-w-0 truncate font-serif capitalize font-medium leading-snug text-foreground">
+                {name}
+                {qty > 0 && (
+                    <span className="ml-2 inline-flex h-5 min-w-5 translate-y-[-1px] items-center justify-center rounded-full bg-green-500 px-1.5 align-middle text-xs font-semibold leading-none text-white shadow-sm">
+                        {qty}
+                    </span>
+                )}
+            </p>
+            <FeaturedPriceChoices product={product} priceClassName="text-sm" />
         </div>
     );
 }
@@ -215,28 +252,14 @@ function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
         <motion.div
             onClick={() => onOpen(product)}
             className="flex flex-col items-center cursor-pointer group"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
         >
-            <FloatWrap delay={delay} amplitude={5}>
-                <FloatImage src={product.image} alt={name} size={size} />
-            </FloatWrap>
-            <div className="mt-2 w-full text-center">
-                <div className="flex items-center justify-between gap-4">
-                    <div className="min-w-0 flex items-start gap-2">
-                        <p className="font-serif capitalize font-light text-foreground/80 tracking-wide truncate">
-                            {name}
-                        </p>
-                        {qty > 0 && (
-                            <div className="flex-shrink-0 flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow-sm" >
-                                {qty}
-                            </div>
-                        )}
-                    </div>
-                    {/* {showAdd && <AddBtn product={product} onOpen={onOpen} />} */}
-                </div>
-                <FeaturedPriceChoices product={product} onOpen={onOpen} name={name} />
-            </div>
+            <FloatImage
+                src={product.image}
+                alt={name}
+                size={size}
+                isSpecial={isSpecialProduct(product)}
+                caption={<ImageCaption name={name} product={product} qty={qty} />}
+            />
         </motion.div>
     );
 }
@@ -335,40 +358,14 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
                         <motion.div
                             onClick={() => onOpen(hero)}
                             className="flex flex-col items-center cursor-pointer"
-                            whileHover={{ scale: 1.03 }}
-                            transition={{ duration: 0.4 }}
                         >
-                            <FloatWrap delay={0} amplitude={9}>
-                                <FloatImage src={hero.image} alt={hero.name_en} size={200} />
-                            </FloatWrap>
-
-                            <div className="text-center mt-2">
-
-                                <div className="flex items-center justify-center gap-3 mt-1.5">
-                                    <div className="min-w-0 flex items-start gap-2"></div>
-                                    <p className="font-serif capitalize font-light text-xl text-foreground/95 tracking-wide">
-                                        {heroName}
-                                    </p>
-                                    {qty > 0 && (
-                                        <div
-                                            className="
-                                                flex-shrink-0
-                                                flex items-center justify-center
-                                                min-w-5 h-5 px-1
-                                                rounded-full
-                                                bg-primary text-primary-foreground
-                                                text-xs font-semibold
-                                                shadow-sm
-                                            "
-                                        >
-                                            {qty}
-                                        </div>
-                                    )}
-                                    <div />
-                                    {/* <AddBtn product={hero} onOpen={onOpen} /> */}
-                                </div>
-                                <FeaturedPriceChoices product={hero} onOpen={onOpen} name={heroName} />
-                            </div>
+                            <FloatImage
+                                src={hero.image}
+                                alt={hero.name_en}
+                                size={200}
+                                isSpecial={isSpecialProduct(hero)}
+                                caption={<ImageCaption name={heroName} product={hero} qty={qty} />}
+                            />
                         </motion.div>
                     </div>
                 )}

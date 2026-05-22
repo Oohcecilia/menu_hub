@@ -11,7 +11,29 @@ import CartDrawer from '@/components/menu/CartDrawer.jsx';
 import FloatingCartButton from '@/components/menu/FloatingCartButton.jsx';
 import ScrollButtons from '@/components/menu/ScrollButtons.jsx';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getDefaultLocalizedText, getDisplayPrices, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryName, getMenuCategoryUid, getProductList, normalizeProduct, selectProductPrice } from '@/utils/menuData';
+import { getDefaultLocalizedText, getDisplayPrices, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryName, getMenuCategoryUid, getProductList, isSpecialProduct, normalizeProduct, selectProductPrice } from '@/utils/menuData';
+
+const SPECIAL_CATEGORY_ID = "__special__";
+const SPECIAL_CATEGORY_KEY = "__special__";
+
+function normalizeSearchText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function getSearchTokens(value) {
+  return normalizeSearchText(value)
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter(Boolean);
+}
+
+function matchesSearchTokens(value, tokens) {
+  const haystack = normalizeSearchText(value);
+  return tokens.every((token) => haystack.includes(token));
+}
 
 export default function Menu() {
   const { getLocalizedField } = useLanguage();
@@ -20,12 +42,42 @@ export default function Menu() {
   const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedCartItem, setSelectedCartItem] = useState(null);
   const userClickedRef = useRef(false);
   const clickTimeoutRef = useRef(null); // Not explicitly used below, but kept from original
+  const categoryFocusHandledRef = useRef(false);
 
   const sectionRefs = useRef({});
 
   const { menu, loading, activeBranch } = useBranch();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const suggestion = params.get("suggestion");
+    const category = params.get("category");
+
+    if (params.get("selection") === "1" || sessionStorage.getItem("openSelection") === "1") {
+      setIsOpen(true);
+      sessionStorage.removeItem("openSelection");
+    }
+
+    if (suggestion) {
+      setSearchQuery(suggestion);
+      return;
+    }
+
+    if (category) return;
+
+    const storedSuggestion = sessionStorage.getItem("menuSuggestionFocus");
+    if (!storedSuggestion) return;
+
+    try {
+      const parsed = JSON.parse(storedSuggestion);
+      if (parsed?.name) setSearchQuery(parsed.name);
+    } catch {
+      sessionStorage.removeItem("menuSuggestionFocus");
+    }
+  }, [setIsOpen]);
 
   // ── 1. FLATTEN THE NEW DATA STRUCTURE ─────────────────────────
   // We extract 'groups' as categories and 'products' as a flat array 
@@ -89,10 +141,10 @@ export default function Menu() {
 
   // ── 2. EXISTING LOGIC (Now powered by the flattened data) ─────
   // ── 1. FILTER THE NESTED MENU OBJECT ───────────────────────────
-  const filteredMenu = useMemo(() => {
+  const searchFilteredMenu = useMemo(() => {
     if (!menu) return {};
-    const search = searchQuery.toLowerCase().trim();
-    if (!search) return menu;
+    const searchTokens = getSearchTokens(searchQuery);
+    if (searchTokens.length === 0) return menu;
 
     const filtered = {};
 
@@ -101,8 +153,8 @@ export default function Menu() {
         getLocalizedField(section, 'translations') ||
         getLocalizedField(section, 'name') ||
         getDefaultLocalizedText(getLocalizedObject(section, "name"), section.name || catKey)
-      ).toLowerCase();
-      const catMatch = catName.includes(search);
+      );
+      const catMatch = matchesSearchTokens(catName, searchTokens);
 
       // Filter the groups (subcategories)
       const filteredGroups = (section.groups || []).map(group => {
@@ -110,8 +162,8 @@ export default function Menu() {
           getLocalizedField(group, 'translations') ||
           getLocalizedField(group, 'name') ||
           getDefaultLocalizedText(getLocalizedObject(group, "name"), group.name || "")
-        ).toLowerCase();
-        const groupMatch = groupName.includes(search);
+        );
+        const groupMatch = matchesSearchTokens(`${catName} ${groupName}`, searchTokens);
         const groupProducts = getProductList(group.products);
 
         // If the group name matches, we keep ALL its products.
@@ -123,8 +175,19 @@ export default function Menu() {
               getLocalizedField(p, 'translations') ||
               getLocalizedField(p, 'name') ||
               getDefaultLocalizedText(getLocalizedObject(p, "name"), p.name || p.default_name || "")
-            ).toLowerCase();
-            return pName.includes(search);
+            );
+            const pDesc = (
+              getLocalizedField(p?.properties, 'details') ||
+              getLocalizedField(p, 'details') ||
+              p?.details?.description ||
+              p?.description ||
+              ""
+            );
+            const productGroupNames = Array.isArray(p?.all_product_groups)
+              ? p.all_product_groups.join(" ")
+              : p?.all_product_groups_label || p?.all_product_groups || "";
+
+            return matchesSearchTokens(`${catName} ${groupName} ${productGroupNames} ${pName} ${pDesc}`, searchTokens);
           });
 
         return { ...group, products: filteredProducts };
@@ -144,12 +207,97 @@ export default function Menu() {
     return filtered;
   }, [menu, searchQuery, getLocalizedField]);
 
+  const specialMenu = useMemo(() => {
+    if (!menu) return {};
+
+    const specialGroups = [];
+
+    Object.entries(menu).forEach(([catKey, section]) => {
+      const categoryLabel = getMenuCategoryLabel(section, catKey);
+
+      (section.groups || []).forEach((group, groupIndex) => {
+        const specialProducts = getProductList(group.products).filter(isSpecialProduct);
+
+        if (specialProducts.length === 0) return;
+
+        specialGroups.push({
+          ...group,
+          uid: group.uid ?? `${catKey}-${groupIndex}`,
+          name: group.name || categoryLabel,
+          translations: group.translations,
+          products: specialProducts,
+        });
+      });
+    });
+
+    if (specialGroups.length === 0) return {};
+
+    return {
+      [SPECIAL_CATEGORY_KEY]: {
+        uid: SPECIAL_CATEGORY_ID,
+        name: { en: "Specials" },
+        label: "Specials",
+        sort: -1,
+        groups: specialGroups,
+      },
+    };
+  }, [menu]);
+
+  const hasSpecialProducts = Object.keys(specialMenu).length > 0;
+
+  const filteredMenu = useMemo(() => {
+    if (activeCategory === SPECIAL_CATEGORY_ID) {
+      if (!searchQuery.trim()) return specialMenu;
+
+      const specialSearchResult = {};
+      const specialSection = specialMenu[SPECIAL_CATEGORY_KEY];
+      const searchedSection = searchFilteredMenu[SPECIAL_CATEGORY_KEY];
+
+      if (searchedSection) {
+        specialSearchResult[SPECIAL_CATEGORY_KEY] = searchedSection;
+      } else if (specialSection) {
+        const searchTokens = getSearchTokens(searchQuery);
+        const groups = (specialSection.groups || []).map((group) => {
+          const products = getProductList(group.products).filter((product) => {
+            const productName = (
+              getLocalizedField(product, 'translations') ||
+              getLocalizedField(product, 'name') ||
+              getDefaultLocalizedText(getLocalizedObject(product, "name"), product.name || product.default_name || "")
+            );
+            const productDescription = (
+              getLocalizedField(product?.properties, 'details') ||
+              getLocalizedField(product, 'details') ||
+              product?.details?.description ||
+              product?.description ||
+              ""
+            );
+            const productGroupNames = Array.isArray(product?.all_product_groups)
+              ? product.all_product_groups.join(" ")
+              : product?.all_product_groups_label || product?.all_product_groups || "";
+
+            return matchesSearchTokens(`${group.name || ""} ${productGroupNames} ${productName} ${productDescription}`, searchTokens);
+          });
+
+          return { ...group, products };
+        }).filter((group) => getProductList(group.products).length > 0);
+
+        if (groups.length > 0) {
+          specialSearchResult[SPECIAL_CATEGORY_KEY] = { ...specialSection, groups };
+        }
+      }
+
+      return specialSearchResult;
+    }
+
+    return searchFilteredMenu;
+  }, [activeCategory, getLocalizedField, searchFilteredMenu, searchQuery, specialMenu]);
+
   // ── 2. DERIVE SORTED CATEGORIES FROM FILTERED MENU ─────────────
   // This keeps your CategoryNav and Scroll logic in sync with search results
   // Always derive this from the full 'menu' so the Nav Bar stays complete
   const sortedCategories = useMemo(() => {
     if (!menu) return [];
-    return Object.entries(menu)
+    const menuCategories = Object.entries(menu)
       .map(([key, section]) => ({
         id: getMenuCategoryUid(section, key),
         key: key, // Keep the key to match against filteredMenu later
@@ -158,15 +306,37 @@ export default function Menu() {
         sort_order: section.sort ?? 0
       }))
       .sort((a, b) => a.sort_order - b.sort_order);
-  }, [menu]); // Dependent on 'menu', not 'filteredMenu'
+
+    if (!hasSpecialProducts) return menuCategories;
+
+    return [
+      ...menuCategories,
+      {
+        id: SPECIAL_CATEGORY_ID,
+        key: SPECIAL_CATEGORY_KEY,
+        label: "Specials",
+        name: { en: "Specials" },
+        sort_order: Number.MAX_SAFE_INTEGER,
+      },
+    ];
+  }, [hasSpecialProducts, menu]); // Dependent on 'menu', not 'filteredMenu'
 
   const activeCategoryId = activeCategory || sortedCategories[0]?.id || "";
+
+  const scrollCategories = useMemo(() => {
+    if (activeCategory === SPECIAL_CATEGORY_ID) {
+      return sortedCategories.filter((category) => category.id === SPECIAL_CATEGORY_ID);
+    }
+
+    return sortedCategories.filter((category) => category.id !== SPECIAL_CATEGORY_ID);
+  }, [activeCategory, sortedCategories]);
 
   const activeSubcategories = useMemo(() => {
     if (!activeCategoryId) return [];
 
     const active = sortedCategories.find((category) => category.id === activeCategoryId);
-    const section = active ? filteredMenu[active.key] || menu?.[active.key] : null;
+    const sourceMenu = activeCategoryId === SPECIAL_CATEGORY_ID ? specialMenu : filteredMenu;
+    const section = active ? sourceMenu[active.key] || menu?.[active.key] : null;
 
     return (section?.groups || [])
       .map((group, index) => {
@@ -186,10 +356,12 @@ export default function Menu() {
       })
       .filter((group) => group.product_count > 0 && group.label)
       .sort((a, b) => a.sort_order - b.sort_order);
-  }, [activeCategoryId, filteredMenu, getLocalizedField, menu, sortedCategories]);
+  }, [activeCategoryId, filteredMenu, getLocalizedField, menu, sortedCategories, specialMenu]);
 
   useEffect(() => {
     const search = searchQuery.trim();
+
+    if (activeCategory === SPECIAL_CATEGORY_ID) return;
 
     // SEARCH MODE
     if (search) {
@@ -218,7 +390,7 @@ export default function Menu() {
       const pageHeight = document.documentElement.scrollHeight;
 
       if (scrollBottom >= pageHeight - 20) {
-        const lastCategory = sortedCategories[sortedCategories.length - 1];
+        const lastCategory = scrollCategories[scrollCategories.length - 1];
         if (lastCategory) setActiveCategory(lastCategory.id);
         return;
       }
@@ -226,7 +398,7 @@ export default function Menu() {
       const offset = 225;
       let currentCategory = null;
 
-      for (const category of sortedCategories) {
+      for (const category of scrollCategories) {
         const section = sectionRefs.current[category.id];
         if (!section) continue;
         const rect = section.getBoundingClientRect();
@@ -239,8 +411,8 @@ export default function Menu() {
         }
       }
 
-      if (!currentCategory && sortedCategories.length) {
-        currentCategory = sortedCategories[0].id;
+      if (!currentCategory && scrollCategories.length) {
+        currentCategory = scrollCategories[0].id;
       }
 
       if (currentCategory) setActiveCategory(currentCategory);
@@ -249,7 +421,7 @@ export default function Menu() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     requestAnimationFrame(handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [sortedCategories, filteredMenu, searchQuery]); 
+  }, [activeCategory, scrollCategories, filteredMenu, searchQuery]); 
 // Added filteredMenu as a dependency so it re-checks matches as the user types
   // Dependency is now just sortedCategories (which reacts to filteredMenu) and searchQuery
   const cartProducts = useMemo(() => {
@@ -276,6 +448,16 @@ export default function Menu() {
     }, 0);
   }, [items, productMap]);
 
+  const handleProductOpen = useCallback((product, cartItem = null) => {
+    setSelectedProduct(product);
+    setSelectedCartItem(cartItem);
+  }, []);
+
+  const handleProductModalClose = useCallback(() => {
+    setSelectedProduct(null);
+    setSelectedCartItem(null);
+  }, []);
+
   // ── Click handler: scroll to section ─────────────────────────
   const handleCategorySelect = useCallback(
     (catId) => {
@@ -287,6 +469,9 @@ export default function Menu() {
 
       setActiveCategory(catId);
       userClickedRef.current = true;
+      window.setTimeout(() => {
+        userClickedRef.current = false;
+      }, 700);
 
       let tries = 0;
 
@@ -299,7 +484,10 @@ export default function Menu() {
           return;
         }
 
-        if (!section) return;
+        if (!section) {
+          userClickedRef.current = false;
+          return;
+        }
 
         const offset = 225;
         const top =
@@ -382,6 +570,27 @@ export default function Menu() {
     [searchQuery]
   );
 
+  useEffect(() => {
+    if (categoryFocusHandledRef.current || !sortedCategories.length) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const requestedCategory = params.get("category") || sessionStorage.getItem("menuCategoryFocus");
+    if (!requestedCategory) return;
+
+    const normalizedCategory = requestedCategory.toLowerCase();
+    const match = sortedCategories.find((category) =>
+      String(category.id).toLowerCase() === normalizedCategory ||
+      String(category.label || "").toLowerCase() === normalizedCategory
+    );
+
+    if (!match) return;
+
+    categoryFocusHandledRef.current = true;
+    sessionStorage.removeItem("menuCategoryFocus");
+    setSearchQuery("");
+    handleCategorySelect(match.id);
+  }, [handleCategorySelect, sortedCategories]);
+
   return (
     <div className="min-h-screen bg-background">
       <Header products={products} setIsOpen={setIsOpen} />
@@ -416,7 +625,7 @@ export default function Menu() {
         ) : (
           <ProductGrid
             menu={filteredMenu}
-            onProductOpen={setSelectedProduct}
+            onProductOpen={handleProductOpen}
             sectionRefs={sectionRefs}
           />
         )}
@@ -426,7 +635,9 @@ export default function Menu() {
         <ProductModal
           open={isOpen} // Check if this should be `!!selectedProduct` rather than `isOpen` (cart state) based on your needs
           product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
+          onClose={handleProductModalClose}
+          cart_id={selectedCartItem?.cart_id || ""}
+          cartItem={selectedCartItem}
         />
       )}
 
@@ -435,7 +646,7 @@ export default function Menu() {
         onClose={() => setIsOpen(false)}
         products={cartProducts}
         subtotal={subtotal}
-        onProductOpen={setSelectedProduct}
+        onProductOpen={handleProductOpen}
       />
       <FloatingCartButton subtotal={subtotal} onClick={() => setIsOpen(true)} />
       <ScrollButtons />

@@ -72,6 +72,24 @@ function parseMaybeJson(value) {
   }
 }
 
+function isTruthyFlag(value) {
+  if (value === true || value === 1) return true;
+  if (typeof value !== "string") return false;
+
+  return ["1", "true", "yes", "y"].includes(value.trim().toLowerCase());
+}
+
+export function isSpecialProduct(product) {
+  return (
+    isTruthyFlag(product?.special) ||
+    isTruthyFlag(product?.special_flag) ||
+    isTruthyFlag(product?.is_special) ||
+    isTruthyFlag(product?.properties?.special) ||
+    isTruthyFlag(product?.properties?.special_flag) ||
+    isTruthyFlag(product?.properties?.is_special)
+  );
+}
+
 function getBaseProductName(product, fallback) {
   const translatedName = getLocalizedObject(product, "name");
 

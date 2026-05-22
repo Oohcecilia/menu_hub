@@ -8,3 +8,6 @@ entities
 
 apache_live.txt
 backup.txt
+.npm-cache
+backend
+mobile-view.png

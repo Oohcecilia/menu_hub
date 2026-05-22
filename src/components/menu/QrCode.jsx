@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { QRCode } from "react-qrcode-logo";
 import { useCart } from '@/lib/cartStore.jsx';
 import { useBranch } from '@/lib/BranchContext';
@@ -23,7 +23,15 @@ export default function QRCodeComponent({ order = {}, size = 200, cuid = "" }) {
       branch_id: buid,
       cuid: cuid || "",
       items: items.map((item) => {
-        const options = (item.variations || [])
+        const variations = item.variations || [];
+        const addons = variations
+          .filter((v) => typeof v === "object" && v?.type === "addon" && v?.uid)
+          .map((v) => v.uid);
+        const removables = variations
+          .filter((v) => typeof v === "object" && v?.type === "removable" && v?.uid)
+          .map((v) => v.uid);
+        const options = variations
+          .filter((v) => !(typeof v === "object" && (v?.type === "addon" || v?.type === "removable")))
           .map((v) => (typeof v === "string" ? v : v?.name))
           .filter(Boolean)
           .join(", ");
@@ -33,6 +41,8 @@ export default function QRCodeComponent({ order = {}, size = 200, cuid = "" }) {
         return {
           id: item.product_id,
           qty: item.quantity,
+          addon: addons,
+          removable: removables,
           rem: `${options}${options && note ? ", " : ""}${note}`.trim(),
         };
       }),

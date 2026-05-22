@@ -5,8 +5,17 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext';
-import { getDisplayPrices, selectProductPrice } from '@/utils/menuData';
+import { getDisplayPrices, isSpecialProduct, selectProductPrice } from '@/utils/menuData';
 
+
+
+function SpecialBadge() {
+  return (
+    <span className="ml-2 inline-flex translate-y-[-2px] items-center rounded-full bg-red-600 px-2 py-0.5 align-middle text-[10px] font-bold uppercase leading-none tracking-wide text-white shadow-sm">
+      special
+    </span>
+  );
+}
 
 
 function OptionGroup({ group, selections, onChange }) {
@@ -108,6 +117,68 @@ function OptionGroup({ group, selections, onChange }) {
   );
 }
 
+function ComponentChoiceGroup({ title, items, selectedUids, onToggle, prefix = "" }) {
+  const { getLocalizedField } = useLanguage();
+
+  if (!Array.isArray(items) || items.length === 0) return null;
+
+  return (
+    <div className="space-y-1 m-0">
+      <p className="text-xs font-semibold text-gray-800 dark:text-white">
+        {title}
+      </p>
+
+      <div className="space-y-2">
+        {items.map((item) => {
+          const uid = String(item.uid ?? item.id ?? item.name);
+          const selected = selectedUids.includes(uid);
+          const name =
+            getLocalizedField(item, 'translations') ||
+            getLocalizedField(item, 'name') ||
+            item.name;
+
+          return (
+            <button
+              key={uid}
+              type="button"
+              onClick={() => onToggle(uid)}
+              className={`
+                w-full flex items-center justify-between gap-3 px-3 py-1.5 rounded-xl transition-all duration-200
+                ${selected
+                  ? "bg-[color:var(--primary)/0.08]"
+                  : "hover:bg-gray-50 dark:hover:bg-white/10"}
+              `}
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <div
+                  className={`
+                    h-4 w-4 flex flex-shrink-0 items-center justify-center rounded border transition
+                    ${selected
+                      ? "bg-[var(--primary)] border-[var(--primary)]"
+                      : "dark:border-white/20"}
+                  `}
+                >
+                  {selected && <Check className="h-4 w-4 text-lime-500 border-lime-500" />}
+                </div>
+
+                <span className="truncate text-sm font-medium text-gray-800 dark:text-white">
+                  {prefix}{name}
+                </span>
+              </div>
+
+              {Number.isFinite(Number(item.price)) && (
+                <span className="flex-shrink-0 text-xs font-semibold tracking-widest text-primary">
+                  {item.price}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function PriceChoiceGroup({ prices, selectedPriceUid, onSelect }) {
   if (prices.length <= 1) return null;
 
@@ -151,19 +222,21 @@ function PriceChoiceGroup({ prices, selectedPriceUid, onSelect }) {
 }
 
 
-export default function ProductModal({ open, product, onClose, cart_id = "" }) {
+export default function ProductModal({ open, product, onClose, cart_id = "", cartItem = null }) {
   const { activeBranch } = useBranch();
   const { addItem } = useCart();
   const { t, getLocalizedField } = useLanguage();
 
   const name = getLocalizedField(product, 'translations') || getLocalizedField(product, 'name') || product?.default_name || product?.name;
 
-  const [quantity, setQuantity] = useState(1);
-  const [note, setNote] = useState("");
+  const [quantity, setQuantity] = useState(cartItem?.quantity || 1);
+  const [note, setNote] = useState(cartItem?.note || "");
   const [imgError, setImgError] = useState(false);
 
   // ✅ stable structure: { [groupId]: selectedOptionId }
   const [selections, setSelections] = useState({});
+  const [selectedAddonUids, setSelectedAddonUids] = useState([]);
+  const [selectedRemovableUids, setSelectedRemovableUids] = useState([]);
   const prices = useMemo(() => getDisplayPrices(product), [product]);
   const hasMultiplePrices = prices.length > 1;
   const [selectedPriceUid, setSelectedPriceUid] = useState("");
@@ -171,13 +244,38 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
   const noImage = activeBranch?.no_image;
 
   useEffect(() => {
+    if (cartItem?.price_uid || cartItem?.product_id) {
+      setSelectedPriceUid(String(cartItem.price_uid || cartItem.product_id));
+      return;
+    }
+
     if (prices.length === 1) {
       setSelectedPriceUid(prices[0].uid || `${prices[0].label}-0`);
       return;
     }
 
     setSelectedPriceUid("");
-  }, [prices]);
+  }, [prices, cartItem?.price_uid, cartItem?.product_id]);
+
+  useEffect(() => {
+    setQuantity(cartItem?.quantity || 1);
+    setNote(cartItem?.note || "");
+  }, [cartItem?.cart_id, cartItem?.quantity, cartItem?.note, product?.id]);
+
+  useEffect(() => {
+    const variations = Array.isArray(cartItem?.variations) ? cartItem.variations : [];
+
+    setSelectedAddonUids(
+      variations
+        .filter((variation) => variation?.type === "addon" && variation?.uid != null)
+        .map((variation) => String(variation.uid))
+    );
+    setSelectedRemovableUids(
+      variations
+        .filter((variation) => variation?.type === "removable" && variation?.uid != null)
+        .map((variation) => String(variation.uid))
+    );
+  }, [cartItem?.cart_id, cartItem?.variations, product?.id]);
 
 
 
@@ -212,8 +310,49 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
     });
   }, [product]);
 
+  useEffect(() => {
+    if (!cartItem?.variations || !groups.length) {
+      setSelections({});
+      return;
+    }
+
+    const variationNames = cartItem.variations
+      .map((variation) => {
+        if (typeof variation === "string") return variation;
+        return variation?.name || "";
+      })
+      .filter(Boolean);
+
+    const nextSelections = {};
+
+    groups.forEach((group) => {
+      const match = group.items.find((item) => {
+        const itemName = item.name?.def || item.name;
+        return variationNames.includes(itemName);
+      });
+
+      if (match) {
+        nextSelections[group.name] = match.id;
+      }
+    });
+
+    setSelections(nextSelections);
+  }, [cartItem?.cart_id, cartItem?.variations, groups]);
+
 
   const hasGroups = groups.length > 0;
+
+  const toggleAddon = useCallback((uid) => {
+    setSelectedAddonUids((prev) =>
+      prev.includes(uid) ? prev.filter((item) => item !== uid) : [...prev, uid]
+    );
+  }, []);
+
+  const toggleRemovable = useCallback((uid) => {
+    setSelectedRemovableUids((prev) =>
+      prev.includes(uid) ? prev.filter((item) => item !== uid) : [...prev, uid]
+    );
+  }, []);
 
   // 🔥 ADD TO CART FIXED
   const handleAdd = () => {
@@ -239,7 +378,43 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
         .map(item => item.name?.def);
     });
 
-    addItem(selectProductPrice(product, selectedPrice), quantity, note, selectedVariations, cart_id);
+    const selectedAddons = (product?.addons || [])
+      .filter((addon) => selectedAddonUids.includes(String(addon.uid ?? addon.id ?? addon.name)))
+      .map((addon) => {
+        const addonName =
+          getLocalizedField(addon, 'translations') ||
+          getLocalizedField(addon, 'name') ||
+          addon.name;
+        return {
+          type: 'addon',
+          uid: addon.uid ?? addon.id,
+          name: `Add: ${addonName}`,
+          price: Number(addon.price) || 0,
+        };
+      });
+
+    const selectedRemovables = (product?.removables || [])
+      .filter((removable) => selectedRemovableUids.includes(String(removable.uid ?? removable.id ?? removable.name)))
+      .map((removable) => {
+        const removableName =
+          getLocalizedField(removable, 'translations') ||
+          getLocalizedField(removable, 'name') ||
+          removable.name;
+        return {
+          type: 'removable',
+          uid: removable.uid ?? removable.id,
+          name: `No: ${removableName}`,
+          price: Number(removable.price) || 0,
+        };
+      });
+
+    addItem(
+      selectProductPrice(product, selectedPrice),
+      quantity,
+      note,
+      [...selectedVariations, ...selectedAddons, ...selectedRemovables],
+      cart_id
+    );
     onClose();
   };
 
@@ -295,13 +470,15 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
             style={{ minHeight: 200, maxHeight: 240 }}
           >
             {!imgError && (
-              <img
-                src={product.image}
-                alt={getLocalizedField(product, "name")}
-                className="w-full h-full object-contain drop-shadow-xl relative w-[90%]"
-                style={{ maxHeight: 240 }}
-                onError={() => setImgError(true)}
-              />
+              <div className="relative flex h-full w-[90%] items-center justify-center">
+                <img
+                  src={product.image}
+                  alt={getLocalizedField(product, "name")}
+                  className="relative h-full w-full object-contain drop-shadow-xl"
+                  style={{ maxHeight: 240 }}
+                  onError={() => setImgError(true)}
+                />
+              </div>
             )}
 
             {imgError && (
@@ -321,6 +498,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
               <div className="flex justify-between items-start gap-3">
                 <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white capitalize">
                   {name}
+                  {isSpecialProduct(product) && <SpecialBadge />}
                 </h2>
               </div>
 
@@ -359,6 +537,22 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
                 }
               />
             ))}
+
+            <ComponentChoiceGroup
+              title="Addons"
+              items={product?.addons}
+              selectedUids={selectedAddonUids}
+              onToggle={toggleAddon}
+              prefix="Add: "
+            />
+
+            <ComponentChoiceGroup
+              title="Remove"
+              items={product?.removables}
+              selectedUids={selectedRemovableUids}
+              onToggle={toggleRemovable}
+              prefix="No: "
+            />
           </div>
 
           {/* Bottom */}
@@ -408,5 +602,3 @@ export default function ProductModal({ open, product, onClose, cart_id = "" }) {
     </AnimatePresence>
   );
 }
-
-

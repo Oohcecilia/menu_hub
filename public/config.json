@@ -1,0 +1,7 @@
+{
+  "couchBaseUrl": "/couch",
+  "menuDb": "auto",
+  "menuHost": "iloilo.giuseppe.ph",
+  "menuDoc": "menu:current",
+  "menuField": "content"
+}
