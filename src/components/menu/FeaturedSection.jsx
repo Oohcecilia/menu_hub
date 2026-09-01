@@ -1,10 +1,10 @@
 import { useMemo, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Minus } from 'lucide-react';
+import { Leaf, Plus, Minus } from 'lucide-react';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
-import { getDisplayPrices, isSpecialProduct } from '@/utils/menuData';
+import { getDisplayPrices, getMenuProductTitle, isSpecialProduct, isVegetarianProduct } from '@/utils/menuData';
 
 
 /* ─── Cart hook ─────────────────────────────────────────────────── */
@@ -131,8 +131,8 @@ function FloatImage({ src, alt, size, float = true, caption, isSpecial = false }
     const [isPortrait, setIsPortrait] = useState(false);
 
     const imageClassName = isPortrait
-        ? "relative z-10 h-[90vw] w-auto max-w-full object-contain drop-shadow-2xl sm:h-[var(--image-size)]"
-        : "relative z-10 h-auto max-h-[90vw] w-auto max-w-full object-contain drop-shadow-2xl sm:max-h-[var(--image-size)]";
+        ? "relative z-10 h-[90vw] w-auto max-w-full object-contain drop-shadow-2xl transition-transform duration-300 ease-out sm:h-[var(--image-size)] sm:hover:scale-[1.55]"
+        : "relative z-10 h-auto max-h-[90vw] w-auto max-w-full object-contain drop-shadow-2xl transition-transform duration-300 ease-out sm:max-h-[var(--image-size)] sm:hover:scale-[1.55]";
 
     return (
         <div
@@ -140,9 +140,7 @@ function FloatImage({ src, alt, size, float = true, caption, isSpecial = false }
             style={{ "--image-size": `${size}px` }}
         >
             <motion.div
-                className="relative z-30 flex w-full items-center justify-center pt-4"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="relative z-30 flex w-full items-center justify-center pt-4 sm:hover:z-50"
             >
                 {src && (
                     <>
@@ -225,11 +223,18 @@ function SpecialBadge() {
     );
 }
 
+function VegetarianLeaf() {
+    return (
+        <Leaf className="ml-1.5 inline-block h-4 w-4 translate-y-[-1px] fill-green-500/20 text-green-600" aria-label="Vegetarian" />
+    );
+}
+
 function ImageCaption({ name, product, qty }) {
     return (
         <div className="flex min-w-0 items-start justify-center gap-2">
             <p className="min-w-0 truncate font-serif capitalize font-medium leading-snug text-foreground">
                 {name}
+                {isVegetarianProduct(product) && <VegetarianLeaf />}
                 {qty > 0 && (
                     <span className="ml-2 inline-flex h-5 min-w-5 translate-y-[-1px] items-center justify-center rounded-full bg-green-500 px-1.5 align-middle text-xs font-semibold leading-none text-white shadow-sm">
                         {qty}
@@ -245,7 +250,7 @@ function ImageCaption({ name, product, qty }) {
 /* ─── Small card ─────────────────────────────────────────────────── */
 function SmallCard({ product, onOpen, size = 110, delay = 0, showAdd = true }) {
     const { getLocalizedField } = useLanguage();
-    const name = getLocalizedField(product, 'translations') || getLocalizedField(product, 'name') || product.default_name || product.name;
+    const name = getMenuProductTitle(product, getLocalizedField);
     const { qty } = useProductCart(product);
 
     return (
@@ -292,7 +297,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
         }
 
         if (items.length === 4) {
-            gridItems = [items[0], items[1], items[2], items[3]];
+            gridItems = [items[0], items[1], items[3]];
         }
 
         if (items.length === 5) {
@@ -325,9 +330,7 @@ function LayoutGrandStage({ products, onOpen, isAll }) {
 
     const { hero, gridItems } = layout;
     const { qty = 0 } = useProductCart(hero || {});
-    const heroName = hero
-        ? getLocalizedField(hero, "translations") || getLocalizedField(hero, "name") || hero.default_name || hero.name
-        : "";
+    const heroName = hero ? getMenuProductTitle(hero, getLocalizedField) : "";
 
     return (
         <div className="relative w-full overflow-hidden sm:overflow-visible">

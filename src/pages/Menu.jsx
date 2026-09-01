@@ -11,7 +11,7 @@ import CartDrawer from '@/components/menu/CartDrawer.jsx';
 import FloatingCartButton from '@/components/menu/FloatingCartButton.jsx';
 import ScrollButtons from '@/components/menu/ScrollButtons.jsx';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getDefaultLocalizedText, getDisplayPrices, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryName, getMenuCategoryUid, getProductList, isSpecialProduct, normalizeProduct, selectProductPrice } from '@/utils/menuData';
+import { getDefaultLocalizedText, getDisplayPrices, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryName, getMenuCategoryUid, getProductCategorySearchText, getProductList, isSpecialProduct, normalizeProduct, selectProductPrice } from '@/utils/menuData';
 
 const SPECIAL_CATEGORY_ID = "__special__";
 const SPECIAL_CATEGORY_KEY = "__special__";
@@ -179,15 +179,16 @@ export default function Menu() {
             const pDesc = (
               getLocalizedField(p?.properties, 'details') ||
               getLocalizedField(p, 'details') ||
-              p?.details?.description ||
+              getDefaultLocalizedText(p?.details?.description, "") ||
               p?.description ||
               ""
             );
             const productGroupNames = Array.isArray(p?.all_product_groups)
               ? p.all_product_groups.join(" ")
               : p?.all_product_groups_label || p?.all_product_groups || "";
+            const productCategoryNames = getProductCategorySearchText(p);
 
-            return matchesSearchTokens(`${catName} ${groupName} ${productGroupNames} ${pName} ${pDesc}`, searchTokens);
+            return matchesSearchTokens(`${catName} ${groupName} ${productGroupNames} ${productCategoryNames} ${pName} ${pDesc}`, searchTokens);
           });
 
         return { ...group, products: filteredProducts };
@@ -267,15 +268,16 @@ export default function Menu() {
             const productDescription = (
               getLocalizedField(product?.properties, 'details') ||
               getLocalizedField(product, 'details') ||
-              product?.details?.description ||
+              getDefaultLocalizedText(product?.details?.description, "") ||
               product?.description ||
               ""
             );
             const productGroupNames = Array.isArray(product?.all_product_groups)
               ? product.all_product_groups.join(" ")
               : product?.all_product_groups_label || product?.all_product_groups || "";
+            const productCategoryNames = getProductCategorySearchText(product);
 
-            return matchesSearchTokens(`${group.name || ""} ${productGroupNames} ${productName} ${productDescription}`, searchTokens);
+            return matchesSearchTokens(`${group.name || ""} ${productGroupNames} ${productCategoryNames} ${productName} ${productDescription}`, searchTokens);
           });
 
           return { ...group, products };

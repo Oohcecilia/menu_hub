@@ -27,11 +27,108 @@ export function getDefaultLocalizedText(value, fallback = "") {
   if (typeof value === "string") return value || fallback;
 
   return (
-    value.en ||
-    value.def ||
-    Object.values(value).find(Boolean) ||
+    getDefaultLocalizedText(value.en, "") ||
+    getDefaultLocalizedText(value.def, "") ||
+    Object.values(value).map((entry) => getDefaultLocalizedText(entry, "")).find(Boolean) ||
     fallback
   );
+}
+
+function normalizeLabel(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function formatProductName(value) {
+  const label = normalizeLabel(value);
+  const letters = label.replace(/[^A-Za-z]/g, "");
+
+  if (!letters || letters !== letters.toUpperCase()) return label;
+
+  return label
+    .toLocaleLowerCase()
+    .replace(/(^|[\s(/-])([A-Za-z])/g, (_, prefix, letter) => `${prefix}${letter.toLocaleUpperCase()}`);
+}
+
+export function getMenuProductTitle(product, getLocalizedField) {
+  const translated = formatProductName(
+    getLocalizedField?.(product, "translations") ||
+    getLocalizedField?.(product, "name") ||
+    product?.default_name ||
+    product?.name
+  );
+  const original = formatProductName(
+    product?.basename ||
+    product?.original_name ||
+    product?.bo_name ||
+    product?.properties?.basename
+  );
+
+  if (!translated) return original;
+  if (!original || translated.toLowerCase() === original.toLowerCase()) return translated;
+
+  return `${translated} (${original})`;
+}
+
+function collectTextValues(value) {
+  if (!value) return [];
+  if (typeof value === "string" || typeof value === "number") return [String(value)];
+  if (Array.isArray(value)) return value.flatMap(collectTextValues);
+  if (typeof value === "object") return Object.values(value).flatMap(collectTextValues);
+
+  return [];
+}
+
+function hasVegetarianCategoryUid(product) {
+  const categoryUids = [
+    product?.category_uid,
+    product?.category_id,
+    product?.product_category_uid,
+    product?.product_category_id,
+    ...(Array.isArray(product?.category_uids) ? product.category_uids : []),
+  ].map((value) => String(value || "").trim().toLowerCase());
+
+  return categoryUids.some((value) => value === "123" || value === "product_category:123");
+}
+
+export function isVegetarianProduct(product) {
+  if (hasVegetarianCategoryUid(product)) {
+    return true;
+  }
+
+  const categoryText = [
+    product?.category,
+    product?.category_name,
+    product?.group,
+    product?.group_name,
+    product?.properties?.category,
+    product?.properties?.Category,
+    ...(Array.isArray(product?.product_categories) ? product.product_categories : []),
+  ].flatMap(collectTextValues);
+
+  return categoryText.some((value) => /\bvegetarian\b/i.test(value));
+}
+
+export function getProductCategorySearchText(product) {
+  const values = [
+    product?.category_uid,
+    product?.category_id,
+    product?.product_category_uid,
+    product?.product_category_id,
+    ...(Array.isArray(product?.category_uids) ? product.category_uids : []),
+    product?.category,
+    product?.category_name,
+    product?.group,
+    product?.group_name,
+    product?.properties?.category,
+    product?.properties?.Category,
+    ...(Array.isArray(product?.product_categories) ? product.product_categories : []),
+  ].flatMap(collectTextValues);
+
+  if (hasVegetarianCategoryUid(product)) {
+    values.push("Vegetarian");
+  }
+
+  return values.join(" ");
 }
 
 export function getMenuCategoryUid(section, fallback) {
@@ -56,8 +153,8 @@ export function getMenuCategoryName(section, fallback) {
 }
 
 export function getProductList(products) {
-  if (Array.isArray(products)) return products;
-  if (products && typeof products === "object") return Object.values(products);
+  if (Array.isArray(products)) return products.filter(isProductVisible);
+  if (products && typeof products === "object") return Object.values(products).filter(isProductVisible);
 
   return [];
 }
@@ -77,6 +174,35 @@ function isTruthyFlag(value) {
   if (typeof value !== "string") return false;
 
   return ["1", "true", "yes", "y"].includes(value.trim().toLowerCase());
+}
+
+function isFalseFlag(value) {
+  if (value === false || value === 0) return true;
+  if (typeof value !== "string") return false;
+
+  return ["0", "false", "no", "n"].includes(value.trim().toLowerCase());
+}
+
+export function isCatalogVisible(product) {
+  return !(
+    isFalseFlag(product?.catalog) ||
+    isFalseFlag(product?.pb?.catalog) ||
+    isFalseFlag(product?.product_branch?.catalog) ||
+    isFalseFlag(product?.properties?.catalog)
+  );
+}
+
+export function isWebsiteVisible(product) {
+  return !(
+    isFalseFlag(product?.website) ||
+    isFalseFlag(product?.pb?.website) ||
+    isFalseFlag(product?.product_branch?.website) ||
+    isFalseFlag(product?.properties?.website)
+  );
+}
+
+export function isProductVisible(product) {
+  return isCatalogVisible(product) && isWebsiteVisible(product);
 }
 
 export function isSpecialProduct(product) {

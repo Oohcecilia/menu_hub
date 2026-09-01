@@ -8,8 +8,8 @@ const rootDir = path.resolve(__dirname, '..')
 const distDir = path.join(rootDir, 'dist')
 
 const couchBaseUrl = (process.env.COUCHDB_URL || 'http://127.0.0.1:5984').replace(/\/+$/g, '')
-const siteDb = process.env.MENU_SITE_DB || 'site_iloilo_giuseppe_ph'
-const siteDoc = process.env.MENU_SITE_DOC || 'site:current'
+const siteDb = process.env.MENU_SITE_DB || 'templates'
+const siteDoc = process.env.MENU_SITE_DOC || 'restaurant-menu:v1'
 
 const mimeByExt = {
   '.css': 'text/css; charset=utf-8',

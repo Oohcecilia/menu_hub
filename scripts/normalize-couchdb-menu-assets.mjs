@@ -1,8 +1,8 @@
 import { authHeaders } from './couchdb-local-auth.mjs'
 
 const couchBaseUrl = (process.env.COUCHDB_URL || 'http://127.0.0.1:5984').replace(/\/+$/g, '')
-const menuDb = process.env.MENU_DB || 'menu_iloilo_giuseppe_ph'
-const menuDoc = process.env.MENU_DOC || 'menu:current'
+const menuDb = process.env.MENU_DB || 'templates'
+const menuDoc = process.env.MENU_DOC || 'menus/menu_v1'
 const imageDb = process.env.MENU_IMAGE_DB || 'pp'
 
 async function couchRequest(path, options = {}) {
@@ -42,7 +42,7 @@ async function normalizeMenuImageUrls() {
       const uid = product.prices?.[0]?.uid
       if (!uid) return
 
-      const image = `/bo/${imageDb}/products/${uid}`
+      const image = `/images/products/${uid}`
       if (product.image !== image) {
         product.image = image
         changed = true

@@ -5,7 +5,8 @@ import { useLanguage } from '@/lib/i18n.jsx';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
 import { useLocation } from 'react-router-dom'
-import { getDefaultLocalizedText, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryUid, getProductList, isSpecialProduct, normalizeProduct } from '@/utils/menuData';
+import { Leaf } from 'lucide-react';
+import { getDefaultLocalizedText, getLocalizedObject, getMenuCategoryLabel, getMenuCategoryUid, getMenuProductTitle, getProductList, isSpecialProduct, isVegetarianProduct, normalizeProduct } from '@/utils/menuData';
 import PriceOptions from './PriceOptions.jsx';
 
 
@@ -66,6 +67,12 @@ function SpecialBadge() {
     <span className="ml-2 inline-flex translate-y-[-1px] items-center rounded-full bg-red-600 px-2 py-0.5 align-middle text-[10px] font-bold uppercase leading-none tracking-wide text-white shadow-sm">
       special
     </span>
+  );
+}
+
+function VegetarianLeaf() {
+  return (
+    <Leaf className="ml-1.5 inline-block h-4 w-4 translate-y-[-1px] fill-green-500/20 text-green-600" aria-label="Vegetarian" />
   );
 }
 
@@ -155,13 +162,31 @@ function CategoryBanner({ category }) {
   );
 }
 
-/* ─── Text list item (no-image products) ──*/
+function ProductTextThumbnail({ product, name }) {
+  if (!hasProductImage(product)) return null;
+
+  return (
+    <div className="relative z-10 mt-0.5 flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-transparent sm:ml-3 sm:h-[4.5rem] sm:w-[4.5rem] sm:overflow-visible sm:hover:z-50">
+      <img
+        src={product.image}
+        alt={name}
+        className="relative z-10 max-h-full max-w-full origin-left object-contain transition-transform duration-300 ease-out sm:hover:scale-[6] sm:hover:drop-shadow-2xl"
+        loading="lazy"
+      />
+    </div>
+  );
+}
+
+/* ─── Text list item ──*/
 function TextListItem({ product, onOpen, delay = 0 }) {
   const { getLocalizedField } = useLanguage();
   const { getProductQuantity, addItem, items, updateQuantity, removeItem, itemMatchesProduct } = useCart();
   const qty = getProductQuantity(product);
-  const name = getLocalizedField(product, 'translations') || getLocalizedField(product, 'name') || product.default_name || product.name;
-  const desc = getLocalizedField(product?.properties, 'details') || getLocalizedField(product, 'details') || product?.details?.description;
+  const name = getMenuProductTitle(product, getLocalizedField);
+  const desc =
+    getLocalizedField(product?.properties, 'details') ||
+    getLocalizedField(product, 'details') ||
+    getDefaultLocalizedText(product?.details?.description, "");
   const location = useLocation();
 
   const handleMinus = (e) => {
@@ -179,9 +204,9 @@ function TextListItem({ product, onOpen, delay = 0 }) {
       onClick={() => onOpen(product)}
       className="
       w-full
-      grid grid-cols-1 sm:grid-cols-[1fr_auto]
-      gap-3 sm:gap-4
-      items-start sm:items-center
+      flex
+      items-start
+      gap-3
       px-4 py-4
       cursor-pointer
       group
@@ -192,8 +217,10 @@ function TextListItem({ product, onOpen, delay = 0 }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
     >
+      <ProductTextThumbnail product={product} name={name} />
+
       {/* Left: Name + Description */}
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
 
           {/* Left Content */}
@@ -202,6 +229,7 @@ function TextListItem({ product, onOpen, delay = 0 }) {
             {/* Product Name */}
             <p className="font-serif capitalize font-medium leading-snug line-clamp-2 text-foreground group-hover:text-foreground/75 transition-colors duration-300 break-words">
               {name}
+              {isVegetarianProduct(product) && <VegetarianLeaf />}
               {isSpecialProduct(product) && <SpecialBadge />}
 
               {location.pathname.startsWith("/debug") && (
@@ -247,7 +275,7 @@ function TextList({ products, onProductOpen }) {
   const rightProducts = sortedProducts.slice(leftCount);
 
   return (
-    <div className="rounded-lg  overflow-hidden ">
+    <div className="rounded-lg overflow-visible">
       {/* Mobile: single column, all items stacked */}
       <ListBanner />
       <div className="sm:hidden  divide-y divide-border/25 ">

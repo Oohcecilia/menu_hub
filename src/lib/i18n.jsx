@@ -340,6 +340,20 @@ const translations = {
 
 const LanguageContext = createContext();
 
+function firstLocalizedString(value, lang) {
+  if (!value) return "";
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (typeof value !== "object") return "";
+
+  return (
+    firstLocalizedString(value[lang], lang) ||
+    firstLocalizedString(value.en, lang) ||
+    firstLocalizedString(value.def, lang) ||
+    Object.values(value).map((entry) => firstLocalizedString(entry, lang)).find(Boolean) ||
+    ""
+  );
+}
+
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => localStorage.getItem("menu_lang") || "en");
 
@@ -360,13 +374,7 @@ export function LanguageProvider({ children }) {
 
     // ✅ case: object with translations
     if (typeof value === "object" && value !== null) {
-      return (
-        value[lang] ||      
-        value.en ||       
-        value.def ||
-        Object.values(value).find(v => v) ||    
-        ""
-      );
+      return firstLocalizedString(value, lang);
     }
 
     // ✅ legacy flat fields

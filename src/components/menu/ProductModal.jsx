@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, Check, AlertCircle } from 'lucide-react';
+import { X, Plus, Minus, Check, AlertCircle, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cartStore.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext';
-import { getDisplayPrices, isSpecialProduct, selectProductPrice } from '@/utils/menuData';
+import { getDefaultLocalizedText, getDisplayPrices, isSpecialProduct, isVegetarianProduct, selectProductPrice } from '@/utils/menuData';
 
 
 
@@ -14,6 +14,12 @@ function SpecialBadge() {
     <span className="ml-2 inline-flex translate-y-[-2px] items-center rounded-full bg-red-600 px-2 py-0.5 align-middle text-[10px] font-bold uppercase leading-none tracking-wide text-white shadow-sm">
       special
     </span>
+  );
+}
+
+function VegetarianLeaf() {
+  return (
+    <Leaf className="ml-1.5 inline-block h-4 w-4 translate-y-[-1px] fill-green-500/20 text-green-600" aria-label="Vegetarian" />
   );
 }
 
@@ -117,8 +123,9 @@ function OptionGroup({ group, selections, onChange }) {
   );
 }
 
-function ComponentChoiceGroup({ title, items, selectedUids, onToggle, prefix = "" }) {
+function ComponentChoiceGroup({ title, items, selectedUids, onToggle, prefix = "", tone = "green" }) {
   const { getLocalizedField } = useLanguage();
+  const selectedToneClass = tone === "red" ? "text-red-600" : "text-green-600";
 
   if (!Array.isArray(items) || items.length === 0) return null;
 
@@ -132,6 +139,7 @@ function ComponentChoiceGroup({ title, items, selectedUids, onToggle, prefix = "
         {items.map((item) => {
           const uid = String(item.uid ?? item.id ?? item.name);
           const selected = selectedUids.includes(uid);
+          const price = Number(item.price);
           const name =
             getLocalizedField(item, 'translations') ||
             getLocalizedField(item, 'name') ||
@@ -152,13 +160,10 @@ function ComponentChoiceGroup({ title, items, selectedUids, onToggle, prefix = "
               <div className="flex min-w-0 items-center gap-2">
                 <div
                   className={`
-                    h-4 w-4 flex flex-shrink-0 items-center justify-center rounded border transition
-                    ${selected
-                      ? "bg-[var(--primary)] border-[var(--primary)]"
-                      : "dark:border-white/20"}
+                    h-5 w-5 flex flex-shrink-0 items-center justify-center rounded border-2 border-gray-500 bg-white shadow-sm transition dark:border-white/60 dark:bg-black/40
                   `}
                 >
-                  {selected && <Check className="h-4 w-4 text-lime-500 border-lime-500" />}
+                  {selected && <Check className={`h-4 w-4 stroke-[3] ${selectedToneClass}`} />}
                 </div>
 
                 <span className="truncate text-sm font-medium text-gray-800 dark:text-white">
@@ -166,7 +171,7 @@ function ComponentChoiceGroup({ title, items, selectedUids, onToggle, prefix = "
                 </span>
               </div>
 
-              {Number.isFinite(Number(item.price)) && (
+              {Number.isFinite(price) && price > 0 && (
                 <span className="flex-shrink-0 text-xs font-semibold tracking-widest text-primary">
                   {item.price}
                 </span>
@@ -498,12 +503,13 @@ export default function ProductModal({ open, product, onClose, cart_id = "", car
               <div className="flex justify-between items-start gap-3">
                 <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white capitalize">
                   {name}
+                  {isVegetarianProduct(product) && <VegetarianLeaf />}
                   {isSpecialProduct(product) && <SpecialBadge />}
                 </h2>
               </div>
 
               <p className="py-4 text-gray-500 dark:text-white/60 text-sm mt-1">
-                {getLocalizedField(product, "details") || getLocalizedField(product.properties, "details") || product?.details?.description}
+                {getLocalizedField(product, "details") || getLocalizedField(product.properties, "details") || getDefaultLocalizedText(product?.details?.description, "")}
               </p>
 
             
@@ -544,6 +550,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "", car
               selectedUids={selectedAddonUids}
               onToggle={toggleAddon}
               prefix="Add: "
+              tone="green"
             />
 
             <ComponentChoiceGroup
@@ -552,6 +559,7 @@ export default function ProductModal({ open, product, onClose, cart_id = "", car
               selectedUids={selectedRemovableUids}
               onToggle={toggleRemovable}
               prefix="No: "
+              tone="red"
             />
           </div>
 

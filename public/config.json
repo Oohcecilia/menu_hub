@@ -1,6 +1,6 @@
 {
   "couchBaseUrl": "/couch",
-  "menuDb": "auto",
+  "menuDb": "pos_pp_config_1154",
   "menuHost": "iloilo.giuseppe.ph",
   "menuDoc": "menu:current",
   "menuField": "content"

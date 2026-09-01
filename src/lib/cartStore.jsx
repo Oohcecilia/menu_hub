@@ -5,6 +5,18 @@ import { getWaiterSuggestions } from '@/utils/waiterSuggestions';
 
 const CartContext = createContext();
 
+function loadStoredCart() {
+  try {
+    const saved = localStorage.getItem('cart');
+    const parsed = saved ? JSON.parse(saved) : [];
+
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    localStorage.removeItem('cart');
+    return [];
+  }
+}
+
 function getSelectionKey(items, buid, language) {
   return JSON.stringify({
     buid: buid || '',
@@ -20,10 +32,7 @@ function getSelectionKey(items, buid, language) {
 
 export function CartProvider({ children }) {
   // ✅ use new storage key
-  const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem('cart');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [items, setItems] = useState(loadStoredCart);
 
   const { activeBranch, products = [], menu } = useBranch();
   const { lang } = useLanguage();
@@ -144,9 +153,7 @@ export function CartProvider({ children }) {
   useEffect(() => {
     if (!activeBranch?.buid) return;
 
-    const storedItems = JSON.parse(
-      localStorage.getItem('cart') || '[]'
-    );
+    const storedItems = loadStoredCart();
 
     const hasDifferentBranch = storedItems.some(
       item => item.buid && item.buid !== activeBranch.buid

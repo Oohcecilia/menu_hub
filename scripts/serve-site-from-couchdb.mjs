@@ -3,8 +3,8 @@ import path from 'node:path'
 import { authHeaders } from './couchdb-local-auth.mjs'
 
 const couchBaseUrl = (process.env.COUCHDB_URL || 'http://127.0.0.1:5984').replace(/\/+$/g, '')
-const siteDb = process.env.MENU_SITE_DB || 'site_iloilo_giuseppe_ph'
-const siteDoc = process.env.MENU_SITE_DOC || 'site:current'
+const siteDb = process.env.MENU_SITE_DB || 'templates'
+const siteDoc = process.env.MENU_SITE_DOC || 'restaurant-menu:v1'
 const port = Number(process.env.MENU_SITE_PORT || 5174)
 
 const cacheableAsset = /^\/assets\//
@@ -27,16 +27,19 @@ async function proxyCouch(pathname) {
   })
 }
 
-async function proxyBoProductImage(pathname) {
-  const match = pathname.match(/^\/bo\/([^/?#]+)\/products\/([0-9]+)(?:[?#].*)?$/)
+async function proxyProductImage(pathname) {
+  const cleanPath = pathname.split(/[?#]/, 1)[0]
+  const imageMatch = cleanPath.match(/^\/images\/products\/([0-9]+)$/)
+  const boMatch = cleanPath.match(/^\/bo\/([^/?#]+)\/products\/([0-9]+)$/)
 
-  if (!match) {
+  if (!imageMatch && !boMatch) {
     return fetch(`${couchBaseUrl}${pathname}`, {
       headers: authHeaders(),
     })
   }
 
-  const [, dbName, productUid] = match
+  const dbName = boMatch?.[1] || 'pp'
+  const productUid = imageMatch?.[1] || boMatch?.[2]
   const docId = `${dbName}/products/${productUid}`
   const docResponse = await fetch(`${couchBaseUrl}/bo/${encodeURIComponent(docId)}`, {
     headers: {
@@ -84,8 +87,8 @@ const server = http.createServer(async (req, res) => {
       return
     }
 
-    if (url.pathname.startsWith('/bo/')) {
-      const response = await proxyBoProductImage(url.pathname + url.search)
+    if (url.pathname.startsWith('/images/products/') || url.pathname.startsWith('/bo/')) {
+      const response = await proxyProductImage(url.pathname + url.search)
       sendResponse(res, response, Buffer.from(await response.arrayBuffer()))
       return
     }

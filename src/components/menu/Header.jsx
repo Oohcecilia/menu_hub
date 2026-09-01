@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, ChevronDown, Sun, Moon, Crown, History } from 'lucide-react';
+import { Check, ChevronDown, Crown, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -7,7 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTheme } from '@/lib/themeToggle.jsx';
 import { useLanguage } from '@/lib/i18n.jsx';
 import { useBranch } from '@/lib/BranchContext.jsx';
 import { branchesData } from '@/data/branches.config';
@@ -19,11 +18,9 @@ const LANGUAGES = [
   { code: 'en', label: 'EN' }, { code: 'es', label: 'ES' }, { code: 'de', label: 'DE' },
   { code: 'fr', label: 'FR' }, { code: 'it', label: 'IT' }, { code: 'zh', label: '中' },
   { code: 'ja', label: '日' }, { code: 'ko', label: '한' }, { code: 'ru', label: 'РУ' },
-  { code: 'fil', label: 'FIL' },
 ];
 
 export default function Header({ products, setIsOpen }) {
-  const { theme, toggleTheme } = useTheme();
   const { lang, setLang } = useLanguage();
   const { activeBranch } = useBranch();
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -87,10 +84,6 @@ export default function Header({ products, setIsOpen }) {
                 <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
               )}
             </Button>
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full h-9 w-9 transition-colors hover:text-[hsl(var(--primary)/0.85)] hover:bg-[hsl(var(--primary)/0.5)">
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
